@@ -1,1 +1,1 @@
-![logo](https://github.com/jolespin/soothsayer/blob/master/logo.png?raw=true "Soothsayer")
+<img src="https://github.com/jolespin/soothsayer/blob/master/logo.png?raw=true" width="200" />
