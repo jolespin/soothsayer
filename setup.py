@@ -1,5 +1,5 @@
-import re
-from setuptools import setup
+import re, datetime
+from setuptools import setup, find_packages
 
 # Version
 version = None
@@ -7,7 +7,7 @@ with open("./soothsayer/__init__.py", "r") as f:
     for line in f.readlines():
         line = line.strip()
         if line.startswith("__version__"):
-            version = line.split("=")[-1].strip()
+            version = line.split("=")[-1].strip().strip('"')
 
 setup(name='soothsayer',
       version=version,
@@ -15,20 +15,31 @@ setup(name='soothsayer',
       url='https://github.com/jolespin/soothsayer',
       author='Josh L. Espinoza',
       author_email='jespinoz@jcvi.org',
-      license='MIT',
-      packages=["soothsayer"],
+      license='BSD',
+      packages=find_packages(include=("*", "./*")),
       install_requires=[
     # "python >= 3.6",
 	"matplotlib >= 2.2.2",
 	"scipy >= 1.0",
-	"scikit-learn >= 0.19.1",
-    'numpy >= 1.9.2, < 1.14.0',
-    'pandas >= 0.19.2, < 0.23.0',
+	"scikit-learn >= 0.20.2",
+    "numpy >= 1.13", #, < 1.14.0",
+    # "numpy >= 1.13",
+    'pandas >= 0.24.2',
 	'networkx >= 2.0',
 	'ete3 >= 3.0',
-	'scikit-bio >= 0.5',
+	'scikit-bio >= 0.5.1',
+    # "scikikit-bio >= 0.5.1",
     "biopython >= 1.5",
     "xarray >= 0.10.3",
     "tqdm >=4.19",
+    "openpyxl >= 2.5",
+    "astropy >= 3.0",
+    "rpy2 >= 2.9",
+    "matplotlib_venn",
+    "palettable >= 3.0.0",
       ],
-      zip_safe=False)
+     include_package_data=True,
+     scripts=['bin/clairvoyance.py', "bin/run_soothsayer.py"],
+
+
+)

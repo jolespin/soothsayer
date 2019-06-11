@@ -1,0 +1,7 @@
+recursive-include examples *
+recursive-include soothsayer/io/data_type/ *.py
+recursive-include soothsayer/feature_extraction/algorithms/ *.py
+recursive-include soothsayer/r_wrappers/packages/ *.py
+recursive-include soothsayer/tests/data/ *.py
+recursive-include soothsayer/db/ *.pbz2
+global-exclude *.py[cod] __pycache__
