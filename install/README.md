@@ -1,4 +1,4 @@
-I've tried to make installation as seemless as possible.  There are several R dependencies that are difficult to install via conda which is why there is no conda installation.  
+I've tried to make installation as seemless as possible.  There are several R dependencies that are difficult to install via conda which is why there is no conda installation...yet [but I'm working on it :)]  
 
 Current installation method:
 
