@@ -4,7 +4,7 @@
 
 *\*Espinoza, \*Dupont et al. 2019 TBD*
 
-Documentation soon
+Documentation and tutorials coming soon.
 
 ### Installation:
 Now available via conda: https://anaconda.org/jolespin/soothsayer
