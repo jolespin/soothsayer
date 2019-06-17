@@ -3,14 +3,14 @@ I've tried to make installation as seemless as possible.  There are several Pyth
 Current installation method (similar to [qiime2](https://docs.qiime2.org/2019.4/install/native/) installation):
 
 ## Method 1:
-### OSX [64-bit] Installation
+### OSX Installation
 ```bash
 wget https://raw.githubusercontent.com/jolespin/soothsayer/master/install/soothsayer_py36_v2019.06.yml
 conda env create -y --name soothsayer_env --file soothsayer_py36_v2019.06.yml
 ```
 
 ## Method 2:
-### OSX|Linux|(Windows?)[64-bit] Installation
+### OSX|Linux|(Windows?) Installation
 ```bash
 wget https://raw.githubusercontent.com/jolespin/soothsayer/master/install/install_soothsayer.sh
 # bash install_soothsayer.sh  <env_name> <py_version>
