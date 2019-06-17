@@ -4,4 +4,7 @@
 
 *\*Espinoza, \*Dupont et al. 2019 TBD*
 
-Conda installation & documentation soon
+Documentation soon
+
+https://anaconda.org/jolespin/soothsayer
+`conda install -c jolespin soothsayer`
