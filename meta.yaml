@@ -1,0 +1,26 @@
+{% set name = "soothsayer" %}
+{% set version = "2019.06" %}
+
+package:
+  name: {{ name|lower }}
+  version: py36_{{ version }}
+
+source:
+  url: https://github.com/jolespin/{{ name }}/archive/v{{ version }}.tar.gz
+
+build:
+  noarch: python
+  number: 0
+  script: python -m pip install --no-deps --ignore-installed .
+
+requirements:
+  run:
+    - python >=3.6,<3.7
+
+about:
+  home: https://github.com/jolespin/soothsayer
+  license: BSD-3
+  license_family: BSD
+  license_file: license.txt
+  summary: 'High-level API for (bio-)informatics'
+  description: 'This module contains analytical tools and sophisticated plotting methods for informatics datasets.'
