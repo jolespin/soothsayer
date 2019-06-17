@@ -6,4 +6,5 @@ Current installation method:
 
 ```
 
-Let me know if you have any issues before creating an issue on GitHub (jespinoz[ a t ]jcvi[ d o t ]org)
+Let me know if you have any issues before creating an issue on GitHub:
+jespinoz[ a t ]jcvi[ d o t ]org
