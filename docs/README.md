@@ -6,8 +6,8 @@
 
 Documentation soon
 
-**Available via conda: 
+**[Available via conda](https://anaconda.org/jolespin/soothsayer)**: 
 
 `conda install -c jolespin soothsayer`
 
-#https://anaconda.org/jolespin/soothsayer
+
