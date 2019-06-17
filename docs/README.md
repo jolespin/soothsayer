@@ -4,4 +4,4 @@
 
 *\*Espinoza, \*Dupont et al. 2019 TBD*
 
-Documentation soon
+Conda installation & documentation soon
