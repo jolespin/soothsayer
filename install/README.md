@@ -1,5 +1,5 @@
 # ∆ Soothsayer ∆
-_______________________________
+
 ## Installation instructions:
 I've tried to make installation as seemless as possible.  There are several Python & R dependencies that are difficult to install but it should be working through conda [OSX and Linux soon].
 
