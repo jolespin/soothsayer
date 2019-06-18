@@ -11,8 +11,6 @@ I've tried to make installation as seemless as possible.  There are several Pyth
 
 Note, sometimes theres are issues with the conda installation from `-c jolespin soothsayer` but `pip install soothsayer` can be used instead.
 
-##Current installation methods:
-
 ### Method 1 :
 #### OSX Installation
 Inspired by [qiime2](https://docs.qiime2.org/2019.4/install/native/) installation method
