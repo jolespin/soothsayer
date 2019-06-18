@@ -9,25 +9,35 @@ __all__ = sorted(__all__)
 
 # Dataset
 class Dataset(object):
-    def __init__(self, raw_data:pd.DataFrame, metadata_observations:pd.DataFrame=None, metadata_attributes:pd.DataFrame=None, metadata_target_field=None, name=None, description=None, obsv_type=None, attr_type=None, metric_type=None, name_rawdata="raw_data", check_index_overlap=True, **additional_fields):
+    def __init__(self, data:pd.DataFrame, metadata_observations:pd.DataFrame=None, metadata_attributes:pd.DataFrame=None, metadata_target_field=None, name=None, description=None, obsv_type=None, attr_type=None, metric_type=None, name_initial_data=None, check_index_overlap=True, alias_metadata_observations:str="meta_obsvs", alias_metadata_attributes:str="meta_attrs", **additional_fields):
         """
         Dataset class to store different versions of a dataset.  Currently only supports 2D pd.DataFrames but will support ND xarrays in the future
         Assumes columns/axis=1 contains attributes and index/axis=0 contains observations for compatibility with scikit-learn
 
         Usage:
-        D = Dataset(X_iris, name="Iris", metadata=df_metadata, description="iris dataset", obsv_type="iris samples", attr_type="leaf lengths", metric_type="cm")
-        D.add_version(name_version="zscore", data=normalize(X_iris, "zscore", axis=0), notes="normalized across axis=0")
-        D.set_metadata_target("Species")
-        D.add_indexing_subset("versicolor", y_iris.compress(lambda x: x == "virginica").index, axis=0)
-        D.get_indexing_subset(name_subset="versicolor", axis=0)
-        X, y = D.get_dataset("raw_data", return_X_y=True)
-        # Dataset| Iris | (150, 4)
-        # ========================
-        #         obsv_type: iris samples
-        #         attr_type: leaf lengths
-        #         metric_type: cm
-        #         description: iris dataset
-        #         number_of_datasets: 2, datasets: ['raw_data', 'zscore'], metadata: True
+        from soothsayer import Dataset
+        from soothsayer.transmute import normalize
+
+        ds_iris = Dataset(X_iris, name="Iris", metadata_observations=y_iris, description="iris dataset", obsv_type="iris samples", attr_type="leaf lengths", metric_type="cm")
+        ds_iris.add_version(name_version="zscore", data=normalize(X_iris, "zscore", axis=0), notes="normalized across axis=0")
+        ds_iris.set_metadata_target("Species")
+        ds_iris.add_indexing_subset("versicolor", ds_iris.y.compress(lambda x: x == "virginica").index, axis=0)
+        ds_iris.add_indexing_subset("sepal", ['sepal_length', 'sepal_width'], axis=1)
+
+        # Initial dataset
+        X, y = ds_iris.get_dataset(None, return_X_y=True)
+        print("Initial:", X.shape)
+        # Initial: (150, 4)
+
+        # Versicolor dataset
+        X, y = ds_iris.get_dataset(None, observation_subset="versicolor", return_X_y=True)
+        print("Versicolor:", X.shape)
+        # Versicolor: (50, 4)
+
+        # Versicolor dataset with sepal
+        X, y = ds_iris.get_dataset(None, observation_subset="versicolor", attribute_subset="sepal", return_X_y=True)
+        print("Versicolor only sepal:", X.shape)
+        # Versicolor only sepal: (50, 2)
         """
         # Labels
         self.name = name
@@ -35,7 +45,7 @@ class Dataset(object):
         self.obsv_type = obsv_type
         self.attr_type = attr_type
         self.metric_type = metric_type
-        self.name_rawdata = name_rawdata
+        self.name_initial_data = name_initial_data
 
         # Subsets
         self.attribute_subsets = OrderedDict()
@@ -46,30 +56,37 @@ class Dataset(object):
         self.number_of_metadata_observations_fields = 0
         self.number_of_metadata_attributes_fields = 0
         self.metadata_observations = None
+        self.alias_metadata_observations = alias_metadata_observations
         self.metadata_attributes = None
+        self.alias_metadata_attributes = alias_metadata_attributes
         self.y_field = None
         self.y = None
         self.__synthesized__ = datetime.datetime.utcnow()
-        self.__data__ = OrderedDict()
-        if is_path_like(raw_data, path_must_exist=True):
-            raw_data = read_dataframe(raw_data)
+        self.__database__ = OrderedDict()
+        if is_path_like(data, path_must_exist=True):
+            data = read_dataframe(data)
 
-        self.add_version(name_version=name_rawdata, data=raw_data, **additional_fields)
-        self.add_indexing_subset(name_subset=None, labels=raw_data.index, axis=0)
-        self.add_indexing_subset(name_subset=None, labels=raw_data.columns, axis=1)
-        self.set_default( name_version=name_rawdata, observation_subset=None, attribute_subset=None)
+        self.add_version(name_version=name_initial_data, data=data, **additional_fields)
+        self.add_indexing_subset(name_subset=None, labels=data.index, axis=0)
+        self.add_indexing_subset(name_subset=None, labels=data.columns, axis=1)
+        self.set_default( name_version=name_initial_data, observation_subset=None, attribute_subset=None)
 
         # Metadata observations
         if metadata_observations is not None:
             self.add_metadata(metadata_observations, axis="observations", metadata_target_field=metadata_target_field)
+            if self.alias_metadata_observations is not None:
+                setattr(self, str(self.alias_metadata_observations), self.metadata_observations)
+
 
         # Metadata attributes
         if metadata_attributes is not None:
             self.add_metadata(metadata_attributes, axis="attributes", metadata_target_field=None)
+            if self.alias_metadata_attributes is not None:
+                setattr(self, str(self.alias_metadata_attributes), self.metadata_attributes)
 
     def __repr__(self):
         class_name = str(self.__class__).split(".")[-1][:-2]
-        lines = [f"Dataset| {self.name} | {self.__data__[self.name_rawdata]['shape']}"]
+        lines = [f"Dataset| {self.name} | {self.__database__[self.name_initial_data]['shape']}"]
         lines.append(len(lines[0])*"=")
         lines.append("\n".join([
             f"        obsv_type: {self.obsv_type}",
@@ -78,7 +95,7 @@ class Dataset(object):
             f"        description: {self.description}",
         ]))
         lines.append("\n".join([
-            f"datasets: {list(self.__data__.keys())}",
+            f"datasets: {list(self.__database__.keys())}",
             f"attribute_subsets: {list(self.attribute_subsets.keys())}",
             f"observation_subsets: {list(self.observation_subsets.keys())}",
         ]))
@@ -96,8 +113,8 @@ class Dataset(object):
         assert metadata is not None, "metadata can't be None"
         if is_path_like(metadata, path_must_exist=True):
             metadata = read_dataframe(metadata)
-        rawdata_observations = self.get_indexing_subset(name_subset=None, axis="observations")
-        rawdata_attributes = self.get_indexing_subset(name_subset=None, axis="attributes")
+        initial_data_observations = self.get_indexing_subset(name_subset=None, axis="observations")
+        initial_data_attributes = self.get_indexing_subset(name_subset=None, axis="attributes")
 
         # Convert pd.Series to pd.DataFrame
         if isinstance(metadata, pd.Series):
@@ -105,16 +122,16 @@ class Dataset(object):
 
         # Check the axis
         if axis == "infer":
-            if len(set(rawdata_observations) & len(metadata.index)) > 0:
+            if len(set(initial_data_observations) & len(metadata.index)) > 0:
                 axis = "observations"
-            if len(set(rawdata_attributes) & len(metadata.index)) > 0:
+            if len(set(initial_data_attributes) & len(metadata.index)) > 0:
                 axis = "attributes"
-            assert axis != "infer", "Please check the indicies of the metadata and how they match against the raw data"
+            assert axis != "infer", "Please check the indicies of the metadata and how they match against the raw initial data"
         assert axis in accepted_axis, "axis must be one of the following: {accepted_axis}"
         # Metadata observations
         if axis in { "obsvs", "observations","rows", 0}:
             if self.check_index_overlap:
-                assert set(metadata.index) >= set(rawdata_observations), "Not all index of metadata are in raw_data"
+                assert set(metadata.index) >= set(initial_data_observations), "Not all index of metadata are in initial data"
 
             self.metadata_observations = metadata.copy()
             self.number_of_metadata_observations_fields = self.metadata_observations.shape[1]
@@ -125,7 +142,7 @@ class Dataset(object):
 
             # Get useable subset
             if self.check_index_overlap:
-                self.metadata_observations = self.metadata_observations.loc[rawdata_observations]
+                self.metadata_observations = self.metadata_observations.loc[initial_data_observations]
             if metadata_target_field is None:
                 self.y_field = None
                 self.y = None
@@ -137,14 +154,14 @@ class Dataset(object):
         # Metadata attributes
         if axis in {"attrs", "attributes","columns", 1}:
             if self.check_index_overlap:
-                assert set(metadata.index) >= set(rawdata_attributes), "Not all index of metadata are in raw_data"
+                assert set(metadata.index) >= set(initial_data_attributes), "Not all index of metadata are in initial data"
 
             self.metadata_attributes = metadata.copy()
             self.number_of_metadata_attributes_fields = self.metadata_attributes.shape[1]
             if isinstance(self.metadata_attributes, pd.Series):
                 self.metadata_attributes = self.metadata_attributes.to_frame()
             if self.check_index_overlap:
-                self.metadata_attributes = self.metadata_attributes.loc[rawdata_attributes]
+                self.metadata_attributes = self.metadata_attributes.loc[initial_data_attributes]
         return self
 
     # Add data versions
@@ -152,9 +169,9 @@ class Dataset(object):
         """
         Add a version of the data.  For example, a version of data with a different transformation
         """
-        self.__data__[name_version] = {"data":data.copy(), "shape":data.shape, "notes":notes, "alias":alias, **additional_fields}
+        self.__database__[name_version] = {"data":data.copy(), "shape":data.shape, "notes":notes, "alias":alias, **additional_fields}
         if alias is not None:
-            setattr(self, str(alias), self.__data__[name_version]["data"])
+            setattr(self, str(alias), self.__database__[name_version]["data"])
         return self
 
     # Add indexing subsets for observations and attributes
@@ -167,11 +184,11 @@ class Dataset(object):
 
         labels = pd.Index(labels, name=name_subset)
         if axis in { "obsvs", "observations","rows", 0}:
-            assert set(labels) <= set(self.get_dataset(name_version=self.name_rawdata).index), f"Not all labels are in the {self.name_rawdata} index"
+            assert set(labels) <= set(self.get_dataset(name_version=self.name_initial_data).index), f"Not all labels are in the {self.name_initial_data} index"
             self.observation_subsets[name_subset] = {"labels":labels, "notes":notes, "alias":alias, **additional_fields}
 
         if axis in { "attrs", "attributes","columns", 1}:
-            assert set(labels) <= set(self.get_dataset(name_version=self.name_rawdata).columns), f"Not all labels are in the {self.name_rawdata} columns"
+            assert set(labels) <= set(self.get_dataset(name_version=self.name_initial_data).columns), f"Not all labels are in the {self.name_initial_data} columns"
             self.attribute_subsets[name_subset] = {"labels":labels, "notes":notes, "alias":alias, **additional_fields}
         if alias is not None:
             setattr(self, str(alias), labels)
@@ -190,7 +207,7 @@ class Dataset(object):
         return self.get_dataset(name_version=key, return_X_y=False, observation_subset=None, attribute_subset=None)
 
     # Get stored datasets
-    def get_dataset(self, name_version=None, return_X_y=False, observation_subset=None, attribute_subset=None):
+    def get_dataset(self, name_version, return_X_y=False, observation_subset=None, attribute_subset=None):
         """
         Retrieve a dataset that has been stored
         """
@@ -222,12 +239,10 @@ class Dataset(object):
 
 
         # If no version is specified then use the default
-        if name_version is None:
-            name_version = self.X_version
-        assert name_version in self.__data__, f"Cannot find `{name_version}`.  Please add it to the datasets via `add_version`"
+        assert name_version in self.__database__, f"Cannot find `{name_version}`.  Please add it to the datasets via `add_version`"
 
         # Data
-        df = self.__data__[name_version]["data"]
+        df = self.__database__[name_version]["data"]
          # Observations
         idx_obsvs = _get_index(df=df, subset=observation_subset, axis=0)
         assert set(idx_obsvs) <= set(df.index), f"Not all labels are in the {name_version} index"
@@ -245,14 +260,15 @@ class Dataset(object):
     # Get dataset field
     def get_dataset_field(self, name_version=None, field=None):
         if (name_version is not None) and (field is None):
-            print(f"Fields available for Dataset({name_version}):\n", set(self.__data__[name_version].keys()), sep="\t", file=sys.stdout)
+            print(f"Fields available for Dataset({name_version}):\n", set(self.__database__[name_version].keys()), sep="\t", file=sys.stdout)
         if (name_version is None) and (field is None):
             print("Available options:", file=sys.stdout)
-            for k,d in self.__data__.items():
+            for k,d in self.__database__.items():
                 print(f"\t{k}:", set(d.keys()), sep="\t", file=sys.stdout)
-        assert name_version in self.__data__, f"{name_version} is not available.  Please use `add_version`."
-        assert field in self.__data__[name_version], f"{field} not available for dataset version: {name_version}"
-        return self.__data__[name_version][field]
+        assert name_version in self.__database__, f"{name_version} is not available.  Please use `add_version`."
+        assert field in self.__database__[name_version], f"{field} not available for dataset version: {name_version}"
+        return self.__database__[name_version][field]
+
     # Get indexing field
     def get_indexing_field(self, name_subset=None, field=None, axis=None):
         if axis is None:
@@ -286,10 +302,8 @@ class Dataset(object):
         return self
 
     # Set defaults
-    def set_default(self, name_version=None, observation_subset=None, attribute_subset=None):
-        if name_version is None:
-            name_version = self.name_rawdata
-        assert name_version in self.__data__, f"Cannot find `{name_version}`.  Please add it to the datasets via `add_version`"
+    def set_default(self, name_version, observation_subset=None, attribute_subset=None):
+        assert name_version in self.__database__, f"Cannot find `{name_version}`.  Please add it to the datasets via `add_version`"
         assert observation_subset in self.observation_subsets, f"Cannot find `{observation_subset}`.  Please add it to the datasets via `add_indexing_subset`"
         assert attribute_subset in self.attribute_subsets, f"Cannot find `{attribute_subset}`.  Please add it to the datasets via `add_indexing_subset`"
 
@@ -309,8 +323,8 @@ class Dataset(object):
         # If no version is specified then use the default
         if name_version is None:
             name_version = self.X_version
-        assert name_version in self.__data__, f"Cannot find `{name_version}`.  Please add it to the datasets via `add_version`"
-        df = self.__data__[name_version]["data"]
+        assert name_version in self.__database__, f"Cannot find `{name_version}`.  Please add it to the datasets via `add_version`"
+        df = self.__database__[name_version]["data"]
         # Observations
         idx_observations = df.index
         if func_observations is not None:
@@ -331,42 +345,42 @@ class Dataset(object):
         self.add_version(name_version, data)
 
     def __getitem__(self, name_version):
-        return self.__data__[name_version]["data"]
+        return self.__database__[name_version]["data"]
 
     def __len__(self):
-        return len(self.__data__)
+        return len(self.__database__)
 
     def __delitem__(self, name_version):
-        del self.__data__[name_version]
+        del self.__database__[name_version]
 
     def clear(self):
-        return self.__data__.clear()
+        return self.__database__.clear()
 
     def copy(self):
         return copy.deepcopy(self)
 
     def has_key(self, k):
-        return k in self.__data__
+        return k in self.__database__
 
     def update(self, *args, **kwargs):
-        return self.__data__.update(*args, **kwargs)
+        return self.__database__.update(*args, **kwargs)
 
     def keys(self):
         print(f"Dataset versions:")
-        return list(self.__data__.keys())
+        return list(self.__database__.keys())
 
     def values(self):
         print(f"Datasets:")
-        return list(self.__data__.values())
+        return list(self.__database__.values())
 
     def items(self):
-        return self.__data__.items()
+        return self.__database__.items()
 
     def __contains__(self, item):
-        return item in self.__data__
+        return item in self.__database__
 
     def __iter__(self):
-        for name_version, d in self.__data__.items():
+        for name_version, d in self.__database__.items():
             yield name_version, d["data"]
 
     def copy(self):

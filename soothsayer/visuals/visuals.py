@@ -933,6 +933,7 @@ def plot_compositional(
     y:pd.Series=None,
     color_density="black",
     edgecolor="gray",
+    s=None,
     class_colors=None,
     attr_type="attr",
     unit_type="read",
@@ -943,6 +944,7 @@ def plot_compositional(
     vertical_lines = np.mean,
     horizontal_lines=np.mean,
     cmap=plt.cm.gist_heat,
+    scatter_kws=dict(),
     show_xgrid=False,
     show_ygrid=True,
     show_density_2d=True,
@@ -1005,8 +1007,10 @@ def plot_compositional(
     _kde_2d_kws.update(kde_2d_kws)
     _line_kws = {"color":color_density, "linewidth":1.618, "linestyle":":", "alpha":1.0}
     _line_kws.update(line_kws)
-    _annot_kws = {}
+    _annot_kws = {"s":s}
     _annot_kws.update(annot_kws)
+    _scatter_kws={}
+    _scatter_kws.update(scatter_kws)
     # Colors
     if y is not None:
         assert set(y.index) >= set(X.index), "All elements of X.index must be in y.index"
@@ -1032,9 +1036,9 @@ def plot_compositional(
         # Scatter plot
         if y is not None:
             for id_class, idx_query in pd_series_collapse(y).iteritems():
-                ax.scatter(depth[idx_query], richness[idx_query], color=obsv_colors[idx_query], edgecolor=edgecolor, label=id_class)
+                ax.scatter(depth[idx_query], richness[idx_query], color=obsv_colors[idx_query], edgecolor=edgecolor, label=id_class, **_scatter_kws)
         else:
-            ax.scatter(depth, richness, color=color_density, edgecolor=edgecolor)
+            ax.scatter(depth, richness, color=color_density, edgecolor=edgecolor, **_scatter_kws)
         # Limits
         xlim = ax.get_xlim()
         ylim = ax.get_ylim()
@@ -1080,7 +1084,10 @@ def plot_compositional(
                     sns.kdeplot(data=depth, data2=richness, color=color_density, zorder=0,  ax=ax, **_kde_2d_kws)
                 else:
                     for id_class, idx_query in pd_series_collapse(y).iteritems():
-                        sns.kdeplot(data=depth[idx_query], data2=richness[idx_query],  color=class_colors[id_class], zorder=0, ax=ax, **_kde_2d_kws)
+                        try:
+                            sns.kdeplot(data=depth[idx_query], data2=richness[idx_query],  color=class_colors[id_class], zorder=0, ax=ax, **_kde_2d_kws)
+                        except ValueError:
+                            warnings.warn("Could not compute the 2-dimensional KDE plot for the following class: {}".format(id_class))
             else:
                 sns.kdeplot(data=depth, data2=richness, color=color_density, zorder=0,  ax=ax, **_kde_2d_kws)
 
