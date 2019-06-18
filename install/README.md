@@ -1,4 +1,10 @@
-# Soothsayer ∆
+```
+
+____ ____ ____ ___ _  _ ____ ____ _   _ ____ ____ 
+[__  |  | |  |  |  |__| [__  |__|  \_/  |___ |__/ 
+___] |__| |__|  |  |  | ___] |  |   |   |___ |  \ 
+                                                  
+```
 
 ## Installation instructions:
 I've tried to make installation as seemless as possible.  There are several Python & R dependencies that are difficult to install but it should be working through conda [OSX and Linux soon].
