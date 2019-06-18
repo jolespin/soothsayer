@@ -1,9 +1,9 @@
 # Installing Soothsayer
 I've tried to make installation as seemless as possible.  There are several Python & R dependencies that are difficult to install but it should be working through conda [OSX and Linux soon].
 
-Current installation method (similar to [qiime2](https://docs.qiime2.org/2019.4/install/native/) installation):
+Current installation methods:
 
-## Method 1:
+## Method 1 (similar to [qiime2](https://docs.qiime2.org/2019.4/install/native/) installation):
 ### OSX Installation
 ```bash
 wget https://raw.githubusercontent.com/jolespin/soothsayer/master/install/soothsayer_py36_v2019.06.yml
