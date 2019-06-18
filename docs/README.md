@@ -2,7 +2,7 @@
 
 **v2019.06**
 
-*\*Espinoza, \*Dupont et al. 2019 TBD*
+*\*Espinoza, \*Dupont et al. 2019 (Submitted)*
 
 Documentation and tutorials coming soon.
 
