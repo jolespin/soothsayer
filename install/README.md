@@ -20,7 +20,7 @@ bash install_soothsayer.sh
 # or
 bash install_soothsayer.sh soothsayer_env
 # or
-bash install_soothsayer.sh soothsayer_env 3.6.8
+bash install_soothsayer.sh soothsayer_env 3.6.7
 ```
 
 Let me know if you have any issues before creating an issue on GitHub:
