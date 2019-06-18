@@ -259,8 +259,6 @@ class Agglomerative(object):
     def cluster(self, deep_split=2, min_c=3, cut_method="hybrid", cut_height=None, algo_kws=dict(), outlier_module=None):
         """
         Future: Cluster using the actual ete3 nodes
-
-        NOTE: THIS PART DOESN"T EVEN NEED A LABEL ENCODER ANYMORE SINCE IM REMOVING CUSTOM CLUSTERS.  NEED TO ADD SECONDARY CLUSTERS WHERE LABEL ENCODER IS NECESSARY.
         """
         accepted_arguments = {"hybrid", "static"}
         assert cut_method in accepted_arguments, f"`cut_method` must be one of the following: {accepted_arguments}"

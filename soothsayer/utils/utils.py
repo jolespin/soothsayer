@@ -406,7 +406,7 @@ def rgb_to_rgba(u, alpha=1.0, missing_alpha=1.0, name=None, verbose=True):
     """
     # Convert to Series
     u = pd.Series(u)
-    assert len(u[0]) == 3, "Not all values are (r,g,b)"
+    assert len(u.values[0]) == 3, "Not all values are (r,g,b)"
     if is_dict(alpha):
         alpha = pd.Series(alpha, name="alpha")
 
@@ -1032,20 +1032,20 @@ def pd_dataframe_matmul(A:pd.DataFrame,B:pd.DataFrame):
     return pd.DataFrame(np.matmul(A, B.loc[A.columns,:]), index=A.index, columns=B.columns)
 
 # Extend a DataFrame
-def pd_dataframe_extend_index(df, index_extended, fill, axis=0):
+def pd_dataframe_extend_index(df, index_extended, fill=np.nan, axis=0):
     """
     Extend the index of pd.DataFrame like pandas used to do before 23.4
     """
     if axis == 0:
         idx_extend = set(index_extended) - set(df.index)
         A = np.empty((len(idx_extend), df.shape[1]))
-        A[:] = fill
-        return pd.concat([df, pd.DataFrame(A, index=idx_extend, columns=df.columns)])
+        A[:] = np.nan
+        return pd.concat([df, pd.DataFrame(A, index=idx_extend, columns=df.columns)]).fillna(fill)
     if axis == 1:
         idx_extend = set(index_extended) - set(df.columns)
         A = np.empty(( df.shape[0], len(idx_extend)))
-        A[:] = fill
-        return pd.concat([df, pd.DataFrame(A, index=df.index, columns=idx_extend)])
+        A[:] = np.nan
+        return pd.concat([df, pd.DataFrame(A, index=df.index, columns=idx_extend)]).fillna(fill)
 
 # =======
 # Filters

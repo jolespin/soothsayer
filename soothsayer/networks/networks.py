@@ -70,6 +70,8 @@ class Hive(object):
                 warnings.simplefilter("ignore")
                 kernel = Symmetric(kernel, data_type=node_type, metric_type=metric_type, name=name, mode='similarity', force_the_symmetry=True)
         assert is_query_class(kernel, "Symmetric"), "`kernel` should either be a Symmetric object or a symmetric pd.DataFrame of adjacencies"
+        assert np.all(kernel.data.values >= 0), "Adjacency weights must be ≥ 0.  You can set edge colors later with the `plot` method."
+
         self.kernel = kernel
         self.name = name
         self.verbose = verbose
@@ -385,10 +387,13 @@ class Hive(object):
             _legend_kws.update(legend_kws)
 
             # Edgecolors
-            edges = self.kernel_subset_.data
+            edges = self.kernel_subset_.data.copy()
 
             if clip_edgeweight is not None:
                 edges = np.clip(edges, a_min=None, a_max=clip_edgeweight)
+                # edges[edges < 0] = np.clip(edges[edges < 0], a_min=-clip_edgeweight, a_max=None)
+                # edges[edges > 0] = np.clip(edges[edges > 0], a_min=None, a_max=clip_edgeweight)
+
             if edge_colors is None:
                 edge_colors = axis_color
             if is_color(edge_colors):
