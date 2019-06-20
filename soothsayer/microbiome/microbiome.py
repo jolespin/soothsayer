@@ -249,6 +249,13 @@ class PhylogenomicFunctionalComponents(object):
         # Metadata
         df_meta = pd.DataFrame(metadata).T.loc[:,["taxonomy_component", "functional_component","number_of_orfs", "∑(lengths)", "µ(lengths)","sem(lengths)","var(lengths)","normaltest__statistic", "normaltest__pvalue", "lengths", "orfs"]].sort_values(["taxonomy_component", "functional_component", "number_of_orfs"], ascending=[True, True, False])
         df_meta.index.name = "id_phylogenomic-functional-component"
+
+        # Ints
+        for id_field in ["number_of_orfs", "∑(lengths)"]:
+            df_meta[id_field] = df_meta[id_field].astype(int)
+        # Floats
+        for id_field in ["µ(lengths)","sem(lengths)","var(lengths)","normaltest__statistic", "normaltest__pvalue"]:
+            df_meta[id_field] = df_meta[id_field].astype(float)
         return df_meta
 
     # Compute the summed ORF counts for each PGFC

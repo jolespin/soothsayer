@@ -1160,7 +1160,7 @@ def get_iris_data(return_data=["X", "y", "colors"], noise=None, return_target_na
     if noise is not None:
         X_noise = pd.DataFrame(
             np.random.RandomState(random_state).normal(size=(X.shape[0], noise)),
-            index=X_iris.index,
+            index=X.index,
             columns=[*map(lambda j:f"noise_{j}", range(noise))]
         )
         X = pd.concat([X, X_noise], axis=1)

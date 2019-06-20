@@ -23,7 +23,7 @@ from ..transmute.normalization import normalize_minmax
 from ..io import write_object
 
 
-__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_from_pandas_adjacency", "signed", "determine_soft_threshold"]
+__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold"]
 __all__ = sorted(__all__)
 # =======================================================
 # Hive
@@ -70,7 +70,8 @@ class Hive(object):
                 warnings.simplefilter("ignore")
                 kernel = Symmetric(kernel, data_type=node_type, metric_type=metric_type, name=name, mode='similarity', force_the_symmetry=True)
         assert is_query_class(kernel, "Symmetric"), "`kernel` should either be a Symmetric object or a symmetric pd.DataFrame of adjacencies"
-        assert np.all(kernel.data.values >= 0), "Adjacency weights must be ≥ 0.  You can set edge colors later with the `plot` method."
+        if not np.all(kernel.data.values >= 0):
+            warnings.warn("Adjacency weights must be ≥ 0 to plot.  The signs are preserve in the Hive but absolute values will be computed for weighted edge plotting.")
 
         self.kernel = kernel
         self.name = name
@@ -386,14 +387,18 @@ class Hive(object):
             _legend_kws = {}
             _legend_kws.update(legend_kws)
 
-            # Edgecolors
+            # Edge info
             edges = self.kernel_subset_.data.copy()
 
+            if not np.all(kernel.data.values >= 0):
+                warnings.warn("Adjacency weights must be ≥ 0 to plot.  Absolute values have been computed for the edgeweights before the `func_edgeweight` has been applied.")
+                edges = edges.abs()
+            if func_edgeweight is not None:
+                edges = func_edgeweight(edges)
             if clip_edgeweight is not None:
                 edges = np.clip(edges, a_min=None, a_max=clip_edgeweight)
                 # edges[edges < 0] = np.clip(edges[edges < 0], a_min=-clip_edgeweight, a_max=None)
                 # edges[edges > 0] = np.clip(edges[edges > 0], a_min=None, a_max=clip_edgeweight)
-
             if edge_colors is None:
                 edge_colors = axis_color
             if is_color(edge_colors):
@@ -412,8 +417,7 @@ class Hive(object):
                 node_positions = axes_data["node_positions_normalized"]
                 colors = axes_data["colors"].tolist() # Needs `.tolist()` for Matplotlib version < 2.0.0
                 sizes = axes_data["sizes"].tolist()
-                if func_edgeweight is not None:
-                    edges = func_edgeweight(edges)
+
 
                 # Positions
                 # =========
@@ -730,7 +734,29 @@ class Hive(object):
 # =======================================================
 # Connectivity
 # =======================================================
-def intramodular_connectivity(kernel, clusters:pd.Series):
+# Connectivity
+def connectivity(kernel, include_self_loops=False):
+    """
+    kernel can be either pd.DataFrame or Symmetric object
+    clusters can be either pd.Series or dict object with keys as node and values as cluster e.g. {node_A:0}
+    """
+    # https://www.rdocumentation.org/packages/WGCNA/versions/1.63/topics/intramodularConnectivity
+    # https://github.com/cran/WGCNA/blob/678c9da2b71c5b4a43cb55005224c243f411abc8/R/Functions.R
+    if is_query_class(kernel, "Symmetric"):
+        kernel = kernel.to_dense()
+
+    kernel = kernel.copy()
+    if not include_self_loops:
+        np.fill_diagonal(kernel.values, 0)
+
+    # Check symmetry
+    assert is_symmetrical(kernel, tol=1e-8), "kernel must be symmetric.  Try using `soothsayer.utils.force_symmetry`"
+    kernel = force_symmetry(kernel)
+
+    #kTotal
+    return kernel.sum(axis=1)
+# Intramodular connectivty
+def intramodular_connectivity(kernel, clusters:pd.Series, include_self_loops=False):
     """
     kernel can be either pd.DataFrame or Symmetric object
     clusters can be either pd.Series or dict object with keys as node and values as cluster e.g. {node_A:0}
@@ -742,7 +768,8 @@ def intramodular_connectivity(kernel, clusters:pd.Series):
     if is_dict(clusters):
         clusters = pd.Series(clusters)
     kernel = kernel.copy()
-    np.fill_diagonal(kernel.values, 0)
+    if not include_self_loops:
+        np.fill_diagonal(kernel.values, 0)
 
     # Check clusters
     assert is_symmetrical(kernel, tol=1e-8), "kernel must be symmetric.  Try using `soothsayer.utils.force_symmetry`"
@@ -778,15 +805,67 @@ def signed(X):
     return (X + 1)/2
 
 # Topological overlap
-def topological_overlap_from_pandas_adjacency(adjacency,  TOMType="unsigned",  TOMDenom="min"):
+def topological_overlap_measure(adjacency):
     """
-    WGCNA: TOMsimilarity
-        function (adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
-                   indent = 0)
+    Compute the topological overlap for a weighted adjacency matrix
+
+    ====================================================
+    Benchmark 5000 nodes (iris w/ 4996 noise variables):
+    ====================================================
+    TOM via rpy2 -> R -> WGCNA: 24 s ± 471 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    TOM via this function: 7.36 s ± 212 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+    =================
+    Acknowledgements:
+    =================
+    Original source:
+        * Peter Langfelder and Steve Horvath
+        https://www.rdocumentation.org/packages/WGCNA/versions/1.67/topics/TOMsimilarity
+        https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-559
+
+    Implementation adapted from the following sources:
+        * Credits to @scleronomic
+        https://stackoverflow.com/questions/56574729/how-to-compute-the-topological-overlap-measure-tom-for-a-weighted-adjacency-ma/56670900#56670900
+        * Credits to @benmaier
+        https://github.com/benmaier/GTOM/issues/3
     """
-    if is_query_class(adjacency, "Symmetric"):
-        adjacency = adjacency.to_dense()
-    return TOMsimilarity(adjacency,  TOMType=TOMType,  TOMDenom=TOMDenom)
+    # Compute topological overlap
+    def _compute_tom(A):
+        # Prepare adjacency
+        np.fill_diagonal(A, 0)
+        # Prepare TOM
+        A_tom = np.zeros_like(A)
+        # Compute TOM
+        L = np.matmul(A,A)
+        ki = A.sum(axis=1)
+        kj = A.sum(axis=0)
+        MINK = np.array([ np.minimum(ki_,kj) for ki_ in ki ])
+        A_tom = (L+A) / (MINK + 1 - A)
+        np.fill_diagonal(A_tom,1)
+        return A_tom
+
+    # Check input type
+    node_labels = None
+    if not isinstance(adjacency, np.ndarray):
+        if is_query_class(adjacency, "Symmetric"):
+            adjacency = adjacency.to_dense()
+        assert np.all(adjacency.index == adjacency.columns), "`adjacency` index and columns must have identical ordering"
+        node_labels = adjacency.index
+
+    # Check input type
+    assert is_symmetrical(adjacency, tol=1e-10), "`adjacency` is not symmetric"
+    assert np.all(adjacency >= 0), "`adjacency` weights must ≥ 0"
+
+    # Compute TOM
+    A_tom = _compute_tom(np.asarray(adjacency))
+
+    # Unlabeled adjacency
+    if node_labels is None:
+        return A_tom
+
+    # Labeled adjacency
+    else:
+        return pd.DataFrame(A_tom, index=node_labels, columns=node_labels)
 
 # Soft threshold curves
 def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True, query_powers = np.append(np.arange(1,10), np.arange(10,30,2)), style="seaborn-white", scalefree_threshold=0.85, pad=1.0, markeredgecolor="black"):

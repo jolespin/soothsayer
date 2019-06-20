@@ -172,7 +172,7 @@ def normalize(X, method="tss", axis=1, tree=None, feature_range=(0,1)):
     return df_normalized
 
 # Normalize gene expresssion data
-def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None, p=0.75, **kws):
+def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None, p=0.75, kws=dict()):
     """
     # FPKM
     Fragments Per Kilobase of transcript per Million mapped reads
@@ -210,6 +210,7 @@ def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None
     """
     if method is None:
         return X
+
     method = method.lower()
     assert_acceptable_arguments(query=[method], target={"rpk", "fpkm", "rpkm", "tpm", "tmm", "getmm", "rle", "upperquartile", "css"})
 
