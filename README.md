@@ -7,7 +7,7 @@ _________________________________
 *v2019.06*
 
 #### Citation:
-***Espinoza, *Dupont et al. 2019 (Submitted)
+*Espinoza, *Dupont et al. 2019 (Submitted)
 
 #### Usage:
 Documentation and tutorials coming soon.
