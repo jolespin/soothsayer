@@ -390,7 +390,7 @@ class Hive(object):
             # Edge info
             edges = self.kernel_subset_.data.copy()
 
-            if not np.all(kernel.data.values >= 0):
+            if not np.all(edges >= 0):
                 warnings.warn("Adjacency weights must be ≥ 0 to plot.  Absolute values have been computed for the edgeweights before the `func_edgeweight` has been applied.")
                 edges = edges.abs()
             if func_edgeweight is not None:

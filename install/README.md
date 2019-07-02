@@ -24,6 +24,7 @@ conda env create -y --name soothsayer_env --file soothsayer_py36_v2019.06.yml
 rm soothsayer_py36_v2019.06.yml
 # Activate environment
 conda activate soothsayer_env
+# Duration: This took < 5 minutes on `MacBook Pro v10.14.5` 
 ```
 
 ### Method 2:
@@ -36,6 +37,7 @@ bash install_soothsayer.sh
 bash install_soothsayer.sh soothsayer_env
 # or
 bash install_soothsayer.sh soothsayer_env 3.6.7
+# Duration: This will take a few hours and may require manually installing a few packages if certain ones fail
 ```
 
 Let me know if you have any issues before creating an issue on GitHub:

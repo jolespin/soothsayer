@@ -33,11 +33,12 @@
 # =======
 # Version
 # =======
-__version__= "2019.06"
+__version__= "2019.07"
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
 __url__ = "https://github.com/jolespin/soothsayer"
 __cite__ = "https://github.com/jolespin/soothsayer"
+__license__ = "BSD-3"
 __developmental__ = True
 
 # =======

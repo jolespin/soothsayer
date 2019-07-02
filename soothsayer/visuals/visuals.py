@@ -1,4 +1,4 @@
-import os,sys,operator
+import os,sys,operator, warnings
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -1007,9 +1007,9 @@ def plot_compositional(
     _kde_2d_kws.update(kde_2d_kws)
     _line_kws = {"color":color_density, "linewidth":1.618, "linestyle":":", "alpha":1.0}
     _line_kws.update(line_kws)
-    _annot_kws = {"s":s}
+    _annot_kws = {}
     _annot_kws.update(annot_kws)
-    _scatter_kws={}
+    _scatter_kws={"s":s}
     _scatter_kws.update(scatter_kws)
     # Colors
     if y is not None:

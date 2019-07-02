@@ -26,8 +26,8 @@ __all__ = ["to_precision", "format_duration", "get_timestamp", "dataframe_to_mat
 "rgb_to_rgba", "map_colors", "infer_cmap", "infer_vmin_vmax", "infer_continuous_type", "scalarmapping_from_data", "Chromatic", "logfile_synthesize", "determine_mode_for_logfiles",
 "is_dict", "is_rgb_like", "is_nonstring_iterable","is_dict_like", "is_color", "is_graph", "is_all_same_type", "is_number", "is_query_class","is_symmetrical", "is_in_namespace",
 "format_mpl_legend_handles", "LEGEND_KWS", "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
-"pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","contains",
-"check_symmetry", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size",
+"pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","contains","consecutive_replace",
+"check_symmetry", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath",
 ]
 __all__ = sorted(__all__)
 
@@ -309,6 +309,13 @@ def format_header(text:str, line_character="=", n=None):
         n = len(text)
     line = n*line_character
     return "{}\n{}\n{}".format(line, text, line)
+# Consecutive replace on a string
+def consecutive_replace(x:str, *patterns):
+    if len(patterns) == 1:
+        patterns = patterns[0]
+    for (a,b) in patterns:
+        x = x.replace(a,b)
+    return x
 
 # ============
 # Dictionaries
@@ -1106,6 +1113,7 @@ def filter_compositional(
         if all(conditions):
             tol = round(X.shape[0]*tol)
         data = (X > 0).sum(axis=0)
+        assert tol <= X.shape[0], "If prevalence is an integer, it cannot be larger than the number of samples in the index"
         return X.loc[:,_get_elements(data, tol, operation)]
 
     def _filter_richness(X, tol, operation):
@@ -1180,6 +1188,101 @@ def get_iris_data(return_data=["X", "y", "colors"], noise=None, return_target_na
 # ===============
 # Shell utilities
 # ===============
+# View directory structures
+class DisplayablePath(object):
+    """
+    Display the tree structure of a directory.
+
+    Implementation adapted from the following sources:
+        * Credits to @abstrus
+        https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
+    """
+    display_filename_prefix_middle = '├──'
+    display_filename_prefix_last = '└──'
+    display_parent_prefix_middle = '    '
+    display_parent_prefix_last = '│   '
+
+    def __init__(self, path, parent_path, is_last):
+        self.path = pathlib.Path(str(path))
+        self.parent = parent_path
+        self.is_last = is_last
+        if self.parent:
+            self.depth = self.parent.depth + 1
+        else:
+            self.depth = 0
+
+    @property
+    def displayname(self):
+        if self.path.is_dir():
+            return self.path.name + '/'
+        return self.path.name
+
+    @classmethod
+    def make_tree(cls, root, parent=None, is_last=False, criteria=None):
+        root = pathlib.Path(str(root))
+        criteria = criteria or cls._default_criteria
+
+        displayable_root = cls(root, parent, is_last)
+        yield displayable_root
+
+        children = sorted(list(path
+                               for path in root.iterdir()
+                               if criteria(path)),
+                          key=lambda s: str(s).lower())
+        count = 1
+        for path in children:
+            is_last = count == len(children)
+            if path.is_dir():
+                yield from cls.make_tree(path,
+                                         parent=displayable_root,
+                                         is_last=is_last,
+                                         criteria=criteria)
+            else:
+                yield cls(path, displayable_root, is_last)
+            count += 1
+
+    @classmethod
+    def _default_criteria(cls, path):
+        return True
+
+    @property
+    def displayname(self):
+        if self.path.is_dir():
+            return self.path.name + '/'
+        return self.path.name
+
+    def displayable(self):
+        if self.parent is None:
+            return self.displayname
+
+        _filename_prefix = (self.display_filename_prefix_last
+                            if self.is_last
+                            else self.display_filename_prefix_middle)
+
+        parts = ['{!s} {!s}'.format(_filename_prefix,
+                                    self.displayname)]
+
+        parent = self.parent
+        while parent and parent.parent is not None:
+            parts.append(self.display_parent_prefix_middle
+                         if parent.is_last
+                         else self.display_parent_prefix_last)
+            parent = parent.parent
+
+        return ''.join(reversed(parts))
+
+    # Additions by Josh L. Espinoza for Soothsayer
+    @classmethod
+    def get_ascii(cls, root):
+        ascii_output = list()
+        paths = cls.make_tree(root)
+        for path in paths:
+            ascii_output.append(path.displayable())
+        return "\n".join(ascii_output)
+    @classmethod
+    def view_directory_tree(cls, root, file=sys.stdout):
+        print(cls.get_ascii(root), file=file)
+
 # Directory size
 def get_directory_size(path_directory='.'):
     """
