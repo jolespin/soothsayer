@@ -1,0 +1,4 @@
+13:15:28 INFO logistic | pctl=0.0 | t=0.0	Baseline=0.86667	iteration=1	index=2	num_attr_included=2	Accuracy=0.86	∆=-0.0066667	SEM=0.015556
+13:15:28 INFO logistic | pctl=0.0 | t=0.0	Baseline=0.86667	iteration=2	index=3	num_attr_included=3	Accuracy=0.88	∆=0.013333	SEM=0.021773
+13:15:28 INFO logistic | pctl=0.0 | t=0.0	Baseline=0.86667	iteration=4	index=5	num_attr_included=5	Accuracy=0.90667	∆=0.04	SEM=0.022662
+13:16:32 INFO logistic | pctl=0.9 | t=0.0	Baseline=0.94	iteration=1	index=2	num_attr_included=2	Accuracy=0.96	∆=0.02	SEM=0.014741

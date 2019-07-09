@@ -22,8 +22,12 @@
 __version_clairvoyance__ = "v0.3_2018-08-28"
 
 # Built-ins
-import os, sys, multiprocessing, argparse, time, shutil
+import os, sys, multiprocessing, argparse, time, shutil, warnings
 from ast import literal_eval
+# warnings.simplefilter(action='ignore', category=FutureWarning) # FutureWarning: Series.compress(condition) is deprecated. Use 'Series[condition]' or 'np.asarray(series).compress(condition)' instead.
+# warnings.simplefilter(action='ignore', category=UserWarning) # UserWarning: Attempting to set identical left==right results in singular transformations; automatically expanding
+warnings.filterwarnings("ignore")
+os.environ['KMP_DUPLICATE_LIB_OK']='True' # In case you have 2 versions of OMP installed
 
 # PyData
 import pandas as pd
@@ -90,7 +94,7 @@ def main(argv=None):
     parser.add_argument("--method", type=str, default="bruteforce", help = "{'adaptive', 'bruteforce'} [Default: 'bruteforce']")
     parser.add_argument("--adaptive_range", type=str, default="0.0,0.5,1.0", help="Adaptive range in the form of a string of floats separated by commas [Default:'0.0,0.5,1.0']")
     parser.add_argument("--adaptive_steps", type=str, default="1,10", help="Adaptive stepsize in the form of a string of ints separated by commas. len(adaptive_range) - 1 [Default:'1,10']")
-    parser.add_argument("--cv", default=5, help="Number of steps for percentiles when cross validating and dropping attributes.  If cv=0 then it skips cross-validation step. [Default: 5]")
+    parser.add_argument("--cv", default=5, type=str, help="Number of steps for percentiles when cross validating and dropping attributes.  If cv=0 then it skips cross-validation step. [Default: 5]")
     parser.add_argument("--min_bruteforce", type=int, default=150, help="Minimum number of attributes to adjust to bruteforce. If value is 0 then it will not change method [Default: 150]")
     parser.add_argument("--early_stopping", type=int, default=100, help="Stopping the algorthm if a certain number of iterations do not increase the accuracy. Use -1 if you don't want to use `early_stopping` [Default: 100]")
 
@@ -197,7 +201,7 @@ def main(argv=None):
             opts.pickled = True
     # Cross Validation Configure
     cv_repr = opts.cv
-    if opts.cv.isnumeric():
+    if str(opts.cv).isnumeric():
         opts.cv = int(opts.cv)
         cv_labels = list(map(lambda x: "cv={}".format(x+1), range(opts.cv)))
     else:
@@ -205,11 +209,11 @@ def main(argv=None):
             _tmp_ncols_cv = len(f.read().split("\n")[0].split("\t"))
         # Is it just 2 columns (train, test) with no header?
         if  _tmp_ncols_cv == 2:
-            opts.cv = pd.read_table(opts.cv, header=None, sep="\t").applymap(literal_eval).values.tolist()
+            opts.cv = pd.read_csv(opts.cv, header=None, sep="\t", dtype=str).applymap(literal_eval).values.tolist()
             cv_labels = list(map(lambda x: "cv={}".format(x+1), range(len(opts.cv))))
         # Are there 3 columns with a header with the first column being the name of cross-validation set?
         if _tmp_ncols_cv == 3:
-            opts.cv = pd.read_table(opts.cv, sep="\t", index_col=0).applymap(literal_eval)
+            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0, dtype=str).applymap(literal_eval)
             cv_labels = opts.cv.index
             opts.cv = opts.cv.values.tolist()
 
@@ -247,7 +251,7 @@ def main(argv=None):
         print("= == === ===== ======= ============ =====================".replace("=","."), file=sys.stderr)
 
 
-        estimator = {"logistic":LogisticRegression(random_state=opts.random_state, multi_class="ovr"), "tree":DecisionTreeClassifier(random_state=opts.random_state)}[m]
+        estimator = {"logistic":LogisticRegression(random_state=opts.random_state, multi_class="ovr", solver='liblinear'), "tree":DecisionTreeClassifier(random_state=opts.random_state)}[m]
         # Placeholders for dynamic data
         path_attributes_current = opts.attribute_matrix
         best_configuration_for_modeltype = None # (percentile, min_threshold, hyperparameters)
@@ -284,336 +288,338 @@ def main(argv=None):
             # Load attributes
             log_info.info("\t\t{} | Percentile={} | Loading attributes datasets".format(m,i_percentile ))
             X = read_dataframe(path_attributes_current, compression=opts.compression, pickled=opts.pickled,  func_index=str, func_columns=str, verbose=False)
-
-            # Normalize
-            if opts.normalize is not None:
-                X = normalize(X, method=opts.normalize.lower(), axis=1) # COULD PROBABLY MOVE THIS UP AND COMBINE
-
-            # Common Identifiers
-            try:
-                assert np.all([X.index == y.index]), "X.index should be the same ordering as y.index"
-            except ValueError:
-                A = set(X.index)
-                B = set(y.index)
-
-                print("set(X) - set(y) : len(A - B) ==>  {}".format(A - B),
-                      "set(y) - set(X) : len(B - A) ==>  {}".format(B - A),
-                      sep=2*"\n",
-                      file=sys.stderr
-                )
-                sys.exit(1)
-
-
-
-            params = pd.Series(opts.__dict__)
-            if not continue_analysis:
-                log_info.info("\t\t{} | Percentile={} | Skipping analysis and loading data from: {}/{}/percentile_{}".format(m,i_percentile,opts.out_dir,m,i_percentile))
-
-                # Load model
-                model = read_object(path="{}/{}/percentile_{}/model.pbz2".format(opts.out_dir,m,i_percentile), compression="bz2")
-
-                # Set parameters for estimator and calculate baseline score
-                estimator.set_params(**model.best_hyperparameters_)
-                baseline_score = model_selection.cross_val_score(estimator, X=X.values, y=y.values, cv=opts.cv).mean()
-                baseline_scores_[(m,i_percentile)] = baseline_score
-
-                # Set original attribute size and baseline score
-                if i_percentile == 0.0:
-                    n_attributes = X.shape[1]
-                    baseline_percentile_0 = baseline_score
-                print("{} | Percentile={} | X.shape = {} | Baseline score({}) = {}".format(m, i_percentile, X.shape,path_attributes_current,to_precision(baseline_score)), file=sys.stderr)
-
-
-                # Determine if weights are different between any of the other runs
-                tol_difference = 1
-                if len(opts.min_threshold) > 1:
-                    _current_order = np.asarray(model.extract_weights(min_threshold=opts.min_threshold[0], ascending=False).index)
-                    for x in opts.min_threshold[1:]:
-                        _query_order = np.asarray(model.extract_weights(min_threshold=x, ascending=False).index)
-                        num_differences = np.sum(_current_order != _query_order)
-                        if num_differences < tol_difference*2:  # Times 2 because differences come in pairs
-                            opts.min_threshold.remove(x)
-                            log_info.info("\t\t{} | Percentile={} | Removing min_accuracy={} from computation because {} ordering is already present from another threshold".format(m,i_percentile,x,model.attr_type))
-                        else:
-                            _current_order = _query_order
-
-                # Placeholders
-                best_accuracy_for_percentile = 0
-                best_min_threshold_for_percentile = None
-                best_weights_for_percentile = None
-                # best_results_for_percentile = None
-
-                for x in opts.min_threshold:
-                    path_query = "{}/{}/percentile_{}/min_threshold_{}".format(opts.out_dir,m,i_percentile,x)
-                    w_ = model.extract_weights(min_threshold=x, name=opts.name, ascending=False)
-
-                    # Are there weights for this threshold?  If there's not then that means there are no models that predicted with this threshold or higher
-                    if not w_.isnull().any():
-                        scores_ = read_dataframe("{}/scores.tsv.gz".format(path_query), sep="\t", compression="gzip", verbose=False)
-
-                        # Update the scores
-                        idx_best_accuracy_for_minthreshold = scores_["accuracy"].sort_values(ascending=False).index[0]
-                        query_accuracy = scores_.loc[idx_best_accuracy_for_minthreshold,"accuracy"]
-                        query_sem = scores_.loc[idx_best_accuracy_for_minthreshold,"sem"]
-                        attribute_set = scores_.loc[idx_best_accuracy_for_minthreshold, "{}_set".format(opts.attr_type)]
-
-                        # Update accuracies for current percentile
-                        if query_accuracy > best_accuracy_for_percentile:
-                            best_min_threshold_for_percentile = x
-                            best_accuracy_for_percentile = query_accuracy
-                            best_weights_for_percentile = w_.copy()
-
-                            # Update accuracies for current model
-                            if query_accuracy > best_accuracy_for_modeltype:
-                                best_configuration_for_modeltype = (i_percentile, x)
-                                best_hyperparameters_for_modeltype = model.best_hyperparameters_
-                                best_accuracy_for_modeltype = query_accuracy
-                                best_attributes_for_modeltype = attribute_set
-
-                        # Synthesize summary table
-                        Se_query = pd.Series([m, model.best_hyperparameters_, i_percentile, x, baseline_percentile_0, baseline_score, query_accuracy,  query_sem, query_accuracy - baseline_percentile_0, opts.random_state, len(attribute_set), attribute_set],
-                                       index=["model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "num_{}_included".format(opts.attr_type), "{}_set".format(opts.attr_type)])
-                        summary_table.append(Se_query)
-            # ==================================================================
-            # Continue analysis
-            # ==================================================================
+            if X.shape[1] < 2:
+                print("Skipping current iteration {} because there is/are only {} attribute[s]".format(i_percentile, X.shape[1]), file=sys.stderr)
             else:
-                if X.shape[1] <= opts.min_bruteforce:
-                    method_crossvalidation = "bruteforce"
-                    if opts.method is not "bruteforce":
-                        log_info.info("\t\t{} | Percentile={} | Adjusting `method` to `bruteforce` because X.shape[1] <= {}".format(m,i_percentile,opts.min_bruteforce))
-                else:
-                    method_crossvalidation = opts.method
-                # Run model
-                model = Clairvoyant(
-                            model_type=m,
-                            n_iter=opts.n_iter,
-                            map_encoding=opts.encoding,
-                            attr_type=opts.attr_type,
-                            class_type=opts.class_type,
-                            n_jobs=opts.n_jobs,
-                            verbose=True,
-                            random_state=opts.random_state,
-                            random_mode=opts.random_mode,
-                )
-                log_info.info("\t\tFitting data")
-                model.fit(X, y, desc="{} | Percentile={} | Permuting samples and fitting models".format(m, i_percentile))
-                log_info.info("\t\t{} | Percentile={} | Best hyperparameters from fitting: {}".format(m,i_percentile,model.best_hyperparameters_))
-                log_info.info("\t\t{} | Percentile={} | Saving model: {}/{}/percentile_{}/model.pbz2".format(m,i_percentile,opts.out_dir,m,i_percentile))
-                if opts.save_model:
-                    model.save_model(path="{}/{}/percentile_{}/model.pbz2".format(opts.out_dir,m,i_percentile), compression="bz2")
+                # Normalize
+                if opts.normalize is not None:
+                    X = normalize(X, method=opts.normalize.lower(), axis=1) # COULD PROBABLY MOVE THIS UP AND COMBINE
 
-
-                # Get kernel and weights
-                kernel_ = model.extract_kernel(into="xarray", name=opts.name)
-                acu_ = model.extract_accuracies(into="pandas", name=opts.name)
-                hyperparameters_ = model.extract_hyperparameters()
-                W_ = model.extract_weights(min_threshold=None, mode=1) # Future: Incldue any other min_threshold values that aren't in the linspace
-
-                log_info.info("\t\t{} | Percentile={} | Calculating weights".format(m,i_percentile))
-
-                # Set parameters for estimator and calculate baseline score
-                estimator.set_params(**model.best_hyperparameters_)
-                baseline_score = model_selection.cross_val_score(estimator, X=X.values, y=y.values, cv=opts.cv).mean()
-                baseline_scores_[(m,i_percentile)] = baseline_score
-
-                # Set original attribute size and baseline score
-                if i_percentile == 0.0:
-                    n_attributes = X.shape[1]
-                    baseline_percentile_0 = baseline_score
-                print("{} | Percentile={} | X.shape = {} | Baseline score({}) = {}".format(m,i_percentile,X.shape,path_attributes_current,to_precision(baseline_score)), file=sys.stderr)
-
-                acu_.to_frame("Accuracy").to_csv("{}/{}/percentile_{}/acu.tsv.gz".format(opts.out_dir,m,i_percentile), sep="\t", compression="gzip")
-                hyperparameters_.to_csv("{}/{}/percentile_{}/hyperparameters.tsv.gz".format(opts.out_dir,m,i_percentile), sep="\t", compression="gzip")
-                W_.to_csv("{}/{}/percentile_{}/weights.tsv.gz".format(opts.out_dir,m,i_percentile ), sep="\t", compression="gzip")
-
-
-
-                if opts.save_kernel:
-                    kernel_.to_netcdf("{}/{}/percentile_{}/kernel.nc".format(opts.out_dir, m, i_percentile))
-                # Determine if weights are different
-                tol_difference = 1
-                if len(opts.min_threshold) > 1:
-                    _current_order = np.asarray(model.extract_weights(min_threshold=opts.min_threshold[0], ascending=False).index)
-                    for x in opts.min_threshold[1:]:
-                        _query_order = np.asarray(model.extract_weights(min_threshold=x, ascending=False).index)
-                        num_differences = np.sum(_current_order != _query_order)
-                        if num_differences < tol_difference*2:  # Times 2 because differences come in pairs
-                            opts.min_threshold.remove(x)
-                            log_info.info("\t\t{} | Percentile={} | Removing min_accuracy={} from computation because {} ordering is already present from another threshold".format(m,i_percentile,x,model.attr_type))
-                        else:
-                            _current_order = _query_order
-                # Soothsayer | Attribute Finder
-                print("================================\nsoothsayer:clairvoyance {}\n================================".format(__version_clairvoyance__), file=f_summary)
-                print("Name:", opts.name, sep="\t", file=f_summary)
-                print("X:", path_attributes_current, sep="\t", file=f_summary)
-                print("y:", opts.target_vector, sep="\t", file=f_summary)
-                print("Encoding:", opts.encoding, sep="\t", file=f_summary)
-                print("Path:", opts.out_dir, sep="\t", file=f_summary)
-                print("Shape:", X.shape, sep="\t", file=f_summary)
-                print("Model Type:", m, sep="\t", file=f_summary)
-                print("Percentile:", i_percentile, sep="\t", file=f_summary)
-                # if opts.load_model:
-                #     print("Loaded Model:", opts.load_model, sep="\t", file=f_summary)
-                print("================\n Baseline \n================", file=f_summary)
-
-                print("Percentile = 0: ", baseline_percentile_0, file=f_summary)
-                print("Current percentile = {}:".format(i_percentile), baseline_score, file=f_summary)
-
-
-                print("================\n Hyperparameters \n================", file=f_summary)
-                print("\n".join(str(params[["n_iter", "random_state", "random_mode", "n_jobs", "min_threshold"]]).split("\n")[:-1]), file=f_summary)
-                print("================\n Labels \n================", file=f_summary)
-                print("\n".join(str(params[["attr_type", "class_type"]]).split("\n")[:-1]), file=f_summary)
-                print("================\n Cross Validation \n================", file=f_summary)
-                if opts.method == "adaptive":
-                    print("\n".join(str(params[["method","adaptive_range","adaptive_steps", "early_stopping"]]).split("\n")[:-1]), file=f_summary)
-                if opts.method == "bruteforce":
-                    print("\n".join(str(params[["method", "min_bruteforce", "early_stopping"]]).split("\n")[:-1]), file=f_summary)
-
-
-                print("cv", cv_repr, sep="\t", file=f_summary)
-                print("================\n Data Type \n================", file=f_summary)
-                print("\n".join(str(params[["compression", "pickled"]]).split("\n")[:-1]), file=f_summary)
-
-                # Placeholders
-                best_accuracy_for_percentile = 0
-                best_min_threshold_for_percentile = None
-                best_results_for_percentile = None
-                best_weights_for_percentile = None
-                # Run crossvalidation
-                run_crossvalidation = opts.cv is not 0
-                if run_crossvalidation:
-                    # Cross Validation
-                    for x in opts.min_threshold:
-                        # Default to run the analysis.  First check if the path exists if does say if you want to overwrite.  If not then make the directory and do the analysis
-                        run_analysis = True
-                        path_query = "{}/{}/percentile_{}/min_threshold_{}".format(opts.out_dir,m,i_percentile,x)
-                        if os.path.exists(path_query):
-                            # Is there directory empty?
-                            if len(os.listdir(path_query)) > 0: # or os.path.getsize > ?
-                                if opts.force_overwrite == False:
-                                    run_analysis = False
-                        else:
-                            os.makedirs(path_query, exist_ok=True)
-
-                        if run_analysis:
-                            # Calculate weights
-                            w_ = model.extract_weights(min_threshold=x, name=opts.name, ascending=False)
-
-                            # Are there weights for this threshold?
-                            if not w_.isnull().any():
-                                weights_ = w_.to_frame("weights")
-                                weights_.to_csv("{}/weights.tsv.gz".format(path_query), sep="\t", compression="gzip")
-
-                                # NOTE: This is a hack for outputing the weights for each class but only works for logistic regression.  Once this tree methods are converted to OneVsRest then this can be properly integrated
-                                if m == "logistic":
-                                    if len(model.class_labels) > 2:
-                                        weights_class_specific_ = model.extract_weights(min_threshold=x, name=opts.name, mode=3)
-                                        weights_class_specific_.to_csv("{}/weights.class-specific.tsv.gz".format(path_query), sep="\t", compression="gzip")
-
-                                log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Cross validation".format(m,i_percentile,x))
-                                # Synthesize Datasets
-
-                                if opts.save_data:
-                                    path_save = "{}/model-data.pbz2".format(path_query)
-                                else:
-                                    path_save = None
-
-                                scores_ = model.cross_validate(model=clone(estimator),
-                                                                min_threshold=x,
-                                                                cv=opts.cv,
-                                                                cv_labels=cv_labels,
-                                                                method=opts.method,
-                                                                early_stopping=opts.early_stopping,
-                                                                adaptive_range = opts.adaptive_range,
-                                                                adaptive_steps = opts.adaptive_steps,
-                                                                n_jobs=opts.n_jobs,
-                                                                verbose=True,
-                                                                func_groupby=None,
-                                                                path_save=path_save,
-                                                                target_score=best_accuracy_for_modeltype,
-                                                                desc="{} | CV | Percentile={} | Minimum threshold={}".format(m,i_percentile,x),
-                                                                log_file=log_crossvalidation,
-                                                                log_prefix = "{} | pctl={} | t={}".format(m,i_percentile,x)
-                                                                )
-
-                                log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Writing scores".format(m,i_percentile,x))
-                                scores_.to_csv("{}/scores.tsv.gz".format(path_query), sep="\t", compression="gzip")
-
-                                # Update the scores
-                                idx_best_accuracy_for_minthreshold = scores_["accuracy"].sort_values(ascending=False).index[0]
-                                query_accuracy = scores_.loc[idx_best_accuracy_for_minthreshold,"accuracy"]
-                                query_sem = scores_.loc[idx_best_accuracy_for_minthreshold,"sem"]
-                                attribute_set = scores_.loc[idx_best_accuracy_for_minthreshold, "{}_set".format(opts.attr_type)]
-
-                                # Update accuracies for current percentile
-                                if query_accuracy > best_accuracy_for_percentile:
-                                    best_min_threshold_for_percentile = x
-                                    if scores_.shape[0] >= 10:
-                                        best_results_for_percentile = scores_.sort_values(["accuracy", "sem", "num_{}_included".format(opts.attr_type)], ascending=[False,True, False]).iloc[:10,:3]
-                                    else:
-                                        best_results_for_percentile = scores_.sort_values(["accuracy", "sem", "num_{}_included".format(opts.attr_type)], ascending=[False,True, False]).iloc[:scores_.shape[0],:3]
-
-
-                                    best_accuracy_for_percentile = query_accuracy
-                                    best_weights_for_percentile = w_.copy()
-                                    log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Updating the model object with accuracy={}".format(m,i_percentile,x,query_accuracy))
-
-                                    # May be slower than necessary to put this here but it's safer
-                                    if opts.save_model:
-                                        model.save_model(path="{}/{}/percentile_{}/model.pbz2".format(opts.out_dir,m,i_percentile), compression="bz2")
-
-                                    # Update accuracies for current model
-                                    if query_accuracy > best_accuracy_for_modeltype:
-                                        best_configuration_for_modeltype = (i_percentile, x)
-                                        best_hyperparameters_for_modeltype = model.best_hyperparameters_
-                                        best_accuracy_for_modeltype = query_accuracy
-                                        best_attributes_for_modeltype = attribute_set
-
-                                log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Creating plot".format(m,i_percentile,x))
-
-                                fig, ax = model.plot_scores(title="{} | {} | percentile={} | min_threshold={}".format(opts.name,m,i_percentile,x), ylim=(0,1), min_threshold=x, baseline_score=baseline_score)
-                                fig.savefig("{}/scores.png".format(path_query), dpi=300, format="png", bbox_inches="tight")
-                                plt.close()
-
-                                # Synthesize summary table
-                                Se_query = pd.Series([m, model.best_hyperparameters_, i_percentile, x, baseline_percentile_0, baseline_score, query_accuracy,  query_sem, query_accuracy - baseline_percentile_0, opts.random_state, len(attribute_set), attribute_set],
-                                               index=["model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "num_{}_included".format(opts.attr_type), "{}_set".format(opts.attr_type)])
-                                summary_table.append(Se_query)
-
-                            else:
-
-                                log_info.error("\t\t{} | Percentile={} | Minimum threshold={} | No models had an accuracy for this threshold so the weights were NaN".format(m,i_percentile,x))
-                                if os.path.exists(path_query):
-                                    if len(os.listdir(path_query)) == 0:
-                                        os.rmdir(path_query)
-                                        log_info.error("\t\t{} | Percentile={} | Minimum threshold={} | Removing {}".format(m,i_percentile,x,path_query))
-                                break
-
-
-
-                # Plot weights
-                fig, ax = model.plot_weights(title="{} | {} | percentile={}".format(opts.name,m,i_percentile))
-                fig.savefig("{}/{}/percentile_{}/weights.png".format(opts.out_dir,m,i_percentile), dpi=300, format="png", bbox_inches="tight")
-                plt.close()
-
-                log_info.info("\t\t{} | Percentile={} | Complete".format(m,i_percentile))
-
-                print("================\n Results \n================", file=f_summary)
-                print("Best hyperparameters:", model.best_hyperparameters_, sep="\t", file=f_summary)
-                print("Best weights from minimum threshold:", best_min_threshold_for_percentile, 2*"\n", sep="\t", file=f_summary)
-
+                # Common Identifiers
                 try:
-                    print(best_results.to_string(), file=f_summary)
-                except:
-                    if best_results_for_percentile is not None:
-                        print("\n".join(str(best_results_for_percentile.iloc[0,:]).split("\n")[:-1]), file=f_summary)
-                print(2*"\n", file=f_summary)
+                    assert np.all([X.index == y.index]), "X.index should be the same ordering as y.index"
+                except ValueError:
+                    A = set(X.index)
+                    B = set(y.index)
+
+                    print("set(X) - set(y) : len(A - B) ==>  {}".format(A - B),
+                          "set(y) - set(X) : len(B - A) ==>  {}".format(B - A),
+                          sep=2*"\n",
+                          file=sys.stderr
+                    )
+                    sys.exit(1)
 
 
-                # Close summary file
-                f_summary.close()
+
+                params = pd.Series(opts.__dict__)
+                if not continue_analysis:
+                    log_info.info("\t\t{} | Percentile={} | Skipping analysis and loading data from: {}/{}/percentile_{}".format(m,i_percentile,opts.out_dir,m,i_percentile))
+
+                    # Load model
+                    model = read_object(path="{}/{}/percentile_{}/model.pbz2".format(opts.out_dir,m,i_percentile), compression="bz2")
+
+                    # Set parameters for estimator and calculate baseline score
+                    estimator.set_params(**model.best_hyperparameters_)
+                    baseline_score = model_selection.cross_val_score(estimator, X=X.values, y=y.values, cv=opts.cv).mean()
+                    baseline_scores_[(m,i_percentile)] = baseline_score
+
+                    # Set original attribute size and baseline score
+                    if i_percentile == 0.0:
+                        n_attributes = X.shape[1]
+                        baseline_percentile_0 = baseline_score
+                    print("{} | Percentile={} | X.shape = {} | Baseline score({}) = {}".format(m, i_percentile, X.shape,path_attributes_current,to_precision(baseline_score)), file=sys.stderr)
+
+
+                    # Determine if weights are different between any of the other runs
+                    tol_difference = 1
+                    if len(opts.min_threshold) > 1:
+                        _current_order = np.asarray(model.extract_weights(min_threshold=opts.min_threshold[0], ascending=False).index)
+                        for x in opts.min_threshold[1:]:
+                            _query_order = np.asarray(model.extract_weights(min_threshold=x, ascending=False).index)
+                            num_differences = np.sum(_current_order != _query_order)
+                            if num_differences < tol_difference*2:  # Times 2 because differences come in pairs
+                                opts.min_threshold.remove(x)
+                                log_info.info("\t\t{} | Percentile={} | Removing min_accuracy={} from computation because {} ordering is already present from another threshold".format(m,i_percentile,x,model.attr_type))
+                            else:
+                                _current_order = _query_order
+
+                    # Placeholders
+                    best_accuracy_for_percentile = 0
+                    best_min_threshold_for_percentile = None
+                    best_weights_for_percentile = None
+                    # best_results_for_percentile = None
+
+                    for x in opts.min_threshold:
+                        path_query = "{}/{}/percentile_{}/min_threshold_{}".format(opts.out_dir,m,i_percentile,x)
+                        w_ = model.extract_weights(min_threshold=x, name=opts.name, ascending=False)
+
+                        # Are there weights for this threshold?  If there's not then that means there are no models that predicted with this threshold or higher
+                        if not w_.isnull().any():
+                            scores_ = read_dataframe("{}/scores.tsv.gz".format(path_query), sep="\t", compression="gzip", verbose=False)
+
+                            # Update the scores
+                            idx_best_accuracy_for_minthreshold = scores_["accuracy"].sort_values(ascending=False).index[0]
+                            query_accuracy = scores_.loc[idx_best_accuracy_for_minthreshold,"accuracy"]
+                            query_sem = scores_.loc[idx_best_accuracy_for_minthreshold,"sem"]
+                            attribute_set = scores_.loc[idx_best_accuracy_for_minthreshold, "{}_set".format(opts.attr_type)]
+
+                            # Update accuracies for current percentile
+                            if query_accuracy > best_accuracy_for_percentile:
+                                best_min_threshold_for_percentile = x
+                                best_accuracy_for_percentile = query_accuracy
+                                best_weights_for_percentile = w_.copy()
+
+                                # Update accuracies for current model
+                                if query_accuracy > best_accuracy_for_modeltype:
+                                    best_configuration_for_modeltype = (i_percentile, x)
+                                    best_hyperparameters_for_modeltype = model.best_hyperparameters_
+                                    best_accuracy_for_modeltype = query_accuracy
+                                    best_attributes_for_modeltype = attribute_set
+
+                            # Synthesize summary table
+                            Se_query = pd.Series([m, model.best_hyperparameters_, i_percentile, x, baseline_percentile_0, baseline_score, query_accuracy,  query_sem, query_accuracy - baseline_percentile_0, opts.random_state, len(attribute_set), attribute_set],
+                                           index=["model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "num_{}_included".format(opts.attr_type), "{}_set".format(opts.attr_type)])
+                            summary_table.append(Se_query)
+                # ==================================================================
+                # Continue analysis
+                # ==================================================================
+                else:
+                    if X.shape[1] <= opts.min_bruteforce:
+                        method_crossvalidation = "bruteforce"
+                        if opts.method is not "bruteforce":
+                            log_info.info("\t\t{} | Percentile={} | Adjusting `method` to `bruteforce` because X.shape[1] <= {}".format(m,i_percentile,opts.min_bruteforce))
+                    else:
+                        method_crossvalidation = opts.method
+                    # Run model
+                    model = Clairvoyant(
+                                model_type=m,
+                                n_iter=opts.n_iter,
+                                map_encoding=opts.encoding,
+                                attr_type=opts.attr_type,
+                                class_type=opts.class_type,
+                                n_jobs=opts.n_jobs,
+                                verbose=True,
+                                random_state=opts.random_state,
+                                random_mode=opts.random_mode,
+                    )
+                    log_info.info("\t\tFitting data")
+                    model.fit(X, y, desc="{} | Percentile={} | Permuting samples and fitting models".format(m, i_percentile))
+                    log_info.info("\t\t{} | Percentile={} | Best hyperparameters from fitting: {}".format(m,i_percentile,model.best_hyperparameters_))
+                    log_info.info("\t\t{} | Percentile={} | Saving model: {}/{}/percentile_{}/model.pbz2".format(m,i_percentile,opts.out_dir,m,i_percentile))
+                    if opts.save_model:
+                        model.save_model(path="{}/{}/percentile_{}/model.pbz2".format(opts.out_dir,m,i_percentile), compression="bz2")
+
+
+                    # Get kernel and weights
+                    kernel_ = model.extract_kernel(into="xarray", name=opts.name)
+                    acu_ = model.extract_accuracies(into="pandas", name=opts.name)
+                    hyperparameters_ = model.extract_hyperparameters()
+                    W_ = model.extract_weights(min_threshold=None, mode=1) # Future: Incldue any other min_threshold values that aren't in the linspace
+
+                    log_info.info("\t\t{} | Percentile={} | Calculating weights".format(m,i_percentile))
+
+                    # Set parameters for estimator and calculate baseline score
+                    estimator.set_params(**model.best_hyperparameters_)
+                    baseline_score = model_selection.cross_val_score(estimator, X=X.values, y=y.values, cv=opts.cv).mean()
+                    baseline_scores_[(m,i_percentile)] = baseline_score
+
+                    # Set original attribute size and baseline score
+                    if i_percentile == 0.0:
+                        n_attributes = X.shape[1]
+                        baseline_percentile_0 = baseline_score
+                    print("{} | Percentile={} | X.shape = {} | Baseline score({}) = {}".format(m,i_percentile,X.shape,path_attributes_current,to_precision(baseline_score)), file=sys.stderr)
+
+                    acu_.to_frame("Accuracy").to_csv("{}/{}/percentile_{}/acu.tsv.gz".format(opts.out_dir,m,i_percentile), sep="\t", compression="gzip")
+                    hyperparameters_.to_csv("{}/{}/percentile_{}/hyperparameters.tsv.gz".format(opts.out_dir,m,i_percentile), sep="\t", compression="gzip")
+                    W_.to_csv("{}/{}/percentile_{}/weights.tsv.gz".format(opts.out_dir,m,i_percentile ), sep="\t", compression="gzip")
+
+
+
+                    if opts.save_kernel:
+                        kernel_.to_netcdf("{}/{}/percentile_{}/kernel.nc".format(opts.out_dir, m, i_percentile))
+                    # Determine if weights are different
+                    tol_difference = 1
+                    if len(opts.min_threshold) > 1:
+                        _current_order = np.asarray(model.extract_weights(min_threshold=opts.min_threshold[0], ascending=False).index)
+                        for x in opts.min_threshold[1:]:
+                            _query_order = np.asarray(model.extract_weights(min_threshold=x, ascending=False).index)
+                            num_differences = np.sum(_current_order != _query_order)
+                            if num_differences < tol_difference*2:  # Times 2 because differences come in pairs
+                                opts.min_threshold.remove(x)
+                                log_info.info("\t\t{} | Percentile={} | Removing min_accuracy={} from computation because {} ordering is already present from another threshold".format(m,i_percentile,x,model.attr_type))
+                            else:
+                                _current_order = _query_order
+                    # Soothsayer | Attribute Finder
+                    print("================================\nsoothsayer:clairvoyance {}\n================================".format(__version_clairvoyance__), file=f_summary)
+                    print("Name:", opts.name, sep="\t", file=f_summary)
+                    print("X:", path_attributes_current, sep="\t", file=f_summary)
+                    print("y:", opts.target_vector, sep="\t", file=f_summary)
+                    print("Encoding:", opts.encoding, sep="\t", file=f_summary)
+                    print("Path:", opts.out_dir, sep="\t", file=f_summary)
+                    print("Shape:", X.shape, sep="\t", file=f_summary)
+                    print("Model Type:", m, sep="\t", file=f_summary)
+                    print("Percentile:", i_percentile, sep="\t", file=f_summary)
+                    # if opts.load_model:
+                    #     print("Loaded Model:", opts.load_model, sep="\t", file=f_summary)
+                    print("================\n Baseline \n================", file=f_summary)
+
+                    print("Percentile = 0: ", baseline_percentile_0, file=f_summary)
+                    print("Current percentile = {}:".format(i_percentile), baseline_score, file=f_summary)
+
+
+                    print("================\n Hyperparameters \n================", file=f_summary)
+                    print("\n".join(str(params[["n_iter", "random_state", "random_mode", "n_jobs", "min_threshold"]]).split("\n")[:-1]), file=f_summary)
+                    print("================\n Labels \n================", file=f_summary)
+                    print("\n".join(str(params[["attr_type", "class_type"]]).split("\n")[:-1]), file=f_summary)
+                    print("================\n Cross Validation \n================", file=f_summary)
+                    if opts.method == "adaptive":
+                        print("\n".join(str(params[["method","adaptive_range","adaptive_steps", "early_stopping"]]).split("\n")[:-1]), file=f_summary)
+                    if opts.method == "bruteforce":
+                        print("\n".join(str(params[["method", "min_bruteforce", "early_stopping"]]).split("\n")[:-1]), file=f_summary)
+
+
+                    print("cv", cv_repr, sep="\t", file=f_summary)
+                    print("================\n Data Type \n================", file=f_summary)
+                    print("\n".join(str(params[["compression", "pickled"]]).split("\n")[:-1]), file=f_summary)
+
+                    # Placeholders
+                    best_accuracy_for_percentile = 0
+                    best_min_threshold_for_percentile = None
+                    best_results_for_percentile = None
+                    best_weights_for_percentile = None
+                    # Run crossvalidation
+                    run_crossvalidation = opts.cv is not 0
+                    if run_crossvalidation:
+                        # Cross Validation
+                        for x in opts.min_threshold:
+                            # Default to run the analysis.  First check if the path exists if does say if you want to overwrite.  If not then make the directory and do the analysis
+                            run_analysis = True
+                            path_query = "{}/{}/percentile_{}/min_threshold_{}".format(opts.out_dir,m,i_percentile,x)
+                            if os.path.exists(path_query):
+                                # Is there directory empty?
+                                if len(os.listdir(path_query)) > 0: # or os.path.getsize > ?
+                                    if opts.force_overwrite == False:
+                                        run_analysis = False
+                            else:
+                                os.makedirs(path_query, exist_ok=True)
+
+                            if run_analysis:
+                                # Calculate weights
+                                w_ = model.extract_weights(min_threshold=x, name=opts.name, ascending=False)
+
+                                # Are there weights for this threshold?
+                                if not w_.isnull().any():
+                                    weights_ = w_.to_frame("weights")
+                                    weights_.to_csv("{}/weights.tsv.gz".format(path_query), sep="\t", compression="gzip")
+
+                                    # NOTE: This is a hack for outputing the weights for each class but only works for logistic regression.  Once this tree methods are converted to OneVsRest then this can be properly integrated
+                                    if m == "logistic":
+                                        if len(model.class_labels) > 2:
+                                            weights_class_specific_ = model.extract_weights(min_threshold=x, name=opts.name, mode=3)
+                                            weights_class_specific_.to_csv("{}/weights.class-specific.tsv.gz".format(path_query), sep="\t", compression="gzip")
+
+                                    log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Cross validation".format(m,i_percentile,x))
+                                    # Synthesize Datasets
+
+                                    if opts.save_data:
+                                        path_save = "{}/model-data.pbz2".format(path_query)
+                                    else:
+                                        path_save = None
+
+                                    scores_ = model.cross_validate(model=clone(estimator),
+                                                                    min_threshold=x,
+                                                                    cv=opts.cv,
+                                                                    cv_labels=cv_labels,
+                                                                    method=opts.method,
+                                                                    early_stopping=opts.early_stopping,
+                                                                    adaptive_range = opts.adaptive_range,
+                                                                    adaptive_steps = opts.adaptive_steps,
+                                                                    n_jobs=opts.n_jobs,
+                                                                    verbose=True,
+                                                                    func_groupby=None,
+                                                                    path_save=path_save,
+                                                                    target_score=best_accuracy_for_modeltype,
+                                                                    desc="{} | CV | Percentile={} | Minimum threshold={}".format(m,i_percentile,x),
+                                                                    log_file=log_crossvalidation,
+                                                                    log_prefix = "{} | pctl={} | t={}".format(m,i_percentile,x)
+                                                                    )
+
+                                    log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Writing scores".format(m,i_percentile,x))
+                                    scores_.to_csv("{}/scores.tsv.gz".format(path_query), sep="\t", compression="gzip")
+
+                                    # Update the scores
+                                    idx_best_accuracy_for_minthreshold = scores_["accuracy"].sort_values(ascending=False).index[0]
+                                    query_accuracy = scores_.loc[idx_best_accuracy_for_minthreshold,"accuracy"]
+                                    query_sem = scores_.loc[idx_best_accuracy_for_minthreshold,"sem"]
+                                    attribute_set = scores_.loc[idx_best_accuracy_for_minthreshold, "{}_set".format(opts.attr_type)]
+
+                                    # Update accuracies for current percentile
+                                    if query_accuracy > best_accuracy_for_percentile:
+                                        best_min_threshold_for_percentile = x
+                                        if scores_.shape[0] >= 10:
+                                            best_results_for_percentile = scores_.sort_values(["accuracy", "sem", "num_{}_included".format(opts.attr_type)], ascending=[False,True, False]).iloc[:10,:3]
+                                        else:
+                                            best_results_for_percentile = scores_.sort_values(["accuracy", "sem", "num_{}_included".format(opts.attr_type)], ascending=[False,True, False]).iloc[:scores_.shape[0],:3]
+
+
+                                        best_accuracy_for_percentile = query_accuracy
+                                        best_weights_for_percentile = w_.copy()
+                                        log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Updating the model object with accuracy={}".format(m,i_percentile,x,query_accuracy))
+
+                                        # May be slower than necessary to put this here but it's safer
+                                        if opts.save_model:
+                                            model.save_model(path="{}/{}/percentile_{}/model.pbz2".format(opts.out_dir,m,i_percentile), compression="bz2")
+
+                                        # Update accuracies for current model
+                                        if query_accuracy > best_accuracy_for_modeltype:
+                                            best_configuration_for_modeltype = (i_percentile, x)
+                                            best_hyperparameters_for_modeltype = model.best_hyperparameters_
+                                            best_accuracy_for_modeltype = query_accuracy
+                                            best_attributes_for_modeltype = attribute_set
+
+                                    log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Creating plot".format(m,i_percentile,x))
+
+                                    fig, ax = model.plot_scores(title="{} | {} | percentile={} | min_threshold={}".format(opts.name,m,i_percentile,x), ylim=(0,1), min_threshold=x, baseline_score=baseline_score)
+                                    fig.savefig("{}/scores.png".format(path_query), dpi=300, format="png", bbox_inches="tight")
+                                    plt.close()
+
+                                    # Synthesize summary table
+                                    Se_query = pd.Series([m, model.best_hyperparameters_, i_percentile, x, baseline_percentile_0, baseline_score, query_accuracy,  query_sem, query_accuracy - baseline_percentile_0, opts.random_state, len(attribute_set), attribute_set],
+                                                   index=["model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "num_{}_included".format(opts.attr_type), "{}_set".format(opts.attr_type)])
+                                    summary_table.append(Se_query)
+
+                                else:
+
+                                    log_info.error("\t\t{} | Percentile={} | Minimum threshold={} | No models had an accuracy for this threshold so the weights were NaN".format(m,i_percentile,x))
+                                    if os.path.exists(path_query):
+                                        if len(os.listdir(path_query)) == 0:
+                                            os.rmdir(path_query)
+                                            log_info.error("\t\t{} | Percentile={} | Minimum threshold={} | Removing {}".format(m,i_percentile,x,path_query))
+                                    break
+
+
+
+                    # Plot weights
+                    fig, ax = model.plot_weights(title="{} | {} | percentile={}".format(opts.name,m,i_percentile))
+                    fig.savefig("{}/{}/percentile_{}/weights.png".format(opts.out_dir,m,i_percentile), dpi=300, format="png", bbox_inches="tight")
+                    plt.close()
+
+                    log_info.info("\t\t{} | Percentile={} | Complete".format(m,i_percentile))
+
+                    print("================\n Results \n================", file=f_summary)
+                    print("Best hyperparameters:", model.best_hyperparameters_, sep="\t", file=f_summary)
+                    print("Best weights from minimum threshold:", best_min_threshold_for_percentile, 2*"\n", sep="\t", file=f_summary)
+
+                    try:
+                        print(best_results.to_string(), file=f_summary)
+                    except:
+                        if best_results_for_percentile is not None:
+                            print("\n".join(str(best_results_for_percentile.iloc[0,:]).split("\n")[:-1]), file=f_summary)
+                    print(2*"\n", file=f_summary)
+
+
+                    # Close summary file
+                    f_summary.close()
 
             # Create next dataset
             if current_iteration+1 < len(opts.percentiles):

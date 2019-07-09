@@ -1,0 +1,2 @@
+13:18:10 INFO tree | pctl=0.95 | t=0.0	Baseline=0.95333	iteration=1	index=2	num_attr_included=2	Accuracy=0.96	∆=0.0066667	SEM=0.010887
+13:18:18 INFO tree | pctl=0.96 | t=0.0	Baseline=0.96667	iteration=1	index=2	num_attr_included=2	Accuracy=0.96667	∆=0.0	SEM=0.011111

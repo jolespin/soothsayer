@@ -1,0 +1,54 @@
+================================
+soothsayer:clairvoyance v0.3_2018-08-28
+================================
+Name:	iris
+X:	../Data/Iris/Clairvoyance_Output/tree/percentile_0.98/X.subset.pbz2
+y:	../Data/Iris/y_iris.species.tsv.gz
+Encoding:	None
+Path:	../Data/Iris/Clairvoyance_Output
+Shape:	(150, 2)
+Model Type:	tree
+Percentile:	0.98
+================
+ Baseline 
+================
+Percentile = 0:  0.9533333333333334
+Current percentile = 0.98: 0.9533333333333334
+================
+ Hyperparameters 
+================
+n_iter              10
+random_state         0
+random_mode          0
+n_jobs               1
+min_threshold    [0.0]
+================
+ Labels 
+================
+attr_type      attr
+class_type    class
+================
+ Cross Validation 
+================
+method            bruteforce
+min_bruteforce           150
+early_stopping           100
+cv	../Data/Iris/cv-with-labels.tsv
+================
+ Data Type 
+================
+compression    infer
+pickled        infer
+================
+ Results 
+================
+Best hyperparameters:	{'min_samples_leaf': 8, 'max_features': 0.382, 'criterion': 'entropy'}
+Best weights from minimum threshold:	0.0	
+
+
+accuracy              0.953333
+sem                  0.0173561
+num_attr_included            1
+
+
+

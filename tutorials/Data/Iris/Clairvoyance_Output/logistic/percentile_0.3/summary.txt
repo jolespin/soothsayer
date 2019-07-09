@@ -1,0 +1,54 @@
+================================
+soothsayer:clairvoyance v0.3_2018-08-28
+================================
+Name:	iris
+X:	../Data/Iris/Clairvoyance_Output/logistic/percentile_0.3/X.subset.pbz2
+y:	../Data/Iris/y_iris.species.tsv.gz
+Encoding:	None
+Path:	../Data/Iris/Clairvoyance_Output
+Shape:	(150, 70)
+Model Type:	logistic
+Percentile:	0.3
+================
+ Baseline 
+================
+Percentile = 0:  0.8666666666666668
+Current percentile = 0.3: 0.8666666666666668
+================
+ Hyperparameters 
+================
+n_iter                    10
+random_state               0
+random_mode                0
+n_jobs                     1
+min_threshold    [0.0, None]
+================
+ Labels 
+================
+attr_type      attr
+class_type    class
+================
+ Cross Validation 
+================
+method            bruteforce
+min_bruteforce           150
+early_stopping           100
+cv	../Data/Iris/cv-with-labels.tsv
+================
+ Data Type 
+================
+compression    infer
+pickled        infer
+================
+ Results 
+================
+Best hyperparameters:	{'penalty': 'l1', 'C': 0.15789473692631578}
+Best weights from minimum threshold:	0.0	
+
+
+accuracy              0.906667
+sem                  0.0226623
+num_attr_included            5
+
+
+

@@ -1,0 +1,219 @@
+13:15:25 INFO 		logistic | Percentile=0.0 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:15:25 INFO 		logistic | Percentile=0.0 | Loading attributes datasets
+13:15:25 INFO 		Fitting data
+13:15:28 INFO 		logistic | Percentile=0.0 | Best hyperparameters from fitting: {'penalty': 'l1', 'C': 0.15789473692631578}
+13:15:28 INFO 		logistic | Percentile=0.0 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.0/model.pbz2
+13:15:28 INFO 		logistic | Percentile=0.0 | Calculating weights
+13:15:28 INFO 		logistic | Percentile=0.0 | Minimum threshold=0.0 | Cross validation
+13:15:30 INFO 		logistic | Percentile=0.0 | Minimum threshold=0.0 | Writing scores
+13:15:30 INFO 		logistic | Percentile=0.0 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9066666666666666
+13:15:30 INFO 		logistic | Percentile=0.0 | Minimum threshold=0.0 | Creating plot
+13:15:34 INFO 		logistic | Percentile=0.0 | Minimum threshold=None | Cross validation
+13:15:36 INFO 		logistic | Percentile=0.0 | Minimum threshold=None | Writing scores
+13:15:36 INFO 		logistic | Percentile=0.0 | Minimum threshold=None | Creating plot
+13:15:44 INFO 		logistic | Percentile=0.0 | Complete
+13:15:44 INFO 		logistic | Percentile=0.3 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:15:44 INFO 		logistic | Percentile=0.3 | Loading attributes datasets
+13:15:44 INFO 		Fitting data
+13:15:46 INFO 		logistic | Percentile=0.3 | Best hyperparameters from fitting: {'penalty': 'l1', 'C': 0.15789473692631578}
+13:15:46 INFO 		logistic | Percentile=0.3 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.3/model.pbz2
+13:15:46 INFO 		logistic | Percentile=0.3 | Calculating weights
+13:15:47 INFO 		logistic | Percentile=0.3 | Minimum threshold=0.0 | Cross validation
+13:15:48 INFO 		logistic | Percentile=0.3 | Minimum threshold=0.0 | Writing scores
+13:15:48 INFO 		logistic | Percentile=0.3 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9066666666666666
+13:15:48 INFO 		logistic | Percentile=0.3 | Minimum threshold=0.0 | Creating plot
+13:15:51 INFO 		logistic | Percentile=0.3 | Minimum threshold=None | Cross validation
+13:15:53 INFO 		logistic | Percentile=0.3 | Minimum threshold=None | Writing scores
+13:15:53 INFO 		logistic | Percentile=0.3 | Minimum threshold=None | Creating plot
+13:16:00 INFO 		logistic | Percentile=0.3 | Complete
+13:16:00 INFO 		logistic | Percentile=0.5 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:16:00 INFO 		logistic | Percentile=0.5 | Loading attributes datasets
+13:16:00 INFO 		Fitting data
+13:16:03 INFO 		logistic | Percentile=0.5 | Best hyperparameters from fitting: {'penalty': 'l1', 'C': 0.15789473692631578}
+13:16:03 INFO 		logistic | Percentile=0.5 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.5/model.pbz2
+13:16:03 INFO 		logistic | Percentile=0.5 | Calculating weights
+13:16:03 INFO 		logistic | Percentile=0.5 | Minimum threshold=0.0 | Cross validation
+13:16:04 INFO 		logistic | Percentile=0.5 | Minimum threshold=0.0 | Writing scores
+13:16:04 INFO 		logistic | Percentile=0.5 | Minimum threshold=0.0 | Updating the model object with accuracy=0.8933333333333333
+13:16:04 INFO 		logistic | Percentile=0.5 | Minimum threshold=0.0 | Creating plot
+13:16:07 INFO 		logistic | Percentile=0.5 | Minimum threshold=None | Cross validation
+13:16:08 INFO 		logistic | Percentile=0.5 | Minimum threshold=None | Writing scores
+13:16:08 INFO 		logistic | Percentile=0.5 | Minimum threshold=None | Creating plot
+13:16:16 INFO 		logistic | Percentile=0.5 | Complete
+13:16:16 INFO 		logistic | Percentile=0.75 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:16:16 INFO 		logistic | Percentile=0.75 | Loading attributes datasets
+13:16:16 INFO 		Fitting data
+13:16:18 INFO 		logistic | Percentile=0.75 | Best hyperparameters from fitting: {'penalty': 'l1', 'C': 0.21052631586842105}
+13:16:18 INFO 		logistic | Percentile=0.75 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.75/model.pbz2
+13:16:18 INFO 		logistic | Percentile=0.75 | Calculating weights
+13:16:18 INFO 		logistic | Percentile=0.75 | Minimum threshold=0.0 | Cross validation
+13:16:18 INFO 		logistic | Percentile=0.75 | Minimum threshold=0.0 | Writing scores
+13:16:18 INFO 		logistic | Percentile=0.75 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9
+13:16:18 INFO 		logistic | Percentile=0.75 | Minimum threshold=0.0 | Creating plot
+13:16:22 INFO 		logistic | Percentile=0.75 | Minimum threshold=None | Cross validation
+13:16:22 INFO 		logistic | Percentile=0.75 | Minimum threshold=None | Writing scores
+13:16:22 INFO 		logistic | Percentile=0.75 | Minimum threshold=None | Creating plot
+13:16:29 INFO 		logistic | Percentile=0.75 | Complete
+13:16:29 INFO 		logistic | Percentile=0.9 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:16:29 INFO 		logistic | Percentile=0.9 | Loading attributes datasets
+13:16:29 INFO 		Fitting data
+13:16:31 INFO 		logistic | Percentile=0.9 | Best hyperparameters from fitting: {'C': 1.0, 'penalty': 'l1'}
+13:16:31 INFO 		logistic | Percentile=0.9 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.9/model.pbz2
+13:16:31 INFO 		logistic | Percentile=0.9 | Calculating weights
+13:16:31 INFO 		logistic | Percentile=0.9 | Minimum threshold=0.0 | Cross validation
+13:16:32 INFO 		logistic | Percentile=0.9 | Minimum threshold=0.0 | Writing scores
+13:16:32 INFO 		logistic | Percentile=0.9 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9600000000000002
+13:16:32 INFO 		logistic | Percentile=0.9 | Minimum threshold=0.0 | Creating plot
+13:16:35 INFO 		logistic | Percentile=0.9 | Minimum threshold=None | Cross validation
+13:16:35 INFO 		logistic | Percentile=0.9 | Minimum threshold=None | Writing scores
+13:16:35 INFO 		logistic | Percentile=0.9 | Minimum threshold=None | Creating plot
+13:16:42 INFO 		logistic | Percentile=0.9 | Complete
+13:16:42 INFO 		logistic | Percentile=0.95 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:16:42 INFO 		logistic | Percentile=0.95 | Loading attributes datasets
+13:16:42 INFO 		Fitting data
+13:16:44 INFO 		logistic | Percentile=0.95 | Best hyperparameters from fitting: {'C': 1.0, 'penalty': 'l1'}
+13:16:44 INFO 		logistic | Percentile=0.95 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.95/model.pbz2
+13:16:44 INFO 		logistic | Percentile=0.95 | Calculating weights
+13:16:44 INFO 		logistic | Percentile=0.95 | Removing min_accuracy=None from computation because attr ordering is already present from another threshold
+13:16:44 INFO 		logistic | Percentile=0.95 | Minimum threshold=0.0 | Cross validation
+13:16:44 INFO 		logistic | Percentile=0.95 | Minimum threshold=0.0 | Writing scores
+13:16:44 INFO 		logistic | Percentile=0.95 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9600000000000002
+13:16:44 INFO 		logistic | Percentile=0.95 | Minimum threshold=0.0 | Creating plot
+13:16:51 INFO 		logistic | Percentile=0.95 | Complete
+13:16:51 INFO 		logistic | Percentile=0.96 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:16:51 INFO 		logistic | Percentile=0.96 | Loading attributes datasets
+13:16:51 INFO 		Fitting data
+13:16:53 INFO 		logistic | Percentile=0.96 | Best hyperparameters from fitting: {'C': 1.0, 'penalty': 'l1'}
+13:16:53 INFO 		logistic | Percentile=0.96 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.96/model.pbz2
+13:16:53 INFO 		logistic | Percentile=0.96 | Calculating weights
+13:16:53 INFO 		logistic | Percentile=0.96 | Minimum threshold=0.0 | Cross validation
+13:16:53 INFO 		logistic | Percentile=0.96 | Minimum threshold=0.0 | Writing scores
+13:16:53 INFO 		logistic | Percentile=0.96 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9600000000000002
+13:16:53 INFO 		logistic | Percentile=0.96 | Minimum threshold=0.0 | Creating plot
+13:17:00 INFO 		logistic | Percentile=0.96 | Complete
+13:17:00 INFO 		logistic | Percentile=0.97 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:17:00 INFO 		logistic | Percentile=0.97 | Loading attributes datasets
+13:17:00 INFO 		Fitting data
+13:17:02 INFO 		logistic | Percentile=0.97 | Best hyperparameters from fitting: {'C': 1.0, 'penalty': 'l1'}
+13:17:02 INFO 		logistic | Percentile=0.97 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.97/model.pbz2
+13:17:02 INFO 		logistic | Percentile=0.97 | Calculating weights
+13:17:02 INFO 		logistic | Percentile=0.97 | Minimum threshold=0.0 | Cross validation
+13:17:02 INFO 		logistic | Percentile=0.97 | Minimum threshold=0.0 | Writing scores
+13:17:02 INFO 		logistic | Percentile=0.97 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9600000000000002
+13:17:02 INFO 		logistic | Percentile=0.97 | Minimum threshold=0.0 | Creating plot
+13:17:08 INFO 		logistic | Percentile=0.97 | Complete
+13:17:08 INFO 		logistic | Percentile=0.98 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:17:08 INFO 		logistic | Percentile=0.98 | Loading attributes datasets
+13:17:08 INFO 		Fitting data
+13:17:10 INFO 		logistic | Percentile=0.98 | Best hyperparameters from fitting: {'C': 1.0, 'penalty': 'l1'}
+13:17:10 INFO 		logistic | Percentile=0.98 | Saving model: ../Data/Iris/Clairvoyance_Output/logistic/percentile_0.98/model.pbz2
+13:17:10 INFO 		logistic | Percentile=0.98 | Calculating weights
+13:17:10 INFO 		logistic | Percentile=0.98 | Minimum threshold=0.0 | Cross validation
+13:17:10 INFO 		logistic | Percentile=0.98 | Minimum threshold=0.0 | Writing scores
+13:17:10 INFO 		logistic | Percentile=0.98 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9400000000000001
+13:17:10 INFO 		logistic | Percentile=0.98 | Minimum threshold=0.0 | Creating plot
+13:17:17 INFO 		logistic | Percentile=0.98 | Complete
+13:17:17 INFO 		logistic | Percentile=0.99 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:17:17 INFO 		logistic | Percentile=0.99 | Loading attributes datasets
+13:17:17 INFO 		tree | Percentile=0.0 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:17:17 INFO 		tree | Percentile=0.0 | Loading attributes datasets
+13:17:17 INFO 		Fitting data
+13:17:20 INFO 		tree | Percentile=0.0 | Best hyperparameters from fitting: {'min_samples_leaf': 8, 'criterion': 'gini', 'max_features': None}
+13:17:20 INFO 		tree | Percentile=0.0 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.0/model.pbz2
+13:17:20 INFO 		tree | Percentile=0.0 | Calculating weights
+13:17:20 INFO 		tree | Percentile=0.0 | Minimum threshold=0.0 | Cross validation
+13:17:22 INFO 		tree | Percentile=0.0 | Minimum threshold=0.0 | Writing scores
+13:17:22 INFO 		tree | Percentile=0.0 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9533333333333334
+13:17:22 INFO 		tree | Percentile=0.0 | Minimum threshold=0.0 | Creating plot
+13:17:29 INFO 		tree | Percentile=0.0 | Complete
+13:17:29 INFO 		tree | Percentile=0.3 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:17:29 INFO 		tree | Percentile=0.3 | Loading attributes datasets
+13:17:29 INFO 		Fitting data
+13:17:32 INFO 		tree | Percentile=0.3 | Best hyperparameters from fitting: {'min_samples_leaf': 8, 'criterion': 'gini', 'max_features': None}
+13:17:32 INFO 		tree | Percentile=0.3 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.3/model.pbz2
+13:17:32 INFO 		tree | Percentile=0.3 | Calculating weights
+13:17:32 INFO 		tree | Percentile=0.3 | Minimum threshold=0.0 | Cross validation
+13:17:33 INFO 		tree | Percentile=0.3 | Minimum threshold=0.0 | Writing scores
+13:17:33 INFO 		tree | Percentile=0.3 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9533333333333334
+13:17:33 INFO 		tree | Percentile=0.3 | Minimum threshold=0.0 | Creating plot
+13:17:40 INFO 		tree | Percentile=0.3 | Complete
+13:17:40 INFO 		tree | Percentile=0.5 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:17:40 INFO 		tree | Percentile=0.5 | Loading attributes datasets
+13:17:40 INFO 		Fitting data
+13:17:42 INFO 		tree | Percentile=0.5 | Best hyperparameters from fitting: {'criterion': 'gini', 'max_features': None, 'min_samples_leaf': 8}
+13:17:42 INFO 		tree | Percentile=0.5 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.5/model.pbz2
+13:17:42 INFO 		tree | Percentile=0.5 | Calculating weights
+13:17:42 INFO 		tree | Percentile=0.5 | Minimum threshold=0.0 | Cross validation
+13:17:43 INFO 		tree | Percentile=0.5 | Minimum threshold=0.0 | Writing scores
+13:17:43 INFO 		tree | Percentile=0.5 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9533333333333334
+13:17:43 INFO 		tree | Percentile=0.5 | Minimum threshold=0.0 | Creating plot
+13:17:50 INFO 		tree | Percentile=0.5 | Complete
+13:17:50 INFO 		tree | Percentile=0.75 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:17:50 INFO 		tree | Percentile=0.75 | Loading attributes datasets
+13:17:50 INFO 		Fitting data
+13:17:52 INFO 		tree | Percentile=0.75 | Best hyperparameters from fitting: {'criterion': 'gini', 'max_features': None, 'min_samples_leaf': 8}
+13:17:52 INFO 		tree | Percentile=0.75 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.75/model.pbz2
+13:17:52 INFO 		tree | Percentile=0.75 | Calculating weights
+13:17:52 INFO 		tree | Percentile=0.75 | Minimum threshold=0.0 | Cross validation
+13:17:52 INFO 		tree | Percentile=0.75 | Minimum threshold=0.0 | Writing scores
+13:17:52 INFO 		tree | Percentile=0.75 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9533333333333334
+13:17:52 INFO 		tree | Percentile=0.75 | Minimum threshold=0.0 | Creating plot
+13:17:59 INFO 		tree | Percentile=0.75 | Complete
+13:17:59 INFO 		tree | Percentile=0.9 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:17:59 INFO 		tree | Percentile=0.9 | Loading attributes datasets
+13:17:59 INFO 		Fitting data
+13:18:01 INFO 		tree | Percentile=0.9 | Best hyperparameters from fitting: {'criterion': 'gini', 'max_features': None, 'min_samples_leaf': 8}
+13:18:01 INFO 		tree | Percentile=0.9 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.9/model.pbz2
+13:18:01 INFO 		tree | Percentile=0.9 | Calculating weights
+13:18:01 INFO 		tree | Percentile=0.9 | Minimum threshold=0.0 | Cross validation
+13:18:01 INFO 		tree | Percentile=0.9 | Minimum threshold=0.0 | Writing scores
+13:18:01 INFO 		tree | Percentile=0.9 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9533333333333334
+13:18:01 INFO 		tree | Percentile=0.9 | Minimum threshold=0.0 | Creating plot
+13:18:08 INFO 		tree | Percentile=0.9 | Complete
+13:18:08 INFO 		tree | Percentile=0.95 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:18:08 INFO 		tree | Percentile=0.95 | Loading attributes datasets
+13:18:08 INFO 		Fitting data
+13:18:10 INFO 		tree | Percentile=0.95 | Best hyperparameters from fitting: {'min_samples_leaf': 2, 'criterion': 'gini', 'max_features': None}
+13:18:10 INFO 		tree | Percentile=0.95 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.95/model.pbz2
+13:18:10 INFO 		tree | Percentile=0.95 | Calculating weights
+13:18:10 INFO 		tree | Percentile=0.95 | Minimum threshold=0.0 | Cross validation
+13:18:10 INFO 		tree | Percentile=0.95 | Minimum threshold=0.0 | Writing scores
+13:18:10 INFO 		tree | Percentile=0.95 | Minimum threshold=0.0 | Updating the model object with accuracy=0.96
+13:18:10 INFO 		tree | Percentile=0.95 | Minimum threshold=0.0 | Creating plot
+13:18:17 INFO 		tree | Percentile=0.95 | Complete
+13:18:17 INFO 		tree | Percentile=0.96 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:18:17 INFO 		tree | Percentile=0.96 | Loading attributes datasets
+13:18:17 INFO 		Fitting data
+13:18:18 INFO 		tree | Percentile=0.96 | Best hyperparameters from fitting: {'criterion': 'gini', 'min_samples_leaf': 3, 'max_features': None}
+13:18:18 INFO 		tree | Percentile=0.96 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.96/model.pbz2
+13:18:18 INFO 		tree | Percentile=0.96 | Calculating weights
+13:18:18 INFO 		tree | Percentile=0.96 | Minimum threshold=0.0 | Cross validation
+13:18:18 INFO 		tree | Percentile=0.96 | Minimum threshold=0.0 | Writing scores
+13:18:18 INFO 		tree | Percentile=0.96 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9666666666666666
+13:18:18 INFO 		tree | Percentile=0.96 | Minimum threshold=0.0 | Creating plot
+13:18:25 INFO 		tree | Percentile=0.96 | Complete
+13:18:25 INFO 		tree | Percentile=0.97 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:18:25 INFO 		tree | Percentile=0.97 | Loading attributes datasets
+13:18:25 INFO 		Fitting data
+13:18:27 INFO 		tree | Percentile=0.97 | Best hyperparameters from fitting: {'criterion': 'gini', 'max_features': None, 'min_samples_leaf': 3}
+13:18:27 INFO 		tree | Percentile=0.97 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.97/model.pbz2
+13:18:27 INFO 		tree | Percentile=0.97 | Calculating weights
+13:18:27 INFO 		tree | Percentile=0.97 | Minimum threshold=0.0 | Cross validation
+13:18:27 INFO 		tree | Percentile=0.97 | Minimum threshold=0.0 | Writing scores
+13:18:27 INFO 		tree | Percentile=0.97 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9666666666666666
+13:18:27 INFO 		tree | Percentile=0.97 | Minimum threshold=0.0 | Creating plot
+13:18:34 INFO 		tree | Percentile=0.97 | Complete
+13:18:34 INFO 		tree | Percentile=0.98 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:18:34 INFO 		tree | Percentile=0.98 | Loading attributes datasets
+13:18:34 INFO 		Fitting data
+13:18:35 INFO 		tree | Percentile=0.98 | Best hyperparameters from fitting: {'min_samples_leaf': 8, 'max_features': 0.382, 'criterion': 'entropy'}
+13:18:35 INFO 		tree | Percentile=0.98 | Saving model: ../Data/Iris/Clairvoyance_Output/tree/percentile_0.98/model.pbz2
+13:18:35 INFO 		tree | Percentile=0.98 | Calculating weights
+13:18:35 INFO 		tree | Percentile=0.98 | Minimum threshold=0.0 | Cross validation
+13:18:35 INFO 		tree | Percentile=0.98 | Minimum threshold=0.0 | Writing scores
+13:18:35 INFO 		tree | Percentile=0.98 | Minimum threshold=0.0 | Updating the model object with accuracy=0.9533333333333334
+13:18:35 INFO 		tree | Percentile=0.98 | Minimum threshold=0.0 | Creating plot
+13:18:42 INFO 		tree | Percentile=0.98 | Complete
+13:18:42 INFO 		tree | Percentile=0.99 | Creating temporary directories in ../Data/Iris/Clairvoyance_Output
+13:18:42 INFO 		tree | Percentile=0.99 | Loading attributes datasets
+13:18:42 INFO 		Total time:	 00:03:17
