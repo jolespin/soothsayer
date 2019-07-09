@@ -13,7 +13,7 @@ _________________________________
 Documentation coming soon. .. ... ..... ........
 
 * [Antimicrobial resistance modeling](https://github.com/jolespin/antimicrobial_resistance_modeling/blob/master/Espinoza-Dupont_et_al_2019/Notebooks/markdown_version/Espinoza-Dupont_et_al_2019.md)
-* [Denoising Iris dataset + noise attributes with *Clairvoyance*](Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
+* [Denoising Iris dataset + noise attributes with *Clairvoyance*](tutorials/Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
 
 #### Installation:
 Please refer to the [installation manual](install/README.md) for installation details.
