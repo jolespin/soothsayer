@@ -64,9 +64,9 @@ sy.io.write_dataframe(df_cv, "../Data/Iris/cv-with-labels.tsv")
 df_dism = sy.symmetry.pairwise(X_iris.loc[:,['sepal_length', 'sepal_width', 'petal_length', 'petal_width']], metric="euclidean", axis=0)
 
 # Hierarchical clustering
-ach_iris = sy.Agglomerative(df_dism,  name="iris")
-ach_iris.add_secondary_class(name="species", mapping=y_iris, class_colors=chromatic_iris.class_colors)
-ach_iris.plot()
+ahc_iris = sy.Agglomerative(df_dism,  name="iris")
+ahc_iris.add_secondary_class(name="species", mapping=y_iris, class_colors=chromatic_iris.class_colors)
+ahc_iris.plot()
 
 # Ordination
 with plt.style.context("seaborn-white"):
@@ -101,9 +101,9 @@ with plt.style.context("seaborn-white"):
 df_dism = sy.symmetry.pairwise(X_iris, metric="euclidean", axis=0)
 
 # Hierarchical clustering
-ach_iris = sy.Agglomerative(df_dism, name="iris")
-ach_iris.add_secondary_class(name="species", mapping=y_iris, class_colors=chromatic_iris.class_colors)
-ach_iris.plot()
+ahc_iris = sy.Agglomerative(df_dism, name="iris")
+ahc_iris.add_secondary_class(name="species", mapping=y_iris, class_colors=chromatic_iris.class_colors)
+ahc_iris.plot()
 
 # Ordination
 with plt.style.context("seaborn-white"):
@@ -252,47 +252,46 @@ X="../Data/Iris/X_iris.noise_96.zscore.pbz2"
 y="../Data/Iris/y_iris.species.tsv.gz"
 cv="../Data/Iris/cv-with-labels.tsv"
 output_directory="../Data/Iris/Clairvoyance_Output"
-mkdirs -p ${output_directory}
+mkdir -p ${output_directory}
 # Run algorithm
 time(run_soothsayer.py clairvoyance -X ${X} -y ${y} -n iris -o ${output_directory} --cv ${cv} > ${output_directory}/clairvoyance.o)
 ```
 
-    bash: line 8: mkdirs: command not found
     = == === ===== ======= ============ =====================
     logistic
     . .. ... ..... ....... ............ .....................
-    logistic | Percentile=0.0 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  3.45it/s]
+    logistic | Percentile=0.0 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:03<00:00,  3.09it/s]
     logistic | Percentile=0.0 | X.shape = (150, 100) | Baseline score(../Data/Iris/X_iris.noise_96.zscore.pbz2) = 0.86667
-    logistic | CV | Percentile=0.0 | Minimum threshold=0.0: 100%|██████████| 99/99 [00:02<00:00, 46.63it/s]
-    logistic | CV | Percentile=0.0 | Minimum threshold=None: 100%|██████████| 99/99 [00:02<00:00, 45.33it/s]
-    logistic | Percentile=0.3 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  3.86it/s]
+    logistic | CV | Percentile=0.0 | Minimum threshold=0.0: 100%|██████████| 99/99 [00:02<00:00, 45.00it/s]
+    logistic | CV | Percentile=0.0 | Minimum threshold=None: 100%|██████████| 99/99 [00:02<00:00, 44.43it/s]
+    logistic | Percentile=0.3 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  3.73it/s]
     logistic | Percentile=0.3 | X.shape = (150, 70) | Baseline score(../Data/Iris/Clairvoyance_Output/logistic/percentile_0.3/X.subset.pbz2) = 0.86667
-    logistic | CV | Percentile=0.3 | Minimum threshold=0.0: 100%|██████████| 69/69 [00:01<00:00, 53.32it/s]
-    logistic | CV | Percentile=0.3 | Minimum threshold=None: 100%|██████████| 69/69 [00:01<00:00, 46.44it/s]
-    logistic | Percentile=0.5 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  3.95it/s]
+    logistic | CV | Percentile=0.3 | Minimum threshold=0.0: 100%|██████████| 69/69 [00:01<00:00, 48.31it/s]
+    logistic | CV | Percentile=0.3 | Minimum threshold=None: 100%|██████████| 69/69 [00:01<00:00, 49.25it/s]
+    logistic | Percentile=0.5 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.20it/s]
     logistic | Percentile=0.5 | X.shape = (150, 50) | Baseline score(../Data/Iris/Clairvoyance_Output/logistic/percentile_0.5/X.subset.pbz2) = 0.86667
-    logistic | CV | Percentile=0.5 | Minimum threshold=0.0: 100%|██████████| 49/49 [00:00<00:00, 52.22it/s]
-    logistic | CV | Percentile=0.5 | Minimum threshold=None: 100%|██████████| 49/49 [00:00<00:00, 52.96it/s]
-    logistic | Percentile=0.75 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.78it/s]
+    logistic | CV | Percentile=0.5 | Minimum threshold=0.0: 100%|██████████| 49/49 [00:00<00:00, 57.46it/s]
+    logistic | CV | Percentile=0.5 | Minimum threshold=None: 100%|██████████| 49/49 [00:01<00:00, 48.45it/s]
+    logistic | Percentile=0.75 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.69it/s]
     logistic | Percentile=0.75 | X.shape = (150, 25) | Baseline score(../Data/Iris/Clairvoyance_Output/logistic/percentile_0.75/X.subset.pbz2) = 0.87333
-    logistic | CV | Percentile=0.75 | Minimum threshold=0.0: 100%|██████████| 24/24 [00:00<00:00, 57.20it/s]
-    logistic | CV | Percentile=0.75 | Minimum threshold=None: 100%|██████████| 24/24 [00:00<00:00, 51.54it/s]
-    logistic | Percentile=0.9 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  5.05it/s]
+    logistic | CV | Percentile=0.75 | Minimum threshold=0.0: 100%|██████████| 24/24 [00:00<00:00, 58.34it/s]
+    logistic | CV | Percentile=0.75 | Minimum threshold=None: 100%|██████████| 24/24 [00:00<00:00, 51.78it/s]
+    logistic | Percentile=0.9 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.88it/s]
     logistic | Percentile=0.9 | X.shape = (150, 10) | Baseline score(../Data/Iris/Clairvoyance_Output/logistic/percentile_0.9/X.subset.pbz2) = 0.94
-    logistic | CV | Percentile=0.9 | Minimum threshold=0.0: 100%|██████████| 9/9 [00:00<00:00, 44.01it/s]
-    logistic | CV | Percentile=0.9 | Minimum threshold=None: 100%|██████████| 9/9 [00:00<00:00, 36.25it/s]
-    logistic | Percentile=0.95 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.30it/s]
+    logistic | CV | Percentile=0.9 | Minimum threshold=0.0: 100%|██████████| 9/9 [00:00<00:00, 41.02it/s]
+    logistic | CV | Percentile=0.9 | Minimum threshold=None: 100%|██████████| 9/9 [00:00<00:00, 35.52it/s]
+    logistic | Percentile=0.95 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.28it/s]
     logistic | Percentile=0.95 | X.shape = (150, 5) | Baseline score(../Data/Iris/Clairvoyance_Output/logistic/percentile_0.95/X.subset.pbz2) = 0.93333
-    logistic | CV | Percentile=0.95 | Minimum threshold=0.0: 100%|██████████| 4/4 [00:00<00:00, 42.16it/s]
-    logistic | Percentile=0.96 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.18it/s]
+    logistic | CV | Percentile=0.95 | Minimum threshold=0.0: 100%|██████████| 4/4 [00:00<00:00, 42.31it/s]
+    logistic | Percentile=0.96 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.53it/s]
     logistic | Percentile=0.96 | X.shape = (150, 4) | Baseline score(../Data/Iris/Clairvoyance_Output/logistic/percentile_0.96/X.subset.pbz2) = 0.93333
-    logistic | CV | Percentile=0.96 | Minimum threshold=0.0: 100%|██████████| 3/3 [00:00<00:00, 40.33it/s]
-    logistic | Percentile=0.97 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.32it/s]
+    logistic | CV | Percentile=0.96 | Minimum threshold=0.0: 100%|██████████| 3/3 [00:00<00:00, 36.01it/s]
+    logistic | Percentile=0.97 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.36it/s]
     logistic | Percentile=0.97 | X.shape = (150, 3) | Baseline score(../Data/Iris/Clairvoyance_Output/logistic/percentile_0.97/X.subset.pbz2) = 0.94
-    logistic | CV | Percentile=0.97 | Minimum threshold=0.0: 100%|██████████| 2/2 [00:00<00:00, 37.93it/s]
-    logistic | Percentile=0.98 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.45it/s]
+    logistic | CV | Percentile=0.97 | Minimum threshold=0.0: 100%|██████████| 2/2 [00:00<00:00, 36.41it/s]
+    logistic | Percentile=0.98 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.37it/s]
     logistic | Percentile=0.98 | X.shape = (150, 2) | Baseline score(../Data/Iris/Clairvoyance_Output/logistic/percentile_0.98/X.subset.pbz2) = 0.96
-    logistic | CV | Percentile=0.98 | Minimum threshold=0.0: 100%|██████████| 1/1 [00:00<00:00, 28.67it/s]
+    logistic | CV | Percentile=0.98 | Minimum threshold=0.0: 100%|██████████| 1/1 [00:00<00:00, 27.03it/s]
     /Users/jespinoz/anaconda/envs/µ_env/lib/python3.6/site-packages/pandas/plotting/_core.py:1001: UserWarning: Attempting to set identical left==right results
     in singular transformations; automatically expanding.
     left=1.0, right=1.0
@@ -341,33 +340,33 @@ time(run_soothsayer.py clairvoyance -X ${X} -y ${y} -n iris -o ${output_director
     = == === ===== ======= ============ =====================
     tree
     . .. ... ..... ....... ............ .....................
-    tree | Percentile=0.0 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.18it/s]
+    tree | Percentile=0.0 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.38it/s]
     tree | Percentile=0.0 | X.shape = (150, 100) | Baseline score(../Data/Iris/X_iris.noise_96.zscore.pbz2) = 0.95333
-    tree | CV | Percentile=0.0 | Minimum threshold=0.0: 100%|██████████| 99/99 [00:02<00:00, 44.47it/s]
-    tree | Percentile=0.3 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.68it/s]
+    tree | CV | Percentile=0.0 | Minimum threshold=0.0: 100%|██████████| 99/99 [00:02<00:00, 45.35it/s]
+    tree | Percentile=0.3 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.81it/s]
     tree | Percentile=0.3 | X.shape = (150, 70) | Baseline score(../Data/Iris/Clairvoyance_Output/tree/percentile_0.3/X.subset.pbz2) = 0.95333
-    tree | CV | Percentile=0.3 | Minimum threshold=0.0: 100%|██████████| 69/69 [00:01<00:00, 42.81it/s]
-    tree | Percentile=0.5 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  4.87it/s]
+    tree | CV | Percentile=0.3 | Minimum threshold=0.0: 100%|██████████| 69/69 [00:01<00:00, 53.64it/s]
+    tree | Percentile=0.5 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.10it/s]
     tree | Percentile=0.5 | X.shape = (150, 50) | Baseline score(../Data/Iris/Clairvoyance_Output/tree/percentile_0.5/X.subset.pbz2) = 0.95333
-    tree | CV | Percentile=0.5 | Minimum threshold=0.0: 100%|██████████| 49/49 [00:00<00:00, 59.04it/s]
-    tree | Percentile=0.75 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.31it/s]
+    tree | CV | Percentile=0.5 | Minimum threshold=0.0: 100%|██████████| 49/49 [00:00<00:00, 61.69it/s]
+    tree | Percentile=0.75 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:02<00:00,  5.09it/s]
     tree | Percentile=0.75 | X.shape = (150, 25) | Baseline score(../Data/Iris/Clairvoyance_Output/tree/percentile_0.75/X.subset.pbz2) = 0.95333
-    tree | CV | Percentile=0.75 | Minimum threshold=0.0: 100%|██████████| 24/24 [00:00<00:00, 66.97it/s]
+    tree | CV | Percentile=0.75 | Minimum threshold=0.0: 100%|██████████| 24/24 [00:00<00:00, 72.73it/s]
     tree | Percentile=0.9 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.50it/s]
     tree | Percentile=0.9 | X.shape = (150, 10) | Baseline score(../Data/Iris/Clairvoyance_Output/tree/percentile_0.9/X.subset.pbz2) = 0.95333
-    tree | CV | Percentile=0.9 | Minimum threshold=0.0: 100%|██████████| 9/9 [00:00<00:00, 66.90it/s]
-    tree | Percentile=0.95 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.77it/s]
+    tree | CV | Percentile=0.9 | Minimum threshold=0.0: 100%|██████████| 9/9 [00:00<00:00, 83.05it/s]
+    tree | Percentile=0.95 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.84it/s]
     tree | Percentile=0.95 | X.shape = (150, 5) | Baseline score(../Data/Iris/Clairvoyance_Output/tree/percentile_0.95/X.subset.pbz2) = 0.95333
-    tree | CV | Percentile=0.95 | Minimum threshold=0.0: 100%|██████████| 4/4 [00:00<00:00, 63.72it/s]
-    tree | Percentile=0.96 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.81it/s]
+    tree | CV | Percentile=0.95 | Minimum threshold=0.0: 100%|██████████| 4/4 [00:00<00:00, 64.58it/s]
+    tree | Percentile=0.96 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.75it/s]
     tree | Percentile=0.96 | X.shape = (150, 4) | Baseline score(../Data/Iris/Clairvoyance_Output/tree/percentile_0.96/X.subset.pbz2) = 0.96667
-    tree | CV | Percentile=0.96 | Minimum threshold=0.0: 100%|██████████| 3/3 [00:00<00:00, 60.94it/s]
-    tree | Percentile=0.97 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.82it/s]
+    tree | CV | Percentile=0.96 | Minimum threshold=0.0: 100%|██████████| 3/3 [00:00<00:00, 58.65it/s]
+    tree | Percentile=0.97 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.57it/s]
     tree | Percentile=0.97 | X.shape = (150, 3) | Baseline score(../Data/Iris/Clairvoyance_Output/tree/percentile_0.97/X.subset.pbz2) = 0.96667
-    tree | CV | Percentile=0.97 | Minimum threshold=0.0: 100%|██████████| 2/2 [00:00<00:00, 57.15it/s]
-    tree | Percentile=0.98 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.75it/s]
+    tree | CV | Percentile=0.97 | Minimum threshold=0.0: 100%|██████████| 2/2 [00:00<00:00, 55.97it/s]
+    tree | Percentile=0.98 | Permuting samples and fitting models: 100%|██████████| 10/10 [00:01<00:00,  5.80it/s]
     tree | Percentile=0.98 | X.shape = (150, 2) | Baseline score(../Data/Iris/Clairvoyance_Output/tree/percentile_0.98/X.subset.pbz2) = 0.95333
-    tree | CV | Percentile=0.98 | Minimum threshold=0.0: 100%|██████████| 1/1 [00:00<00:00, 45.07it/s]
+    tree | CV | Percentile=0.98 | Minimum threshold=0.0: 100%|██████████| 1/1 [00:00<00:00, 45.99it/s]
     /Users/jespinoz/anaconda/envs/µ_env/lib/python3.6/site-packages/pandas/plotting/_core.py:1001: UserWarning: Attempting to set identical left==right results
     in singular transformations; automatically expanding.
     left=1.0, right=1.0
@@ -414,9 +413,9 @@ time(run_soothsayer.py clairvoyance -X ${X} -y ${y} -n iris -o ${output_director
     . .. ... ..... ....... ............ .....................
     
     
-    real	3m28.155s
-    user	3m36.305s
-    sys	0m2.698s
+    real	3m28.509s
+    user	3m36.768s
+    sys	0m3.045s
 
 
 ## *Clairvoyance* Output

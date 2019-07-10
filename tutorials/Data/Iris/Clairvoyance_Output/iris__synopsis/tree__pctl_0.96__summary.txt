@@ -42,7 +42,7 @@ pickled        infer
 ================
  Results 
 ================
-Best hyperparameters:	{'criterion': 'gini', 'min_samples_leaf': 3, 'max_features': None}
+Best hyperparameters:	{'max_features': None, 'criterion': 'gini', 'min_samples_leaf': 3}
 Best weights from minimum threshold:	0.0	
 
 
