@@ -14,7 +14,7 @@ from scipy.interpolate import griddata
 
 ## Matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.colors import rgb2hex, hex2color, colorConverter #, ListedColormap
+from matplotlib.colors import rgb2hex, hex2color, to_rgb, to_rgba #, ListedColormap
 from palettable.cartocolors.diverging import TealRose_3
 from palettable.cmocean.sequential import Tempo_8
 
@@ -23,11 +23,11 @@ from sklearn.datasets import load_iris
 
 __all__ = ["to_precision", "format_duration", "get_timestamp", "dataframe_to_matrixstring", "pad_left", "iterable_depth", "flatten", "get_unique_identifier", "infer_compression", "format_filename", "format_path","format_header", "boolean",
 "dict_filter", "dict_reverse", "dict_expand", "dict_fill", "dict_build", "dict_collapse",
-"rgb_to_rgba", "map_colors", "infer_cmap", "infer_vmin_vmax", "infer_continuous_type", "scalarmapping_from_data", "Chromatic", "logfile_synthesize", "determine_mode_for_logfiles",
+"rgb_to_rgba", "map_colors", "infer_cmap", "infer_vmin_vmax", "infer_continuous_type", "scalarmapping_from_data", "Chromatic", "create_logfile", "determine_mode_for_logfiles",
 "is_dict", "is_rgb_like", "is_nonstring_iterable","is_dict_like", "is_color", "is_graph", "is_all_same_type", "is_number", "is_query_class","is_symmetrical", "is_in_namespace",
-"format_mpl_legend_handles", "LEGEND_KWS", "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
+"format_mpl_legend_handles", "LEGEND_KWS", "DIVERGING_KWS", "CMAP_DIVERGING", "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
 "pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","contains","consecutive_replace",
-"check_symmetry", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath",
+"check_symmetry", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath","join_as_strings",
 ]
 __all__ = sorted(__all__)
 
@@ -36,20 +36,24 @@ __all__ = sorted(__all__)
 # Defaults
 # =============
 LEGEND_KWS = {'fontsize': 15, 'frameon': True, 'facecolor': 'white', 'edgecolor': 'black', 'loc': 'center left', 'bbox_to_anchor': (1, 0.5)}
+DIVERGING_KWS = dict(h_neg=220, h_pos=15, sep=20, n=11, s=90, l=50)
+CMAP_DIVERGING = sns.diverging_palette(**DIVERGING_KWS, as_cmap=True)
 
 # ===========
 # Assertions
 # ===========
-def assert_acceptable_arguments(query:set, target:set, operation:str="le", message:str=f"Invalid option provided.  Please refer to the following for acceptable arguments:"):
+def assert_acceptable_arguments(query, target, operation="le", message=f"Invalid option provided.  Please refer to the following for acceptable arguments:"):
     """
     le: operator.le(a, b) : <=
     eq: operator.eq(a, b) : ==
     ge: operator.ge(a, b) : >=
     """
+    if not is_nonstring_iterable(query):
+        query = [query]
     query = set(query)
     target = set(target)
     func_operation = getattr(operator, operation)
-    assert func_operation(query,target), f"{message}\n{target}"
+    assert func_operation(query,target), "{}\n{}".format(message, target)
 # ===========
 # Types
 # ===========
@@ -74,7 +78,7 @@ def is_dict_like(obj):
 def is_color(obj):
     # Note: This can't handle values that are RGB in (0-255) only (0,1)
     try:
-        colorConverter.to_rgb(obj)
+        to_rgb(obj)
         return True
     except ValueError:
         verdict = False
@@ -200,7 +204,9 @@ def pad_left(x, block_size=3, fill=0):
         right = np.array(list(str(x)))
         left = np.repeat(str(fill), block_size - right.size )
         return "".join(np.concatenate([left, right]))
-
+# Join as strings
+def join_as_strings(*args, delimiter:str="_" ):
+    return delimiter.join(list(map(str, args)))
 # =============
 # Iterables
 # =============
@@ -738,7 +744,7 @@ def configure_scatter(
     # Set up alpha values
     # If Hex string, convert to RGB
     if isinstance(c.values[0], (str, bytes)):
-        c = c.map(colorConverter.to_rgb)
+        c = c.map(to_rgb)
 
     # If RGB or RGBA
     # WARNING: Cannot handle an instance where there is a subset of the indices and the values of the subset are floats/ints
@@ -778,7 +784,36 @@ def configure_scatter(
             "cmap":cmap,
             "scalar_vector":scalar_vector,
            }
-# Color class object
+
+# # Colors class object
+# class Hue(str):
+#     # Built in
+#     def __new__(cls, color, name=None, **metadata):
+#         assert is_color(color), "`{}` is not a color".format(color)
+#         cls.color = rgb2hex(to_rgb(color))
+#         cls.name = name
+#         cls.metadata = metadata
+#         return super(Hue, cls).__new__(cls, cls.color)
+#     def __repr__(self):
+#         return self.color
+#     def __str__(self):
+#         return self.color
+#     # View
+#     def view(self):
+#         sns.palplot([self.color])
+#     # Conversion
+#     def to_hex(cls):
+#         return cls.color
+#     def to_rgb(cls, into=tuple):
+#         return into(to_rgb(cls.color))
+#     def to_rgba(cls, alpha=None, into=tuple):
+#         return into(to_rgba(cls.color, alpha=alpha))
+#     def to_rgb_255(cls, into=tuple):
+#         return into(np.asarray(cls.to_rgb())*255)
+#     def to_rgba_255(cls, alpha=None, into=tuple):
+#         return into(np.asarray(cls.to_rgba(alpha=alpha))*255)
+
+# Color collections
 class Chromatic(object):
     """
     # =================
@@ -953,7 +988,7 @@ def get_parameters_ellipse(df_xy, groups, metric=np.mean, n_std=3, into=pd.DataF
 # Logging
 # ===========
 # Log files
-def logfile_synthesize(name, path,level=logging.INFO, mode="w"):
+def create_logfile(name, path,level=logging.INFO, mode="w"):
     """Function setup as many loggers as you want"""
     # https://stackoverflow.com/questions/11232230/logging-to-two-files-with-different-settings
 
@@ -1128,10 +1163,13 @@ def filter_compositional(
     if interval_type == "open":
         operations = {"highpass":operator.gt, "lowpass":operator.lt}
 
+    # Defaults
     if tol_richness is None:
         tol_richness = 1
     if tol_count is None:
         tol_count = 1
+    if tol_prevalence is None:
+        tol_prevalence = 1
 
     functions = dict(zip(["depth", "prevalence", "richness","count"], [_filter_depth, _filter_prevalence, _filter_richness, _filter_count]))
     thresholds = dict(zip(["depth", "prevalence", "richness","count"], [tol_depth, tol_prevalence, tol_richness, tol_count]))
@@ -1315,7 +1353,7 @@ def get_directory_size(path_directory='.'):
 # Bash commands
 class Command(object):
     """
-    Run bash commands and stuff
+    Run bash commands and stuff.
 
     Recommended usage:
     ------------------
@@ -1340,6 +1378,77 @@ class Command(object):
     cmd = Command("echo ':)'' > testing_output.txt", name="TEST", f_cmds="test_commands.sh")
     cmd.run(epilogue="footer", prologue="header", checkpoint="testing_output.txt.checkpoint")
     cmd.close()
+
+    Future:
+    -------
+    * Create an object called ExecutablePipeline that wraps Command objects together
+    * Something like this:
+        ep = ExecutablePipeline(name="RNA-seq mapping", description="Quality trim, remove contaminants, and map reads to reference")
+        # This method
+        ep.create_step(name="kneaddata", pos=1, checkpoint="path/to/checkpoint", write_stdout="path/to/stdout", write_stderr="path/to/stderr", write_returncode="path/to/returncode")
+        ep["kneaddata"].set_inputs(*?)
+        ep["kneaddata"].set_outputs(*?)
+        # or this method
+        ep.create_step(name="kneaddata", pos=1, checkpoint="path/to/checkpoint", write_stdout="path/to/stdout", write_stderr="path/to/stderr", write_returncode="path/to/returncode", inputs=*?, outputs=*?)
+        ep.execute(?*)
+
+    Here is an example for constructing pipelines:
+    -------------------------------------------------------------------
+    # =========
+    # Utility
+    # =========
+    def process_command(cmd, f_cmds, logfile_name, description, directories, io_filepaths):
+        start_time = time.time()
+        # Info
+        program = logfile_name.split("_")[-1]
+        print(description, file=sys.stdout)
+        print("Input: ", io_filepaths[0], "\n", "Output: ", io_filepaths[1], sep="", file=sys.stdout)
+        print("Command: ", " ".join(cmd), file=sys.stdout)
+        executable = Command(cmd, name=logfile_name, description=description, f_cmds=f_cmds)
+        executable.run(
+            prologue=format_header(program, "_"),
+            dry="infer",
+            errors_ok=False,
+            error_message="Check the following files: {}".format(os.path.join(directories["log"], "{}.*".format(logfile_name))),
+            checkpoint=os.path.join(directories["checkpoints"], "{}".format(logfile_name)),
+            write_stdout=os.path.join(directories["log"], "{}.o".format(logfile_name)),
+            write_stderr=os.path.join(directories["log"], "{}.e".format(logfile_name)),
+            write_returncode=os.path.join(directories["log"], "{}.returncode".format(logfile_name)),
+            f_verbose=sys.stdout,
+        )
+        print("Duration: {}".format(executable.duration_), file=sys.stdout)
+        return executable
+    # =========
+    # Kneaddata
+    # =========
+    program = "kneaddata"
+
+    # Add to directories
+    output_directory = directories[("intermediate", program)] = create_directory(os.path.join(directories["intermediate"], "{}_output".format(program)))
+
+    # Info
+    step = "1"
+    logfile_name = "{}_{}".format(step, program)
+    description = "{}. {} | Removing human associated reads and quality trimming".format(step, program)
+
+    # i/o
+    input_filepath = [opts.r1, opts.r2]
+    output_filename = ["kneaddata_repaired_1.fastq.gz", "kneaddata_repaired_2.fastq.gz"]
+    output_filepath = list(map(lambda filename: os.path.join(output_directory, filename), output_filename))
+    io_filepaths = [input_filepath,  output_filepath]
+
+    # Parameters
+    params = {
+        "reads_r1":input_filepath[0],
+        "reads_r2":input_filepath[1],
+        "output_directory":output_directory,
+        "opts":opts,
+        "directories":directories,
+    }
+    cmd = get_kneaddata_cmd(**params)
+    process = process_command(cmd, f_cmds=f_cmds, logfile_name=logfile_name, description=description, directories=directories, io_filepaths=io_filepaths)
+    sys.stdout.flush()
+
     """
     def __init__(self, *args, name=None, description=None, f_cmds=sys.stdout):
         if len(args) == 1:
@@ -1355,7 +1464,7 @@ class Command(object):
         self.description = description
 
     def __repr__(self):
-        class_name = str(cmd.__class__)[17:-2]
+        class_name = str(self.__class__)[17:-2]
         return '{}(name={}, description={}, cmd="{}")'.format(class_name, self.name, self.description, self.cmd)
     def close(self):
         self.f_cmds.close()
@@ -1372,8 +1481,10 @@ class Command(object):
                 f_out.close()
 
     # Run command
-    def run(self, prologue=None, epilogue=None, errors_ok=False, dry="infer", checkpoint=None, write_stdout=None, write_stderr=None, write_returncode=None, close_file=False):
-
+    def run(self, prologue=None, epilogue=None, errors_ok=False, dry="infer", checkpoint=None, write_stdout=None, write_stderr=None, write_returncode=None, close_file=False, checkpoint_message_notexists="Running...", checkpoint_message_exists="Loading...", error_message=None, f_verbose=sys.stdout):
+        """
+        Should future versions should have separate prologue and epilogue for f_cmds and f_verbose?
+        """
         # ----------
         # Checkpoint
         # ----------
@@ -1384,6 +1495,14 @@ class Command(object):
             if checkpoint is not None:
                 if os.path.exists(checkpoint):
                     dry = True
+                    if checkpoint_message_exists is not None:
+                        print(checkpoint_message_exists, file=f_verbose)
+                        f_verbose.flush()
+                else:
+                    if checkpoint_message_notexists is not None:
+                        print(checkpoint_message_notexists, file=f_verbose)
+                        f_verbose.flush()
+
         # ----
         # Info
         # ----
@@ -1424,7 +1543,12 @@ class Command(object):
 
             # Check
             if not errors_ok:
-                assert self.returncode_ == 0, '\nThe following command failed with returncode = {}:\n"{}"'.format(self.returncode_, self.cmd)
+                if self.returncode_ != 0:
+                    # print('\nThe following command failed with returncode = {}:\n"{}"'.format(self.returncode_, self.cmd), file=f_verbose)
+                    if error_message is not None:
+                        print(error_message, file=f_verbose)
+                    sys.exit(self.returncode_)
+
             # Create checkpoint
             if checkpoint is not None:
                 if self.returncode_ == 0:

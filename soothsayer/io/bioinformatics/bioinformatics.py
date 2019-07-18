@@ -7,6 +7,7 @@ from collections import *
 from io import StringIO, BytesIO
 from ast import literal_eval
 from tqdm import tqdm
+import xml.etree.ElementTree as ET
 
 # Compression & Serialization
 import pickle, gzip, bz2, zipfile
@@ -424,3 +425,21 @@ def read_gtf(path:str, compression="infer", record_type=None, verbose = True, re
             name = path
         df_gtf.index.name = name
     return df_gtf
+
+# NCBI XML
+def read_ncbi_xml(path:str, index_name=None):
+    # Format path
+    path = format_path(path)
+    # Parse the XML tree
+    tree = ET.parse(path)
+    root = tree.getroot()
+    # Extract the attributes
+    data = defaultdict(dict)
+    for record in tqdm(root.getchildren(), "Reading NCBI XML: {}".format(path)):
+        id_record = record.attrib["accession"]
+        for attribute in record.findall("Attributes/*"):
+            data[id_record][attribute.attrib["attribute_name"]] = attribute.text
+    # Create pd.DataFrame
+    df = pd.DataFrame(data).T
+    df.index.name = index_name
+    return df

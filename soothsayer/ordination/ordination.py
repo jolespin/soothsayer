@@ -21,7 +21,7 @@ __all__ = sorted(__all__)
 
 
 # General ordination methods
-class _CoreOrdinationMethods(object):
+class CoreOrdinationMethods(object):
     # Get principal components
     def __getitem__(self, key):
         if type(key) == int:
@@ -147,7 +147,7 @@ class MatrixDecomposition(object):
         return model
 
 # Principal Component Analysis
-class PrincipalComponentAnalysis(_CoreOrdinationMethods):
+class PrincipalComponentAnalysis(CoreOrdinationMethods):
     """
     See soothsayer.ordination.MatrixDecomposition for details on parameters.
     https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html#sklearn.decomposition.PCA
@@ -169,7 +169,7 @@ class PrincipalComponentAnalysis(_CoreOrdinationMethods):
 
 
 # Principal Coordinant Analysis
-class PrincipalCoordinatesAnalysis(_CoreOrdinationMethods):
+class PrincipalCoordinatesAnalysis(CoreOrdinationMethods):
     """
     Wrapper for skbio.stats.ordination.pcoa
     http://scikit-bio.org/docs/latest/generated/generated/skbio.stats.ordination.pcoa.html#skbio.stats.ordination.pcoa
@@ -219,7 +219,7 @@ class PrincipalCoordinatesAnalysis(_CoreOrdinationMethods):
         return model
 
 # Manifold Learning
-class Manifold(_CoreOrdinationMethods):
+class Manifold(CoreOrdinationMethods):
     """
     Wrapper for sklearn.manifold objects
     https://scikit-learn.org/stable/modules/classes.html#module-sklearn.manifold

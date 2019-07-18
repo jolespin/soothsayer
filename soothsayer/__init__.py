@@ -45,7 +45,7 @@ __developmental__ = True
 # Shortcuts
 # =======
 # Core
-from .core import Dataset
+from .core import core, Dataset
 # Classification
 from .classification import classification
 # Database
@@ -53,15 +53,19 @@ from .db import db
 # Feature Extraction
 from .feature_extraction import feature_extraction
 # Hierarchy
-from .hierarchy import Agglomerative, Topology
+from .hierarchy import hierarchy, Agglomerative, Topology
 # I/O
-from .io import read_dataframe, read_fasta, write_dataframe, write_fasta, read_object, write_object, read_textfile
+from .io import io
 # Microbiome
 from .microbiome import microbiome
 # Networks
 from .networks import networks, Hive
 # Ordination
-from .ordination import PrincipalComponentAnalysis, PrincipalCoordinatesAnalysis, Manifold
+from .ordination import ordination, PrincipalComponentAnalysis, PrincipalCoordinatesAnalysis, Manifold
+# Regression
+from .regression import regression
+# Statistics
+from .statistics import statistics
 # Symmetry
 from .symmetry import Symmetric
 # Transmute
@@ -76,14 +80,13 @@ from .visuals import visuals
 # =======
 # Direct Exports
 # =======
-_submodules = ["core", "classification", "db", "feature_extraction", "hierarchy", "io", "microbiome", "ordination", "networks", "symmetry", "transmute", "tree", "utils", "visuals"]
+_submodules = ["core", "classification", "db", "feature_extraction", "hierarchy", "io", "microbiome",  "networks", "ordination", "regression", "statistics", "symmetry", "transmute", "tree", "utils", "visuals"]
 _core = ["Dataset"]
 _hierarchy = ["Agglomerative", "Topology"]
-_io = ["read_dataframe", "read_fasta", "write_dataframe", "write_fasta", "read_object", "write_object", "read_textfile"]
 _networks = ["Hive"]
 _ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold"]
 _symmetry = ["Symmetric"]
 _utils = ["Chromatic", "Command"]
 
-__all__ = _submodules + _core + _hierarchy + _io + _networks + _ordination + _symmetry + _utils
+__all__ = _submodules + _core + _hierarchy + _networks + _ordination + _symmetry + _utils
 __all__ = sorted(__all__)

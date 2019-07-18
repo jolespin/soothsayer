@@ -37,9 +37,9 @@ def write_object(obj, path:str, compression="infer", serialization_module=pickle
         _ , ext = os.path.splitext(path)
         if (ext == ".pkl") or (ext == ".dill"):
             compression = None
-        if ext == ".pgz":
+        if ext in {".pgz", ".gz"}:
             compression = "gzip"
-        if ext == ".pbz2":
+        if ext in {".pbz2", ".bz2"}:
             compression = "bz2"
     if compression is not None:
         if compression == "bz2":
@@ -59,9 +59,9 @@ def read_object(path:str, compression="infer", serialization_module=pickle):
         _ , ext = os.path.splitext(path)
         if (ext == ".pkl") or (ext == ".dill"):
             compression = None
-        if ext == ".pgz":
+        if ext in {".pgz", ".gz"}:
             compression = "gzip"
-        if ext == ".pbz2":
+        if ext in {".pbz2", ".bz2"}:
             compression = "bz2"
     if compression is not None:
         if compression == "gzip":

@@ -2,6 +2,7 @@ import os,sys,operator, warnings
 import numpy as np
 import pandas as pd
 import networkx as nx
+from scipy.stats import entropy
 import matplotlib.pyplot as plt
 from matplotlib.colors import is_color_like
 from matplotlib.patches import Ellipse
@@ -931,6 +932,7 @@ def plot_prevalence(X:pd.DataFrame, color="teal", edgecolor="black", interval_ty
 def plot_compositional(
     X:pd.DataFrame,
     y:pd.Series=None,
+    c:pd.Series=None,
     color_density="black",
     edgecolor="gray",
     s=None,
@@ -943,7 +945,7 @@ def plot_compositional(
     palette="hls",
     vertical_lines = np.mean,
     horizontal_lines=np.mean,
-    cmap=plt.cm.gist_heat,
+    cmap=plt.cm.gist_heat_r,
     scatter_kws=dict(),
     show_xgrid=False,
     show_ygrid=True,
@@ -967,6 +969,8 @@ def plot_compositional(
     show_annotations=False,
     adjust_annotation_positions=True,
     annot_kws=dict(),
+    log_depth=True,
+    log_richness=False,
     ):
     def _get_line_data(y, data, lines, class_colors, _line_kws):
         kws_collection = list()
@@ -987,10 +991,32 @@ def plot_compositional(
         if len(kws_collection) == 0:
             kws_collection = [_line_kws]*len(lines)
         return lines, kws_collection
+
+
+
     # Data
-    richness = (X > 0).sum(axis=1)
-    depth = np.log10(X.sum(axis=1))
     X = X.fillna(0)
+    # RIchness
+    richness = (X > 0).sum(axis=1)
+    zeromask_richness = richness == 0
+    if np.any(zeromask_richness):
+        warnings.warn("Removing the following observations because richness = 0: {}".format(zeromask_richness.index[zeromask_richness]))
+        richness = richness[~zeromask_richness]
+    if log_richness:
+        richness = np.log10(richness)
+    # Depth
+    depth = X.sum(axis=1)
+    zeromask_depth = depth == 0
+    if np.any(zeromask_depth):
+        warnings.warn("Removing the following observations because depth = 0: {}".format(zeromask_depth.index[zeromask_depth]))
+        depth = depth[~zeromask_depth]
+    if log_depth:
+        depth = np.log10(depth)
+    # Overlap
+    index = pd.Index(sorted(depth.index & richness.index))
+    depth = depth[index]
+    richness = richness[index]
+    X = X.loc[index,:]
 
     # Defaults
     _title_kws = {"fontsize":15, "fontweight":"bold"}
@@ -1009,9 +1035,10 @@ def plot_compositional(
     _line_kws.update(line_kws)
     _annot_kws = {}
     _annot_kws.update(annot_kws)
-    _scatter_kws={"s":s}
+    _scatter_kws={"s":s, "cmap":cmap, "vmin":0}
     _scatter_kws.update(scatter_kws)
     # Colors
+    use_entropy = True
     if y is not None:
         assert set(y.index) >= set(X.index), "All elements of X.index must be in y.index"
         y = y[X.index]
@@ -1019,10 +1046,24 @@ def plot_compositional(
             obsv_colors = y.map(lambda id_obsv:class_colors[id_obsv])
         else:
             colors = Chromatic.from_classes(y, palette=palette)
-            obsv_colors = colors.obsv_colors
+            obsv_colors = colors.obsv_colors[index]
             class_colors = colors.class_colors
+        use_entropy = False
     else:
         show_legend=False
+
+    if use_entropy:
+        c = X.apply(lambda x:entropy(x, base=2), axis=1)
+
+    if c is not None:
+        c = pd.Series(c)
+        assert set(c.index) >= set(X.index), "Not all observations from `X` are in `c`"
+        c = c[index]
+        obsv_colors = c
+        colors_global = c
+    else:
+        colors_global = color_density
+
 
     axes = list()
     with plt.style.context(style):
@@ -1036,9 +1077,9 @@ def plot_compositional(
         # Scatter plot
         if y is not None:
             for id_class, idx_query in pd_series_collapse(y).iteritems():
-                ax.scatter(depth[idx_query], richness[idx_query], color=obsv_colors[idx_query], edgecolor=edgecolor, label=id_class, **_scatter_kws)
+                ax.scatter(depth[idx_query], richness[idx_query], c=obsv_colors[idx_query], edgecolor=edgecolor, label=id_class, **_scatter_kws)
         else:
-            ax.scatter(depth, richness, color=color_density, edgecolor=edgecolor, **_scatter_kws)
+            ax.scatter(depth, richness, c=colors_global, edgecolor=edgecolor, **_scatter_kws)
         # Limits
         xlim = ax.get_xlim()
         ylim = ax.get_ylim()
@@ -1104,8 +1145,13 @@ def plot_compositional(
             plot_annotation(labels=show_annotations, x=depth[show_annotations], y=richness[show_annotations], ax=ax, adjust_label_positions=adjust_annotation_positions, **_annot_kws)
 
         # Labels
-        xlabel = "log$_{10}$(Depth [$N_{%s}$])"%(f"{unit_type}s")
+        xlabel = "Depth [$N_{%s}$]"%(f"{unit_type}s")
+        if log_depth:
+            xlabel = "log$_{10}$(%s)"%(xlabel)
         ylabel = "Richness [$N_{%s}$]"%(f"{attr_type}s")
+        if log_richness:
+            ylabel = "log$_{10}$(%s)"%(ylabel)
+
         ax.set_xlabel(xlabel, **_axis_label_kws)
         ax.set_ylabel(ylabel, **_axis_label_kws)
         ax.xaxis.grid(show_xgrid)

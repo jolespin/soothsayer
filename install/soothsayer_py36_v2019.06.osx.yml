@@ -1,5 +1,4 @@
 channels:
-  - jolespin
   - r
   - conda-forge
   - bioconda
