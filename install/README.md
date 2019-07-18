@@ -21,7 +21,7 @@ wget https://raw.githubusercontent.com/jolespin/soothsayer/master/install/sooths
 # Create a new environment (you should probably do this from the base environment [conda activate base])
 conda env create -y --name soothsayer_env --file soothsayer_py36_v2019.06.osx.yml
 # [Optional] Remove the environment file
-rm soothsayer_py36_v2019.06.yml
+rm soothsayer_py36_v2019.06.osx.yml
 # Activate environment
 conda activate soothsayer_env
 # Duration: This took < 5 minutes on `MacBook Pro v10.14.5` 
