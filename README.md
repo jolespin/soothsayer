@@ -16,7 +16,8 @@ Documentation coming soon. .. ... ..... ........
 * [Denoising Iris dataset + noise attributes with *Clairvoyance*](tutorials/Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
 
 #### Installation:
-Please refer to the [installation manual](install/README.md) for installation details.
+**Please refer to the [installation manual](install/README.md) for installation details.**  
+It will make the installation process *much easier* due to all of the dependencies. 
 
 * conda: https://anaconda.org/jolespin/soothsayer
 
@@ -24,7 +25,9 @@ Please refer to the [installation manual](install/README.md) for installation de
 
 
 #### Development:
-*Soothsayer* is in a developmental stage.  If you're not sure if your installation is a developmental version, check by running: `import soothsayer as sy; print(sy.__developmental__)`.  If you are interested in contributing, please refer to contact details below.
+*Soothsayer* is in a developmental stage.  If you're not sure if your installation is a developmental version, check by running: `import soothsayer as sy; print(sy.__developmental__)`.  It is *highly recommended* to [update to the current version](https://github.com/jolespin/soothsayer/tree/master/install#update-to-the-current-release-recommended). 
+
+If you are interested in requesting features or wish to report a bug, please post a GitHub issue prefixed with the tag `[Feature Request]` and `[Bug]`, respectively.
 
 #### Contact:
 * Josh L. Espinoza: [jespinoz@jcvi.org](jespinoz@jcvi.org).
