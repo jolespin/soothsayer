@@ -47,7 +47,16 @@ Since `soothsayer` is still in a developmental stage, I'm constantly adding meth
 
 ```bash
 pip install git+https://github.com/jolespin/soothsayer
+
+# pip install git+https://github.com/jolespin/soothsayer --force-reinstall --no-deps
 ```
 
 Let me know if you have any issues before creating an issue on GitHub:
 jespinoz[ a t ]jcvi[ d o t ]org
+
+#### Know bugs
+* `statsmodels v0.10.0` has a [bug](https://github.com/statsmodels/statsmodels/issues/5899) that fails to unpickle regression models.  If you will be using `soothsayer.regression`, then install the `v0.10.x` patch for `statsmodels` with the following:
+
+```bash
+pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
+```
