@@ -1,62 +1,44 @@
-```
 
-____ ____ ____ ___ _  _ ____ ____ _   _ ____ ____ 
-[__  |  | |  |  |  |__| [__  |__|  \_/  |___ |__/ 
-___] |__| |__|  |  |  | ___] |  |   |   |___ |  \ 
-                                                  
-```
+<img src="logo.png" width=200>
 
-## Installation instructions:
-I've tried to make installation as seemless as possible.  There are several Python & R dependencies that are difficult to install but it should be working via `conda` with the preconfigured environment `.yml` files.  
+_________________________________
 
-Note, sometimes theres are issues with the conda installation from `-c jolespin soothsayer` but `pip install soothsayer` can be used instead.  
+#### Current Version:
+*v2019.07*
 
-### Method 1 :
-#### [OSX|Linux] Installation [Recommended]
-Inspired by [qiime2](https://docs.qiime2.org/2019.4/install/native/) installation method
+#### Citation:
+*Espinoza, *Dupont et al. 2019 (Submitted)
 
-```bash
-# Download the conda environment instructions
-wget https://raw.githubusercontent.com/jolespin/soothsayer/master/install/soothsayer_py36_v2019.06.osx.yml
-# Create a new environment (you should probably do this from the base environment [conda activate base])
-conda env create -y --name soothsayer_env --file soothsayer_py36_v2019.06.osx.yml
-# [Optional] Remove the environment file
-rm soothsayer_py36_v2019.06.osx.yml
-# Activate environment
-conda activate soothsayer_env
-# Duration: This took < 5 minutes on `MacBook Pro v10.14.5` 
+#### Case studies, tutorials and usage:
+Documentation coming soon. .. ... ..... ........
 
-# For Linux, replace the `osx` with `linux`
-```
+* [Antimicrobial resistance modeling](https://github.com/jolespin/antimicrobial_resistance_modeling/blob/master/Espinoza-Dupont_et_al_2019/Notebooks/markdown_version/Espinoza-Dupont_et_al_2019.md)
+* [Denoising Iris dataset + noise attributes with *Clairvoyance*](tutorials/Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
 
-### Method 2:
-#### OSX | Linux | (Windows?) Installation
-```bash
-wget https://raw.githubusercontent.com/jolespin/soothsayer/master/install/install_soothsayer.sh
-# bash install_soothsayer.sh  <env_name> <py_version>
-bash install_soothsayer.sh 
-# or
-bash install_soothsayer.sh soothsayer_env
-# or
-bash install_soothsayer.sh soothsayer_env 3.6.7
-# Duration: This will take a few hours and may require manually installing a few packages if certain ones fail.  
-```
+#### Installation:
+**Please refer to the [installation manual](install/README.md) for installation details.**  
+It will make the installation process *much easier* due to all of the dependencies. 
 
-#### Update to the current release [Recommended]
-Since `soothsayer` is still in a developmental stage, I'm constantly adding methods, fixing bugs, and moving code around.  You should run the following command to use the current version:
+* conda: https://anaconda.org/jolespin/soothsayer
 
-```bash
-pip install git+https://github.com/jolespin/soothsayer
+* pip: https://pypi.org/project/soothsayer
 
-# pip install git+https://github.com/jolespin/soothsayer --force-reinstall --no-deps
-```
 
-Let me know if you have any issues before creating an issue on GitHub:
-jespinoz[ a t ]jcvi[ d o t ]org
+#### Development:
+*Soothsayer* is in a developmental stage.  If you're not sure if your installation is a developmental version, check by running: `import soothsayer as sy; print(sy.__developmental__)`.  It is *highly recommended* to [update to the current version](https://github.com/jolespin/soothsayer/tree/master/install#update-to-the-current-release-recommended). 
 
-#### Know bugs
+If you are interested in requesting features or wish to report a bug, please post a GitHub issue prefixed with the tag `[Feature Request]` and `[Bug]`, respectively.
+
+#### Known bugs:
 * `statsmodels v0.10.0` has a [bug](https://github.com/statsmodels/statsmodels/issues/5899) that fails to unpickle regression models.  If you will be using `soothsayer.regression`, then install the `v0.10.x` patch for `statsmodels` with the following:
 
 ```bash
 pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
 ```
+
+
+#### Contact:
+* Josh L. Espinoza: [jespinoz@jcvi.org](jespinoz@jcvi.org).
+
+<img src ="https://allpistuff.com/wp-content/uploads/2018/07/twitter.c0030826.jpg" width=100>
+<img src="https://binstar-static-prod.s3.amazonaws.com/latest/img/AnacondaCloud_logo_green.png" width=300>
