@@ -223,7 +223,12 @@ class Hive(object):
             self.axes[query_axis]["theta"] = np.deg2rad(self.axes[query_axis]["theta"])
 
         # Nodes
-        self.nodes_ = flatten([*map(lambda axes_data:axes_data["nodes"], self.axes.values())])
+        # Old method: self.nodes_ = flatten([*map(lambda axes_data:axes_data["nodes"], self.axes.values())])
+        # Not using old method because frozenset objects and tuples are unfolded.  
+        self.nodes_ = list()
+        for axes_data in self.axes.values():
+            self.nodes_ += list(axes_data["nodes"])
+
         assert len(self.nodes_) == len(set(self.nodes_)), "Axes cannot contain duplicate nodes"
         self.number_of_nodes = len(self.nodes_)
 

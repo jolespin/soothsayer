@@ -2,7 +2,7 @@
 # Modules
 # ==============================================================================
 # Built-ins
-import os, sys, time, pathlib
+import os, sys, time, pathlib,warnings
 from collections import *
 from io import StringIO, BytesIO
 from ast import literal_eval
@@ -14,6 +14,7 @@ import pickle, gzip, bz2, zipfile
 
 # PyData
 import pandas as pd
+import numpy as np
 
 # Biology
 from Bio import SeqIO
@@ -337,8 +338,9 @@ def _read_gtf_gff_base(path, compression, record_type, verbose):
             for line in iterable_lines:
                 if not line.startswith("#"):
                     line = line.strip("\n")
-                    base_fields = line.split("\t")
-                    data.append(base_fields)
+                    if bool(line):
+                        base_fields = line.split("\t")
+                        data.append(base_fields)
         else:
             for line in iterable_lines:
                 if not line.startswith("#"):
@@ -362,24 +364,27 @@ def read_gff3(path:str, compression="infer", record_type=None, verbose = True, r
     # Read the gff3 file
     df_base = _read_gtf_gff_base(path, compression, record_type, verbose)
 
-    # Splitting fields
-    if verbose:
-        # Should make this less confusing like the gtf reader
-        iterable_fields = tqdm(enumerate(df_base.iloc[:,-1].map(lambda x:dict([y.split("=") for y in x.split(";")])).as_matrix()), "Splitting fields")
-    else:
-        iterable_fields = enumerate(df_base.iloc[:,-1].map(lambda x:dict([y.split("=") for y in x.split(";")])).as_matrix())
+    try:
+        # Splitting fields
+        if verbose:
+            # Should make this less confusing like the gtf reader
+            iterable_fields = tqdm(enumerate(df_base.iloc[:,-1].map(lambda x:dict([y.split("=") for y in x.split(";")])).as_matrix()), "Splitting fields")
+        else:
+            iterable_fields = enumerate(df_base.iloc[:,-1].map(lambda x:dict([y.split("=") for y in x.split(";")])).as_matrix())
 
-    df_fields = pd.DataFrame(OrderedDict([(i,pd.Series(v)) for i,v in iterable_fields])).T
-    df_gff3 = pd.concat([df_base.iloc[:,:7], df_fields], axis=1)
+        df_fields = pd.DataFrame(OrderedDict([(i,pd.Series(v)) for i,v in iterable_fields])).T
+        df_gff3 = pd.concat([df_base.iloc[:,:7], df_fields], axis=1)
 
-     # Contains identifier
-    if "ID" in df_gff3.columns:
-        df_gff3["seq_id"] = np.nan
-        mask_notnull = df_gff3["ID"].notnull()
-        df_gff3["seq_id"][mask_notnull] = df_gff3["ID"][mask_notnull].map(lambda id:id.split(":")[1])
+         # Contains identifier
+        if "ID" in df_gff3.columns:
+            df_gff3["seq_id"] = np.nan
+            mask_notnull = df_gff3["ID"].notnull()
+            df_gff3["seq_id"][mask_notnull] = df_gff3["ID"][mask_notnull].map(lambda id:id.split(":")[1])
 
-    if reset_index:
-        df_gff3 = df_gff3.reset_index(drop=True)
+        if reset_index:
+            df_gff3 = df_gff3.reset_index(drop=True)
+    except IndexError:
+        warnings.warn("Could not successfully parse file")
 
     # Path index
     if name is not None:

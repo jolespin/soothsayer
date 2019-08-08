@@ -33,16 +33,22 @@ from sklearn.metrics.pairwise import pairwise_distances
 # Soothsayer
 from ..transmute.conversion import linkage_to_newick, name_ete_nodes
 from ..r_wrappers.packages.WGCNA import bicor
-from ..utils import check_symmetry, force_symmetry
+from ..utils import is_symmetrical, force_symmetry
 
-__all__ = ["Symmetric", "pairwise", "pairwise_tree_distance", "pairwise_logfc"]
+__all__ = ["Symmetric", "pairwise", "pairwise_tree_distance", "pairwise_logfc", "dense_to_condensed"]
 __all__ = sorted(__all__)
 
 
 # =======================================================
 # Pairwise calculations
 # =======================================================
-
+def dense_to_condensed(X, name=None, assert_symmetry=True, tol=None):
+    if assert_symmetry:
+        assert is_symmetrical(X, tol=tol), "`X` is not symmetric with tol=`{}`".format(tol)
+    labels = X.index
+    index=pd.Index([*map(frozenset,itertools.combinations(labels, 2))], name=name)
+    data = distance.squareform(X)
+    return pd.Series(data, index=index, name=name)
 
 # Symmetrical dataframes represented as augment pd.Series
 class Symmetric(object):
@@ -59,6 +65,7 @@ class Symmetric(object):
     Future:
     Take in a Symmetric object and pd.Series with a frozenset index
     Fix the diagonal arithmetic
+    Replace self._dense_to_condensed to dense_to_condensed
     """
     def __init__(self, X:pd.DataFrame, data_type=None, metric_type=None, func_metric=None, name=None, mode="infer", metadata=dict(), force_the_symmetry=True):
         acceptable_modes = ["similarity", "dissimilarity", "statistical_test", "infer"]
@@ -69,7 +76,7 @@ class Symmetric(object):
         if force_the_symmetry:
             X = force_symmetry(X)
         else:
-            assert check_symmetry(X, tol=1e-10), "X is not symmetric"
+            assert is_symmetrical(X, tol=1e-10), "X is not symmetric"
 
         self.mode = mode
         self.data_type = data_type

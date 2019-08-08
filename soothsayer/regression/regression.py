@@ -357,6 +357,31 @@ class CoreLinearModel(object):
 
 # Mixed Linear Effects Models
 class MixedEffectsLinearModel(CoreLinearModel):
+    """
+    import soothsayer as sy
+    
+    # Testing Mixed Linear Model
+    X_iris, y_iris = sy.utils.get_iris_data(return_data=["X","y"], noise=47)
+    # Training Data
+    fixed_effects = ["petal_width"]
+    X = X_iris.drop(fixed_effects, axis=1)
+    Y = pd.concat([y_iris.to_frame(), X_iris[fixed_effects]], axis=1)
+    # Model
+    model = sy.regression.MixedEffectsLinearModel()
+    # Fit
+    model.fit(X=X, Y=Y, fixed_effects_variables=fixed_effects, random_effect_variable="Species")
+    # Create association graph
+    model.create_graph(tol_test=0.05)
+    # Save object (Important b/c statsmodels 0.10.0 is broken) #https://github.com/statsmodels/statsmodels/issues/5899
+    model.to_file("iris.model.pbz2")
+    # Load it (This part wouldn't work w/ the above comment)
+    model = sy.io.read_object("iris.model.pbz2")
+    # Test to make sure it looks good
+    model.plot_graph(show_node_labels=True)
+    # Show the data
+    model.synopsis_.head()
+
+    """
     def __init__(
             self,
             name=None,

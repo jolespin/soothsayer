@@ -26,8 +26,7 @@ __all__ = ["to_precision", "format_duration", "get_timestamp", "dataframe_to_mat
 "rgb_to_rgba", "map_colors", "infer_cmap", "infer_vmin_vmax", "infer_continuous_type", "scalarmapping_from_data", "Chromatic", "create_logfile", "determine_mode_for_logfiles",
 "is_dict", "is_rgb_like", "is_nonstring_iterable","is_dict_like", "is_color", "is_graph", "is_all_same_type", "is_number", "is_query_class","is_symmetrical", "is_in_namespace",
 "format_mpl_legend_handles", "LEGEND_KWS", "DIVERGING_KWS", "CMAP_DIVERGING", "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
-"pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","contains","consecutive_replace",
-"check_symmetry", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath","join_as_strings",
+"pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","contains","consecutive_replace", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath","join_as_strings",
 ]
 __all__ = sorted(__all__)
 
@@ -118,14 +117,14 @@ def is_path_like(obj, path_must_exist=True):
             return False
     else:
         return obj_is_path_like
-def is_symmetrical(X:pd.DataFrame, tol=None):
-    if X.shape[0] != X.shape[1]:
-        return False
-    if X.shape[0] == X.shape[1]:
-        if tol is None:
-            return np.all(np.tril(X) == np.triu(X).T)
-        if tol:
-            return (np.tril(X) - np.triu(X).T).ravel().min() < tol
+# def is_symmetrical(X:pd.DataFrame, tol=None):
+#     if X.shape[0] != X.shape[1]:
+#         return False
+#     if X.shape[0] == X.shape[1]:
+#         if tol is None:
+#             return np.all(np.tril(X) == np.triu(X).T)
+#         if tol:
+#             return (np.tril(X) - np.triu(X).T).ravel().min() < tol
 def is_in_namespace(variable_names, namespace, func_logic=all):
     """
     Check if variable names are in the namespace (i.e. globals())
@@ -153,7 +152,7 @@ def boolean(x, true_values={"true", "t", "yes", "1"}, false_values={"false", "f"
 # =============
 # Checks
 # =============
-def check_symmetry(X, tol=None):
+def is_symmetrical(X, tol=None):
     if X.shape[0] == X.shape[1]:
         if tol is None:
             return np.all(np.tril(X) == np.triu(X).T)
@@ -1148,7 +1147,7 @@ def filter_compositional(
         if all(conditions):
             tol = round(X.shape[0]*tol)
         data = (X > 0).sum(axis=0)
-        assert tol <= X.shape[0], "If prevalence is an integer, it cannot be larger than the number of samples in the index"
+        assert tol <= X.shape[0], "If prevalence is an integer ({}), it cannot be larger than the number of samples ({}) in the index".format(tol, X.shape[0])
         return X.loc[:,_get_elements(data, tol, operation)]
 
     def _filter_richness(X, tol, operation):
