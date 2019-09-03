@@ -798,8 +798,10 @@ def plot_volcano(diffusion_values:pd.Series, test_values:pd.Series, tol_diffusio
 
         # Plot data
         c = map_colors(diffusion_values, mode=3, cmap=cmap, vmin=-vmax, vmax=vmax, format="hex")
+        nonsignificant_labels = pd.Index(list(set(x.index) - set(idx_degs)))
         if color_nonsignificant is not None:
-            c[set(x.index) - set(idx_degs)] = color_nonsignificant
+            mask = c.index.map(lambda label: label in nonsignificant_labels).values.astype(bool)
+            c[mask] = color_nonsignificant
         s = pd.Series(x.index.map(lambda z:{True:50, False:18}[ z in idx_degs]), index=x.index)
 
         # Horizontal Lines

@@ -22,7 +22,7 @@ from palettable.cmocean.sequential import Tempo_8
 from sklearn.datasets import load_iris
 
 __all__ = ["to_precision", "format_duration", "get_timestamp", "dataframe_to_matrixstring", "pad_left", "iterable_depth", "flatten", "get_unique_identifier", "infer_compression", "format_filename", "format_path","format_header", "boolean",
-"dict_filter", "dict_reverse", "dict_expand", "dict_fill", "dict_build", "dict_collapse",
+"dict_filter", "dict_reverse", "dict_expand", "dict_fill", "dict_build", "dict_collapse","dict_tree",
 "rgb_to_rgba", "map_colors", "infer_cmap", "infer_vmin_vmax", "infer_continuous_type", "scalarmapping_from_data", "Chromatic", "create_logfile", "determine_mode_for_logfiles",
 "is_dict", "is_rgb_like", "is_nonstring_iterable","is_dict_like", "is_color", "is_graph", "is_all_same_type", "is_number", "is_query_class","is_symmetrical", "is_in_namespace",
 "format_mpl_legend_handles", "LEGEND_KWS", "DIVERGING_KWS", "CMAP_DIVERGING", "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
@@ -325,6 +325,13 @@ def consecutive_replace(x:str, *patterns):
 # ============
 # Dictionaries
 # ============
+# Dictionary as a tree
+def dict_tree():
+    """
+    Source: https://gist.github.com/hrldcpr/2012250
+    """
+    return defaultdict(dict_tree)
+
 # Reverse a dictionary
 def dict_reverse(d):
     into = type(d)
@@ -1073,10 +1080,12 @@ def pd_dataframe_matmul(A:pd.DataFrame,B:pd.DataFrame):
     return pd.DataFrame(np.matmul(A, B.loc[A.columns,:]), index=A.index, columns=B.columns)
 
 # Extend a DataFrame
-def pd_dataframe_extend_index(df, index_extended, fill=np.nan, axis=0):
+def pd_dataframe_extend_index(index_extended, df=None, fill=np.nan, axis=0):
     """
     Extend the index of pd.DataFrame like pandas used to do before 23.4
     """
+    if df is None:
+        df = pd.DataFrame()
     if axis == 0:
         idx_extend = set(index_extended) - set(df.index)
         A = np.empty((len(idx_extend), df.shape[1]))

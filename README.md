@@ -4,10 +4,10 @@
 _________________________________
 
 #### Current Version:
-*v2019.07*
+*v2019.08*
 
 #### Citation:
-*Espinoza, *Dupont et al. 2019 (Submitted)
+*Espinoza, *Dupont et al. 2019 (In Review)
 
 #### Case studies, tutorials and usage:
 Documentation coming soon. .. ... ..... ........
@@ -28,6 +28,14 @@ It will make the installation process *much easier* due to all of the dependenci
 *Soothsayer* is in a developmental stage.  If you're not sure if your installation is a developmental version, check by running: `import soothsayer as sy; print(sy.__developmental__)`.  It is *highly recommended* to [update to the current version](https://github.com/jolespin/soothsayer/tree/master/install#update-to-the-current-release-recommended). 
 
 If you are interested in requesting features or wish to report a bug, please post a GitHub issue prefixed with the tag `[Feature Request]` and `[Bug]`, respectively.
+
+#### Known bugs:
+* `statsmodels v0.10.0` has a [bug](https://github.com/statsmodels/statsmodels/issues/5899) that fails to unpickle regression models.  If you will be using `soothsayer.regression`, then install the `v0.10.x` patch for `statsmodels` with the following:
+
+```bash
+pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
+```
+
 
 #### Contact:
 * Josh L. Espinoza: [jespinoz@jcvi.org](jespinoz@jcvi.org).

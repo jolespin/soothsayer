@@ -13,6 +13,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy import stats
+from scipy.spatial.distance import squareform
 
 # Soothsayer
 from ..symmetry import *
@@ -23,7 +24,7 @@ from ..transmute.normalization import normalize_minmax
 from ..io import write_object
 
 
-__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold"]
+__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold", "TemporalGraph"]
 __all__ = sorted(__all__)
 # =======================================================
 # Hive
@@ -224,7 +225,7 @@ class Hive(object):
 
         # Nodes
         # Old method: self.nodes_ = flatten([*map(lambda axes_data:axes_data["nodes"], self.axes.values())])
-        # Not using old method because frozenset objects and tuples are unfolded.  
+        # Not using old method because frozenset objects and tuples are unfolded.
         self.nodes_ = list()
         for axes_data in self.axes.values():
             self.nodes_ += list(axes_data["nodes"])
@@ -918,3 +919,185 @@ def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True
                 if title:
                     fig.suptitle(title, fontsize=18, fontweight="bold", y=pad)
         return fig, ax, df_sft
+
+# Temporal Networks
+class TemporalGraph(object):
+    # Initialize
+    def __init__(self, name=None, description=None, time_unit=None, node_type=None, edge_type=None, experimental_warning=True, **metadata):
+        if experimental_warning:
+            warnings.warn("`TemporalGraph` is experimental.  Functionality must be evaluated, plotting functions, must be coded, and much more.  In the current state, this can be used to create create global temporal networks via`teneto.TemporalNetwork` and `nx.OrderedDiGraph` in addition to each timepoint-specific undirected network via `nx.Graph`.")
+        self.name = name
+        self.description = description
+        self.time_unit = time_unit
+        self.node_type = node_type
+        self.edge_type = edge_type
+        self.graphs = dict()
+        self.metadata = metadata
+        self.intertemporal_connections_ = None
+        self.compiled = False
+    # Add timepoint
+    def add_timepoint(self, t, data, **additional_edge_attributes):
+        """
+        """
+        assert is_number(t), "`t` must be a numeric type"
+        if isinstance(data, pd.DataFrame):
+            data = dense_to_condensed(data)
+
+        graph = nx.Graph(name=t)
+        for edge, connection in data.items():
+            edge_attrs = {"weight":abs(connection), "sign":np.sign(connection)}
+            for (field, data) in additional_edge_attributes.items():
+                edge_attrs[field] = data[edge]
+            graph.add_edge(*tuple(edge),**edge_attrs)
+
+        self.graphs[t] = graph
+
+    def __repr__(self):
+        header = "TemporalGraph(name = {}):".format(self.name)
+
+        return " \
+                {}\n\t* Timepoints: {} \
+                \n\t* Compiled: {} \
+                ".format(
+                    format_header(header),
+                    set(self.graphs.keys()),
+                    self.compiled,
+                )
+
+    # Compile
+    def compile(self, intertemporal_connections=None, check_intermodal=True, **additional_edge_attributes):
+        # Get nodes and intratemporal edges
+        self.node_temporal_ = defaultdict(set)
+        for (t, graph) in self.graphs.items():
+            for node in graph.nodes():
+                self.node_temporal_[node].add(t)
+        self.nodes_ = sorted(self.node_temporal_)
+        self.intratemporal_edge_labels_ = pd.Index([*map(frozenset,itertools.combinations(self.nodes_, 2))], name=self.name)
+        self.timepoints_ = np.asarray(list(self.graphs))
+
+        # Encode nodes for teneto
+        self.encoding_ = {node:i for i, node in enumerate((self.nodes_), start=0)}
+        self.decoding_ = {i:node for node, i in self.encoding_.items()}
+
+        # Temporal networks
+        print(format_header("Adding intratemporal edges:", "-"), file=sys.stderr)
+        self.teneto_network_ = teneto.TemporalNetwork(desc=self.description, nettype="wu", starttime=min(self.graphs), N=len(self.nodes_), T=len(self.graphs))
+        self.temporal_graph_ = nx.OrderedDiGraph(name=self.name)
+        encoded_edges = list()
+        decoded_edges = list()
+        for t, graph in self.graphs.items():
+            for node_i,node_j, attrs in tqdm(graph.edges(data=True), "t={}".format(t)):
+                # Teneto
+                edge_data = [self.encoding_[node_i], self.encoding_[node_j], t, attrs["weight"]]
+                encoded_edges.append(edge_data)
+                # NetworkX
+                edge_data = [(node_i, t), (node_j, t), attrs]
+                decoded_edges.append(edge_data)
+                edge_data = [(node_j, t), (node_i, t), attrs]
+                decoded_edges.append(edge_data)
+
+        # Intertemporal connections
+        self.intertemporal_connections_ = intertemporal_connections
+        if intertemporal_connections is not None:
+            # Verbose but quicker
+            if check_intermodal:
+                for edge, connection in tqdm(intertemporal_connections.items(), "Adding intertemporal edges"):
+                    node_i_t_n, node_i_t_n1 = edge
+                    t_n = node_i_t_n[-1]
+                    t_n_1 = node_i_t_n1[-1]
+                    assert t_n < t_n_1, "Please make sure t_n < t_n+1: {} | {} !< {}".format(edge, t_n, t_n_1)
+                    assert node_i_t_n[0] == node_i_t_n1[0], "Please make sure `node_i_t_n` == `node_i_t_n1+1`: {} | {} !< {}".format(edge, node_i_t_n[0], node_i_t_n1[0])
+
+                    edge_attrs = {"weight":abs(connection), "sign":np.sign(connection)}
+                    for (field, data) in additional_edge_attributes.items():
+                        edge_attrs[field] = data[edge]
+                    edge_data = [node_i_t_n, node_i_t_n1, edge_attrs]
+                    decoded_edges.append(edge_data)
+            else:
+                for edge, connection in tqdm(intertemporal_connections.items(), "Adding intertemporal edges"):
+                    edge_attrs = {"weight":abs(connection), "sign":np.sign(connection)}
+                    for (field, data) in additional_edge_attributes.items():
+                        edge_attrs[field] = data[edge]
+                    edge = tuple(edge)
+                    edge_data = [node_i_t_n, node_i_t_n1, edge_attrs]
+                    edge_data = [*edge,edge_attrs]
+                    decoded_edges.append(edge_data)
+
+            self.intertemporal_connections_ = True
+
+
+        # Tento
+        self.teneto_network_.add_edge(encoded_edges)
+
+        # NetworkX
+        self.temporal_graph_.add_edges_from(decoded_edges)
+
+        # Compiled
+        self.compiled = True
+        return self
+
+    def get_intratemporal_connections(self, t=None):
+        pass
+    def get_intertemporal_connections(self):
+        pass
+    def plot_network(self):
+        pass
+    def plot_slice(self):
+        pass
+    def plot_hive(self):
+        pass
+    def plot_graphlets(self):
+        pass
+
+    def compute_measure(self, measure:str, level:str="global", **measure_kws):
+        """
+        Reference: https://teneto.readthedocs.io/en/latest/teneto.networkmeasures.html
+        level: {global, time, node, edge}
+        measure: bursty_coeff, fluctuability, intercontacttimes, local_variation, reachability_latency, shortest_temporal_path, sid, temporal_betweenness_centrality, temporal_closeness_centrality,temporal_efficiency, temporal_participation_coeff, topological_overlap, volatility}
+
+        #! Clean up this code...
+        """
+#         # Supress stdout
+#         f_stdout = sys.stdout
+#         sys.stdout = open(os.devnull, "w")
+        calc_incompatible_measures = {"intercontacttimes", "local_variation", "shortest_temporal_path","temporal_degree_centrality","temporal_participation_coeff"}
+        if measure not in calc_incompatible_measures:
+            measure_kws["calc"] = level
+        data =  self.teneto_network_.calc_networkmeasure(measure, **measure_kws)
+
+        output = None
+        show_warning = False
+        if measure  in calc_incompatible_measures:
+            show_warning = False
+        else:
+            if is_number(data):
+                output = data
+            else:
+                data = np.asarray(data)
+                if len(data.shape) in {1,2}:
+                    if len(data.shape) == 1:
+                        N = data.size
+                        inferred = False
+                        # Time
+                        if N == len(self.graphs)-1:
+                            output = pd.Series(data, index=[*map(lambda t_n: (self.timepoints_[t_n], self.timepoints_[t_n+1]), range(self.timepoints_.size-1))], name=measure)
+                            inferred = True
+                        # Nodes
+                        if N == len(self.nodes_):
+                            output = pd.Series(data, index=self.nodes_, name=measure)
+                            inferred = True
+
+                    if len(data.shape) == 2:
+                        output = pd.Series(squareform(data), index=self.intratemporal_edge_labels_, name=measure)
+                        inferred = True
+
+                    if not inferred:
+                        show_warning = True
+                else:
+                    show_warning = True
+        if show_warning:
+            warnings.warn("Unable to determine labels.  Returning unlabeled data.")
+            output = data
+#         # Get original stdout
+#         sys.stdout = f_stdout
+        return output

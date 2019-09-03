@@ -678,7 +678,8 @@ class Agglomerative(object):
 
         if legend is not None:
             if legend == True:
-                legend = self.cluster_colors
+                if hasattr(self, "cluster_colors"):
+                    legend = self.cluster_colors
             else:
                 if isinstance(legend, pd.Series):
                     legend = legend.to_dict(OrderedDict)

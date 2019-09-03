@@ -1,7 +1,7 @@
 import os, sys, datetime, copy
 from collections import OrderedDict
 import pandas as pd
-from ..utils import is_path_like, is_nonstring_iterable
+from ..utils import is_path_like, is_nonstring_iterable, pd_dataframe_extend_index
 from ..io import read_dataframe, write_object
 
 __all__ = ["Dataset"]
@@ -72,17 +72,19 @@ class Dataset(object):
         self.set_default( name_version=name_initial_data, observation_subset=None, attribute_subset=None)
 
         # Metadata observations
-        if metadata_observations is not None:
-            self.add_metadata(metadata_observations, axis="observations", metadata_target_field=metadata_target_field)
-            if self.alias_metadata_observations is not None:
-                setattr(self, str(self.alias_metadata_observations), self.metadata_observations)
+        if metadata_observations is None:
+            metadata_observations = pd_dataframe_extend_index(data.index, pd.DataFrame(), axis=0)
+        self.add_metadata(metadata_observations, axis="observations", metadata_target_field=metadata_target_field)
+        if self.alias_metadata_observations is not None:
+            setattr(self, str(self.alias_metadata_observations), self.metadata_observations)
 
 
         # Metadata attributes
-        if metadata_attributes is not None:
-            self.add_metadata(metadata_attributes, axis="attributes", metadata_target_field=None)
-            if self.alias_metadata_attributes is not None:
-                setattr(self, str(self.alias_metadata_attributes), self.metadata_attributes)
+        if metadata_attributes is None:
+            metadata_attributes = pd_dataframe_extend_index(data.columns, pd.DataFrame(), axis=0)
+        self.add_metadata(metadata_attributes, axis="attributes", metadata_target_field=None)
+        if self.alias_metadata_attributes is not None:
+            setattr(self, str(self.alias_metadata_attributes), self.metadata_attributes)
 
     def __repr__(self):
         class_name = str(self.__class__).split(".")[-1][:-2]

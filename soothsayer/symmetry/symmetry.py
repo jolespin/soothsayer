@@ -47,7 +47,7 @@ def dense_to_condensed(X, name=None, assert_symmetry=True, tol=None):
         assert is_symmetrical(X, tol=tol), "`X` is not symmetric with tol=`{}`".format(tol)
     labels = X.index
     index=pd.Index([*map(frozenset,itertools.combinations(labels, 2))], name=name)
-    data = distance.squareform(X)
+    data = distance.squareform(X, checks=False)
     return pd.Series(data, index=index, name=name)
 
 # Symmetrical dataframes represented as augment pd.Series
@@ -212,7 +212,7 @@ class Symmetric(object):
     def _dense_to_condensed(self, X):
         np.fill_diagonal(X.values, 0)
         index=pd.Index([*map(frozenset,itertools.combinations(self.labels, 2))], name=self.name)
-        data = distance.squareform(X)
+        data = distance.squareform(X, checks=False)
         return pd.Series(data, index=index, name=self.name)
 
     def _condensed_to_dense(self, y):
