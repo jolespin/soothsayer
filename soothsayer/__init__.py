@@ -34,7 +34,7 @@
 # Version
 # =======
 import datetime
-__version__= "2019.08"
+__version__= "2019.09"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __version_specific__ = datetime.datetime.utcnow().strftime("%Y.%m.%d")
 __author__ = "Josh L. Espinoza"

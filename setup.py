@@ -37,6 +37,8 @@ setup(name='soothsayer',
     "palettable >= 3.0.0",
     "adjustText",
     "tzlocal",
+    "statsmodels >= 0.10.0", #https://github.com/statsmodels/statsmodels/issues/5899 May need to use this separately: pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
+    "teneto",
 
       ],
      include_package_data=True,
