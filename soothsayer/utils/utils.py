@@ -1192,7 +1192,7 @@ def filter_compositional(
 # ===========
 # Prototyping
 # ===========
-def get_iris_data(return_data=["X", "y", "colors"], noise=None, return_target_names=True, palette="hls", desat=1, random_state=0):
+def get_iris_data(return_data=["X", "y", "colors"], noise=None, return_target_names=True, palette="Set2", desat=1, random_state=0):
     """
     return_data priority is [X, y, colors]
     """

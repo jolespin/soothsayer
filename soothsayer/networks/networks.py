@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy import stats
 from scipy.spatial.distance import squareform
+import teneto
+from tqdm import tqdm
 
 # Soothsayer
 from ..symmetry import *

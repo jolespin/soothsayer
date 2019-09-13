@@ -2,7 +2,7 @@
 # Modules
 # ==============================================================================
 # Built-ins
-import os, sys, time
+import os, sys, time, warnings
 from collections import OrderedDict, defaultdict
 
 # PyData
@@ -24,9 +24,9 @@ from ..r_wrappers.packages.edgeR import normalize_edgeR
 from ..r_wrappers.packages.metagenomeSeq import normalize_css
 # from soothsayer.r_wrappers.packages.philr import normalize_philr
 
-from ..utils import is_dict, assert_acceptable_arguments
+from ..utils import is_dict, assert_acceptable_arguments, is_number
 
-__all__ = ["normalize_minmax", "normalize_tss", "normalize_clr", "normalize_center", "normalize_zscore", "normalize_quantile", "normalize_boxcox", "normalize_ilr", "normalize", "normalize_expression"]
+__all__ = ["normalize_minmax", "normalize_tss", "normalize_clr","normalize_xlr", "normalize_center", "normalize_zscore", "normalize_quantile", "normalize_boxcox", "normalize_ilr", "normalize", "normalize_expression"]
 
 # ==============================================================================
 # Normalization
@@ -52,13 +52,131 @@ def normalize_tss(X):
         return X/X.sum()
 
 # CLR Normalization
-def normalize_clr(X):
+def normalize_clr(X, return_zeros_as_neginfinity=False):
+    """
+    Extension of CLR from skbio to handle zeros and NaN; though, this implementation will be slightly slower.
+
+    Please refer to the following for CLR documention:
+    http://scikit-bio.org/docs/latest/generated/skbio.stats.composition.clr.html#skbio.stats.composition.clr
+
+    """
     assert isinstance(X, (pd.Series, pd.DataFrame)), "Type must be either pd.Series or pd.DataFrame"
+    # X
     if isinstance(X, pd.DataFrame):
-        A_clr = clr(X.values)
-        return pd.DataFrame(A_clr, index=X.index, columns=X.columns)
+
+        return normalize_xlr(X, centroid="log_mean",return_zeros_as_neginfinity=return_zeros_as_neginfinity )
+
+    # x
     if isinstance(X, pd.Series):
-        return pd.Series(clr(X),index=X.index, name=X.name)
+        # Get values
+        X_values = X.values
+        # Check for zeros
+        X_contains_zeros = False
+        num_zeros = np.any(X == 0).flatten().sum()
+        if num_zeros:
+            warnings.warn("N={} detected in `X`.  Masking them as NaN to perform nan-robust functions".format(num_zeros))
+            X_zero_mask = X == 0
+            X_values[X_zero_mask] = np.nan
+            X_contains_zeros = True
+
+        # Transform
+        X_log = np.log(X)
+        centroid = np.nanmean(X_log, axis=-1)
+        X_transformed = X_log - centroid
+
+        # Output
+        if all([return_zeros_as_neginfinity, X_contains_zeros]):
+            X_transformed[X_zero_mask] = -np.inf
+        return pd.Series(X_transformed,index=X.index, name=X.name)
+
+# Extension of CLR to use different centroid references and zeros with pseudocounts
+def normalize_xlr(X:pd.DataFrame, centroid="log_median", return_zeros_as_neginfinity=False):
+    """
+    Extension of CLR to incorporate custom metrics such as median and harmonic mean.
+    If you want CLR, please use skbio's implementation as it is faster.
+    This implementation is more versatile with more checks but that makes it slower if it done iteratively.
+
+    This was designed to handle zero values.  It computes the centroid metrics for all non-zero values (masked as nan)
+    and returns them either as nan (can be used with some correlation functions) or as -inf (for mathematical consistency)
+
+    Documentation on CLR:
+    http://scikit-bio.org/docs/latest/generated/skbio.stats.composition.clr.html#skbio.stats.composition.clr
+
+    centroid: {log_median, log_mean, log_hmean}
+
+    Note: log_mean == arithmetic mean of logs == log of geometric mean
+    """
+
+    assert np.all(X >= 0), "`X` cannot contain negative values because of log-transformation step."
+
+    # Check for labels
+    index = None
+    columns = None
+    X_values = X.astype(float)
+    X_is_labeled = False
+    if isinstance(X, pd.DataFrame):
+        index = X.index
+        columns = X.columns
+        X_values = X.values.astype(float)
+        X_is_labeled = True
+
+    # Check for zeros
+    X_contains_zeros = False
+    num_zeros = np.any(X == 0).flatten().sum()
+    if num_zeros:
+        warnings.warn("N={} detected in `X`.  Masking them as NaN to perform nan-robust functions".format(num_zeros))
+        X_zero_mask = X == 0
+        X_values[X_zero_mask] = np.nan
+        X_contains_zeros = True
+
+    # Log transformation
+    X_log = np.log(X_values)
+
+    # Centroid reference
+    median = {"log_median"}
+    geometric_mean = {"log_mean", "gmean_log", }
+    harmonic_mean = {"log_hmean"}
+
+    if isinstance(centroid, str):
+        centroid = centroid.lower()
+        assert_acceptable_arguments(centroid, median  | geometric_mean | harmonic_mean)
+
+        if centroid in median:
+            centroid = np.nanmedian(X_log, axis=-1)
+        elif centroid in geometric_mean:
+            centroid = np.nanmean(X_log, axis=-1)
+        elif centroid in harmonic_mean:
+            if X_contains_zeros:
+                centroid = np.asarray(list(map(lambda x:stats.hmean(x[np.isfinite(x)]), X_log)))
+            else:
+                centroid = stats.hmean(X_log, axis=-1)
+
+    # Percentiles
+    if is_number(centroid):
+        centroid = np.asarray(list(map(lambda x:stats.scoreatpercentile(x, centroid), X_log)))
+
+    # Labeled vector
+    if is_dict(centroid):
+        centroid = pd.Series(centroid)
+    if isinstance(centroid, pd.Series):
+        assert X_is_labeled, "If `centroid` is dict-like then `X` must be a `pd.DataFrame`."
+        assert set(centroid.index) >= set(index), "Not all indicies from `centroid` are available in `X.index`."
+        centroid = centroid[index].values
+
+    # Check dimensions
+    assert len(centroid) == X_log.shape[0], "Dimensionality is not compatible: centroid.size != X.shape[0]."
+    centroid = np.asarray(centroid).reshape(-1,1)
+    # Transform
+    X_transformed = X_log - centroid
+
+    # Output
+    if all([return_zeros_as_neginfinity, X_contains_zeros]):
+        X_transformed[X_zero_mask] = -np.inf
+
+    if X_is_labeled:
+        return pd.DataFrame(X_transformed, index=index, columns=columns)
+    else:
+        return X_transformed
 
 # Center Normalization
 def normalize_center(X):
