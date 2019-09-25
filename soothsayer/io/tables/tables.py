@@ -25,7 +25,7 @@ from soothsayer.utils import format_path, to_precision
 # Tables
 # ======
 # Read dataframe
-def read_dataframe(path:str, sep="infer", index_col=0, header=0, compression="infer", pickled="infer", func_index=None, func_columns=None, evaluate_columns=None, engine="c", verbose=False, excel="infer", infer_series=True, sheet_name=None,  **args):
+def read_dataframe(path:str, sep="infer", index_col=0, header=0, compression="infer", pickled="infer", func_index=None, func_columns=None, evaluate_columns=None, engine="c", verbose=False, excel="infer", infer_series=False, sheet_name=None,  **args):
 
     start_time = time.time()
     path = format_path(path, str)
