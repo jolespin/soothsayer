@@ -37,11 +37,20 @@ def p_adjust(p_values:pd.Series, method="fdr", name=None, **kwargs):
         p_values = p_values.values
     if method == "fdr":
         method = "fdr_bh"
-    adjusted = multipletests(p_values, method=method, **kwargs)[1]
+
     if index is not None:
-        return pd.Series(adjusted, index=index, name=name)
+        mask_null = np.isnan(p_values)
+        if np.any(mask_null):
+            scaffold = np.ones_like(p_values)*np.nan
+            scaffold[np.logical_not(mask_null)] = multipletests(p_values[np.logical_not(mask_null)], method=method, **kwargs)[1]
+            return pd.Series(scaffold, index=index)
+        else:
+            adjusted = multipletests(p_values, method=method, **kwargs)[1]
+            return pd.Series(adjusted, index=index, name=name)
     else:
-        return adjusted
+        num_nan = np.isnan(p_values).sum()
+        assert  num_nan == 0, "Please remove the {} missing values".format(num_nan)
+        return multipletests(p_values, method=method, **kwargs)[1]
 
 
 
