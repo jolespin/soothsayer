@@ -1,4 +1,3 @@
-name: soothsayer_env
 channels:
   - r
   - bioconda
@@ -368,4 +367,3 @@ dependencies:
     - terminado==0.8.2
     - testpath==0.4.2
     - webencodings==0.5.1
-prefix: /Users/jespinoz/anaconda3/envs/soothsayer_env
