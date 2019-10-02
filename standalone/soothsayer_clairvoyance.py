@@ -126,7 +126,7 @@ def format_duration(start_time):
 
 
 # Log files
-def logfile_synthesize(name, path,level=logging.INFO, mode="w"):
+def create_logfile(name, path,level=logging.INFO, mode="w"):
     """Function setup as many loggers as you want"""
     # https://stackoverflow.com/questions/11232230/logging-to-two-files-with-different-settings
 
@@ -1128,7 +1128,7 @@ def main(argv=None):
     os.makedirs(opts.out_dir, exist_ok=True)
     path_synopsis = "{}/{}__synopsis".format(opts.out_dir,opts.name)
     os.makedirs(path_synopsis, exist_ok=True)
-    log_info = logfile_synthesize("information",
+    log_info = create_logfile("information",
                                   "{}/{}.log".format(opts.out_dir,opts.name),
                                   mode=determine_mode_for_logfiles("{}/{}.log".format(opts.out_dir,opts.name), opts.force_overwrite)
     )
@@ -1212,7 +1212,7 @@ def main(argv=None):
             cv_labels = list(map(lambda x: "cv={}".format(x+1), range(len(opts.cv))))
         # Are there 3 columns with a header with the first column being the name of cross-validation set?
         if _tmp_ncols_cv == 3:
-            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0).applymap(literal_eval)
+            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0).applymap(literal_eval).loc[:,"Training", "Testing"]
             cv_labels = opts.cv.index
             opts.cv = opts.cv.values.tolist()
 
@@ -1259,7 +1259,7 @@ def main(argv=None):
         model = None
         best_attributes_for_modeltype = None
 
-        log_crossvalidation = logfile_synthesize(m,
+        log_crossvalidation = create_logfile(m,
                                                  "{}/{}__cross-validation.log".format(path_synopsis,m),
                                                  mode=determine_mode_for_logfiles("{}/{}__cross-validation.log".format(path_synopsis,m), opts.force_overwrite)
         )

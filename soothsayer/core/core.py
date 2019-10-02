@@ -9,7 +9,7 @@ __all__ = sorted(__all__)
 
 # Dataset
 class Dataset(object):
-    def __init__(self, data:pd.DataFrame, metadata_observations:pd.DataFrame=None, metadata_attributes:pd.DataFrame=None, metadata_target_field=None, name=None, description=None, obsv_type=None, attr_type=None, metric_type=None, name_initial_data=None, check_index_overlap=True, alias_metadata_observations:str="meta_obsvs", alias_metadata_attributes:str="meta_attrs", **additional_fields):
+    def __init__(self, data:pd.DataFrame, metadata_observations:pd.DataFrame=None, metadata_attributes:pd.DataFrame=None, metadata_target_field=None, name=None, description=None, obsv_type=None, attr_type=None, metric_type=None, name_initial_data=None, check_index_overlap=True, alias_metadata_observations:str="m0", alias_metadata_attributes:str="m1", **additional_fields):
         """
         Dataset class to store different versions of a dataset.  Currently only supports 2D pd.DataFrames but will support ND xarrays in the future
         Assumes columns/axis=1 contains attributes and index/axis=0 contains observations for compatibility with scikit-learn

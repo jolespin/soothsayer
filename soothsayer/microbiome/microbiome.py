@@ -11,11 +11,11 @@ from ..utils import pd_dataframe_matmul, format_path, pd_series_collapse, is_dic
 from ..transmute.normalization import normalize
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
-__all__ = ["PhylogenomicFunctionalComponents",  "phylogenomically_binned_functional_potential", "mcr_from_directory", "get_taxonomy_lineage_from_identifier", "get_taxonomy_identifier_from_name", "infer_taxonomy", "alpha_diversity", "otu_to_level", "reverse_complement", "count_kmers", "prevalence", "extract_intergenic_sequences"]
+__all__ = ["PhylogenomicFunctionalComponents",  "phylogenomically_binned_functional_potential", "mcr_from_directory", "get_taxonomy_lineage_from_identifier", "get_taxonomy_identifier_from_name", "infer_taxonomy", "alpha_diversity", "otu_to_level", "reverse_complement", "count_kmers", "prevalence", "get_intergenic_sequences"]
 __all__ = sorted(__all__)
 
 # Extract intergenic sequences
-def extract_intergenic_sequences(path_annotations:str, path_sequences:str, seq_type="gene", include_peripheral_info=True, peripheral_tag="locus_tag", into=pd.Series):
+def get_intergenic_sequences(path_annotations:str, path_sequences:str, seq_type="gene", include_peripheral_info=True, peripheral_tag="locus_tag", into=pd.Series):
     """
     Currently tested on GFF3 but it should work for GTF too
     """

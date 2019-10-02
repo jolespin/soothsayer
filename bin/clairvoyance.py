@@ -49,7 +49,7 @@ from sklearn.base import clone
 from tqdm import tqdm, trange
 
 # Soothsayer
-from soothsayer.utils import format_duration, logfile_synthesize, determine_mode_for_logfiles, to_precision
+from soothsayer.utils import format_duration, create_logfile, determine_mode_for_logfiles, to_precision
 from soothsayer.io import read_dataframe, read_object, write_object
 from soothsayer.transmute.normalization import normalize
 from soothsayer.feature_extraction import Clairvoyant
@@ -129,7 +129,7 @@ def main(argv=None):
     os.makedirs(opts.out_dir, exist_ok=True)
     path_synopsis = "{}/{}__synopsis".format(opts.out_dir,opts.name)
     os.makedirs(path_synopsis, exist_ok=True)
-    log_info = logfile_synthesize("information",
+    log_info = create_logfile("information",
                                   "{}/{}.log".format(opts.out_dir,opts.name),
                                   mode=determine_mode_for_logfiles("{}/{}.log".format(opts.out_dir,opts.name), opts.force_overwrite)
     )
@@ -213,7 +213,7 @@ def main(argv=None):
             cv_labels = list(map(lambda x: "cv={}".format(x+1), range(len(opts.cv))))
         # Are there 3 columns with a header with the first column being the name of cross-validation set?
         if _tmp_ncols_cv == 3:
-            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0, dtype=str).applymap(literal_eval)
+            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0, dtype=str).applymap(literal_eval).loc[:,"Training", "Testing"]
             cv_labels = opts.cv.index
             opts.cv = opts.cv.values.tolist()
 
@@ -260,7 +260,7 @@ def main(argv=None):
         model = None
         best_attributes_for_modeltype = None
 
-        log_crossvalidation = logfile_synthesize(m,
+        log_crossvalidation = create_logfile(m,
                                                  "{}/{}__cross-validation.log".format(path_synopsis,m),
                                                  mode=determine_mode_for_logfiles("{}/{}__cross-validation.log".format(path_synopsis,m), opts.force_overwrite)
         )

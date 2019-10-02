@@ -13,7 +13,7 @@ Note, sometimes theres are issues with the conda installation from `-c jolespin 
 
 ### Method 1 :
 #### [OSX|Linux] Installation [Recommended]
-Inspired by [qiime2](https://docs.qiime2.org/2019.4/install/native/) installation method
+Inspired by [qiime2](https://docs.qiime2.org/2019.4/install/native/) installation method.  Please use the most updated environment and then install the current developmental branch (described under `Update to the current release`).
 
 ```bash
 # Download the conda environment instructions
@@ -27,6 +27,7 @@ conda activate soothsayer_env
 # Duration: This took < 5 minutes on `MacBook Pro v10.14.5` 
 
 # For Linux, replace the `osx` with `linux`
+
 ```
 
 ### Method 2:
