@@ -2,7 +2,7 @@
 # Modules
 # ==============================================================================
 # Built-ins
-import os, sys, time, pathlib,warnings
+import os, sys, time, pathlib, warnings, requests
 from collections import *
 from io import StringIO, BytesIO
 from ast import literal_eval
@@ -20,7 +20,7 @@ import numpy as np
 from Bio import SeqIO
 
 # Soothsayer
-from soothsayer.utils import format_path, infer_compression, is_path_like, is_query_class
+from soothsayer.utils import format_path, infer_compression, is_path_like, is_query_class, assert_acceptable_arguments
 from ..text import read_textfile, get_file_object
 
 # ======
@@ -448,3 +448,56 @@ def read_ncbi_xml(path:str, index_name=None):
     df = pd.DataFrame(data).T
     df.index.name = index_name
     return df
+
+# Read EMBL-EBI sample metadata
+def read_ebi_sample_metadata(query, base_url="https://www.ebi.ac.uk/metagenomics/api/v1/samples/{}/metadata", mode="infer"):
+    """
+    query:
+        id_sample: "ERS488919"
+        url: "https://www.ebi.ac.uk/metagenomics/api/v1/samples/ERS488919/metadata
+        file: "/path/to/ERS488919.json"
+
+    JSON file can be retrieved via:
+        curl -X GET "https://www.ebi.ac.uk/metagenomics/api/v1/samples/ERS488919/metadata" -H "accept: application/json" > ERS488919.json
+    """
+    # Acceptable arguments for mode
+    assert_acceptable_arguments(mode, {"infer", "cloud", "local"})
+
+    # Functions
+    def _get_url(query, base_url):
+        # Is a URL provided?
+        if any(map(lambda x: x in query, ["http", "www"])):
+            url = query
+        # Is a sample identifier provided
+        else:
+            url = base_url.format(query)
+        return url
+
+    # Infer mode
+    url = None
+    response = None
+    if mode == "infer":
+        try:
+            url = _get_url(query, base_url)
+            response = requests.get(url)
+            mode = "cloud"
+        except requests.exceptions.MissingSchema:
+            mode = "local"
+
+    # Cloud
+    if mode == "cloud":
+        if response is None:
+            # Get cloud data
+            url = _get_url(query, base_url)
+            response = requests.get(url)
+        data = response.json()["data"]
+    if mode == "local":
+        with open(query, "r") as f:
+            data = json.loads(f.read())["data"]
+    # Determine sample identifier
+    id_sample = data[0]["relationships"]["sample"]["data"]["id"]
+
+    return pd.Series(
+            data=dict(map(lambda item: (item["attributes"]["key"], item["attributes"]["value"]), data)),
+            name=id_sample,
+    )
