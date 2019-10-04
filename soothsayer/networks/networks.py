@@ -15,7 +15,7 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from scipy.interpolate import interp1d
 from scipy import stats
 from scipy.spatial.distance import squareform
-from teneto import TemporalNetwork
+from teneto import TemporalNetwork as TenetoTemporalNetwork
 from tqdm import tqdm
 
 # Soothsayer
@@ -925,7 +925,7 @@ def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True
         return fig, ax, df_sft
 
 # Temporal Networks
-class TemporalGraph(object):
+class TemporalNetwork(object):
     """
     Experimental
 
@@ -934,47 +934,53 @@ class TemporalGraph(object):
     * Add categoricals for add_track.  Right now, they have to be barcharts.
 
     Usage:
+
+    # Set pad for continuous track data
+    whz_pad = 0.1
+    whz_lim = (ds_perturbations.metadata_observations["whz"].min()-whz_pad, ds_perturbations.metadata_observations["whz"].max()+whz_pad )
+
     # Get timepoints for a particular subject
-    visits = list()
-    for id_subject, perturbations in ds_perturbations[None].loc[:,edges_union].groupby(ds_perturbations.metadata_observations["subject"]):
-        if id_subject == "HRG039V":
-            # Perturbation profiles
-            perturbations = perturbations.dropna(how="any", axis=0)
-            # Sort the timepoints
-            days = ds_abundance.metadata_observations.loc[perturbations.index, "day"].astype(int).sort_values()
-            perturbations = perturbations.loc[days.index]
-            # Only include subjects that have 3 timepoints (maximum for this dataset)
-            if perturbations.shape[0] == 3:
-                # Create temporal graph object
-                temporal_graph = TemporalGraph(id_subject, edge_type="perturbation",time_unit="day" )
-                # Add each visit
-                for i, (id_visit, timepoint) in enumerate(days.iteritems(), start=0):
-                    connections = perturbations.loc[id_visit].dropna()
-                    connections = connections[lambda x: x != 0]
-                    temporal_graph.add_timepoint(t=timepoint, data=connections, id=id_visit) #! Should id be required?
-                    visits.append(id_visit)
-                temporal_graph.compile()
+    for id_subject, perturbations in tqdm(ds_perturbations[None].loc[:,edges_union].groupby(ds_perturbations.metadata_observations["subject"])):
+        # Perturbation profiles
+        perturbations = perturbations.dropna(how="any", axis=0)
+        # Sort the timepoints
+        days = ds_abundance.metadata_observations.loc[perturbations.index, "day"].astype(int).sort_values()
+        perturbations = perturbations.loc[days.index]
+        # Only include subjects that have 3 timepoints (maximum for this dataset)
+        if perturbations.shape[0] == 3:
+            # Create temporal graph object
+            temporal_graph = TemporalNetwork(id_subject, edge_type="perturbation",time_unit="day" )
+            # Add each visit
+            visits = list()
+            for i, (id_visit, timepoint) in enumerate(days.iteritems(), start=0):
+                connections = perturbations.loc[id_visit].dropna()
+                connections = connections[lambda x: x != 0]
+                temporal_graph.add_timepoint(t=timepoint, data=connections, id=id_visit) #! Should id be required?
+                visits.append(id_visit)
+            temporal_graph.compile()
 
-    # Transform CLR -> MixedLM residuals to the real, fill missing values with zeros
-    df_node_sizes = np.exp(mixedlm.residuals_.loc[visits]).T.fillna(0)
-    # Relabel sample identifiers to timepoint labels #! The best way to do this?
-    df_node_sizes.columns = df_node_sizes.columns.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
+            # Transform CLR -> MixedLM residuals to the real, fill missing values with zeros
+            df_node_sizes = np.exp(mixedlm.residuals_.loc[visits]).T.fillna(0)
+            # Relabel sample identifiers to timepoint labels #! The best way to do this?
+            df_node_sizes.columns = df_node_sizes.columns.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
 
-    # Get timepoint colors for the track
-    track_colors = chr_status.obsv_colors[visits]
-    track_colors.index = track_colors.index.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
-    # Add tracks (only one in this example)
-    for name in ["whz"]:
-        track_data = ds_perturbations.metadata_observations.loc[visits,name]
-        track_data.index = track_data.index.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
-        temporal_graph.add_track(name=name.upper(),
-                                 data=track_data,
-                                 plot_type="bar",
-                                 color=track_colors,
-        )
+            # Get timepoint colors for the track
+            track_colors = chr_status.obsv_colors[visits].copy()
+            track_colors.index = track_colors.index.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
+            # Add tracks (only one in this example)
+            for name in ["whz"]:
+                track_data = ds_perturbations.metadata_observations.loc[visits,name].copy()
+                track_data.index = track_data.index.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
+                temporal_graph.add_track(name=name.upper(),
+                                         data=track_data,
+                                         plot_type="bar",
+                                         color=track_colors,
+                                         ylim=whz_lim,
+                )
 
-    # Plot arcs
-    temporal_graph.plot_arcs(node_sizes=df_node_sizes*5, show_timepoint_identifiers=True, show_tracks=True)
+            # Plot arcs
+            fig, axes = temporal_graph.plot_arcs(node_sizes=df_node_sizes*5, show_timepoint_identifiers=True, show_tracks=True)
+            fig.savefig("../Figures/TemporalNetworks/{}.pdf".format(id_subject), bbox_inches="tight")
     """
     # Initialize
     def __init__(self, name=None, description=None, time_unit=None, node_type=None, edge_type=None, experimental_warning=True, **metadata):
@@ -1100,7 +1106,7 @@ class TemporalGraph(object):
         # Temporal networks
         if verbose:
             print(format_header("Adding intratemporal edges:", "-"), file=sys.stderr)
-        self.teneto_network_ = TemporalNetwork(desc=self.description, nettype="wu", starttime=min(self.graphs), N=len(self.nodes_), T=len(self.graphs))
+        self.teneto_network_ = TenetoTemporalNetwork(desc=self.description, nettype="wu", starttime=min(self.graphs), N=len(self.nodes_), T=len(self.graphs))
         self.temporal_graph_ = nx.OrderedDiGraph(name=self.name)
         encoded_edges = list()
         decoded_edges = list()
@@ -1229,6 +1235,7 @@ class TemporalGraph(object):
         return output
 
     def _plot_track_mpl(self, name, divider, xlim, xticks, ylim, show_track_ticks, show_track_labels, track_label_kws):
+
         ax = divider.append_axes("bottom", size=self.tracks[name]["size"], pad=self.tracks[name]["pad"])
         data = self.tracks[name]["data"]
         c = self.tracks[name]["color"]
@@ -1424,9 +1431,11 @@ class TemporalGraph(object):
         # Edge colors
         # ----------
         if edge_colors is None:
-            edge_colors = self.get_intratemporal_connections(mode="sign")
-            edge_colors[edge_colors.values == 1.0] = edgecolor_positive
-            edge_colors[edge_colors.values == -1.0] = edgecolor_negative
+            edge_colors = self.get_intratemporal_connections(mode="sign").astype(object)
+            mask_positive = edge_colors.values == 1.0
+            mask_negative = edge_colors.values == -1.0
+            edge_colors[mask_positive] = edgecolor_positive
+            edge_colors[mask_negative] = edgecolor_negative
             if style == "dark_background":
                 edge_colors[edge_colors.values == 0] = "black"
             else:
@@ -1498,8 +1507,13 @@ class TemporalGraph(object):
                         track_label_kws=self.tracks[name]["label_kws"],
                     )
                     ax_track = self._plot_track_mpl( **args_track)
-                    axes.append(ax_track)
                     ax.set_xticklabels([])
+
+                    if show_xgrid:
+                        ax_track.xaxis.grid(show_xgrid, **_grid_kws)
+                    if show_ygrid:
+                        ax_track.yaxis.grid(show_ygrid, **_grid_kws)
+                    axes.append(ax_track)
                     tracks_visible = True
 
 
@@ -1552,7 +1566,6 @@ class TemporalGraph(object):
                 ax.set_title(title, **_title_kws)
 
             return fig, axes
-
 
     def plot_network(self):
         assert self.compiled, "Please compile to continue."
