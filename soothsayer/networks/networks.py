@@ -28,7 +28,7 @@ from ..io import write_object
 
 
 
-__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold", "TemporalGraph"]
+__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold", "TemporalNetwork"]
 __all__ = sorted(__all__)
 # =======================================================
 # Hive
