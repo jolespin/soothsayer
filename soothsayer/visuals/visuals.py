@@ -16,8 +16,64 @@ from collections import OrderedDict, defaultdict
 from ..microbiome import prevalence
 from ..utils import *
 
-__all__ = ["OutlineCollection", "draw_networkx_labels_with_box", "plot_scatter", "plot_venn_diagram", "plot_waterfall", "plot_volcano", "plot_annotation", "plot_prevalence", "plot_compositional"]
+__all__ = ["OutlineCollection", "draw_networkx_labels_with_box", "plot_scatter", "plot_venn_diagram", "plot_waterfall", "plot_volcano", "plot_annotation", "plot_prevalence", "plot_compositional", "bezier_points"]
 __all__ = sorted(__all__)
+
+# Bezier points for arc plots
+def bezier_points(p1, p2, control, granularity=20):
+    """
+    Credit: William Hedley Thompson
+    https://teneto.readthedocs.io/en/latest/_modules/teneto/plot/slice_plot.html#slice_plot
+
+    This has been adapted from the teneto package.
+
+    # Following 3 Function that draw vertical curved lines from around points.
+    # p1 nad p2 are start and end trupes (x,y coords) and pointN is the resolution of the points
+    # negxLim tries to restrain how far back along the x axis the bend can go.
+    """
+    def pascal_row(n):
+        # This returns the nth row of Pascal's Triangle
+        result = [1]
+        x, numerator = 1, n
+        for denominator in range(1, n // 2 + 1):
+            x *= numerator
+            x /= denominator
+            result.append(x)
+            numerator -= 1
+        if n & 1 == 0:
+            # n is even
+            result.extend(reversed(result[:-1]))
+        else:
+            result.extend(reversed(result))
+        return np.asarray(result)
+    # These two functions originated from the plot.ly's documentation for python API.
+    # They create points along a curve.
+    def make_bezier(points):
+        # xys should be a sequence of 2-tuples (Bezier control points)
+        n = len(points)
+        combinations = pascal_row(n - 1)
+
+        def bezier(ts):
+            # This uses the generalized formula for bezier curves
+            # http://en.wikipedia.org/wiki/B%C3%A9zier_curve#Generalization
+            result = []
+            for t in ts:
+                tpowers = np.power(np.ones_like(n)*t, np.arange(n))
+                upowers = np.power(np.ones_like(n)*(1-t), np.arange(n))[::-1]
+                coefs = combinations*tpowers*upowers
+
+                result.append(tuple(np.sum(coefs*ps) for ps in zip(*points))) # Need to optimize this part
+            return np.asarray(result)
+        return bezier
+
+    ts = np.arange(granularity+1)/granularity
+    d = p1[0] - (max(p1[1], p2[1]) - min(p1[1], p2[1])) / control
+    points = np.asarray([p1, (d, p1[1]), (d, p2[1]), p2])
+    bezier = make_bezier(points)
+    points = bezier(ts)
+    bvx = points[:,0]
+    bvy = points[:,1]
+    return np.asarray([bvx, bvy])
 
 # Plot outline around line objects
 class OutlineCollection(PatchCollection):

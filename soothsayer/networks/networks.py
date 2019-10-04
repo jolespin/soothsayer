@@ -11,19 +11,21 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from scipy.interpolate import interp1d
 from scipy import stats
 from scipy.spatial.distance import squareform
-import teneto
+from teneto import TemporalNetwork
 from tqdm import tqdm
 
 # Soothsayer
 from ..symmetry import *
 from ..utils import *
 from ..r_wrappers.packages.WGCNA import TOMsimilarity, pickSoftThreshold_fromSimilarity
-from ..visuals import plot_scatter
+from ..visuals import plot_scatter, bezier_points
 from ..transmute.normalization import normalize_minmax
 from ..io import write_object
+
 
 
 __all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold", "TemporalGraph"]
@@ -924,6 +926,56 @@ def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True
 
 # Temporal Networks
 class TemporalGraph(object):
+    """
+    Experimental
+
+    Future:
+    * Should I require identifiers for `add_timepoint`? It would be much easier adding metadata.
+    * Add categoricals for add_track.  Right now, they have to be barcharts.
+
+    Usage:
+    # Get timepoints for a particular subject
+    visits = list()
+    for id_subject, perturbations in ds_perturbations[None].loc[:,edges_union].groupby(ds_perturbations.metadata_observations["subject"]):
+        if id_subject == "HRG039V":
+            # Perturbation profiles
+            perturbations = perturbations.dropna(how="any", axis=0)
+            # Sort the timepoints
+            days = ds_abundance.metadata_observations.loc[perturbations.index, "day"].astype(int).sort_values()
+            perturbations = perturbations.loc[days.index]
+            # Only include subjects that have 3 timepoints (maximum for this dataset)
+            if perturbations.shape[0] == 3:
+                # Create temporal graph object
+                temporal_graph = TemporalGraph(id_subject, edge_type="perturbation",time_unit="day" )
+                # Add each visit
+                for i, (id_visit, timepoint) in enumerate(days.iteritems(), start=0):
+                    connections = perturbations.loc[id_visit].dropna()
+                    connections = connections[lambda x: x != 0]
+                    temporal_graph.add_timepoint(t=timepoint, data=connections, id=id_visit) #! Should id be required?
+                    visits.append(id_visit)
+                temporal_graph.compile()
+
+    # Transform CLR -> MixedLM residuals to the real, fill missing values with zeros
+    df_node_sizes = np.exp(mixedlm.residuals_.loc[visits]).T.fillna(0)
+    # Relabel sample identifiers to timepoint labels #! The best way to do this?
+    df_node_sizes.columns = df_node_sizes.columns.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
+
+    # Get timepoint colors for the track
+    track_colors = chr_status.obsv_colors[visits]
+    track_colors.index = track_colors.index.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
+    # Add tracks (only one in this example)
+    for name in ["whz"]:
+        track_data = ds_perturbations.metadata_observations.loc[visits,name]
+        track_data.index = track_data.index.map(lambda id_visit: ds_perturbations.metadata_observations.loc[id_visit, "day"])
+        temporal_graph.add_track(name=name.upper(),
+                                 data=track_data,
+                                 plot_type="bar",
+                                 color=track_colors,
+        )
+
+    # Plot arcs
+    temporal_graph.plot_arcs(node_sizes=df_node_sizes*5, show_timepoint_identifiers=True, show_tracks=True)
+    """
     # Initialize
     def __init__(self, name=None, description=None, time_unit=None, node_type=None, edge_type=None, experimental_warning=True, **metadata):
         if experimental_warning:
@@ -934,17 +986,24 @@ class TemporalGraph(object):
         self.node_type = node_type
         self.edge_type = edge_type
         self.graphs = dict()
-        self.metadata = metadata
+        self.metadata = metadata; self.metadata["num_tracks"] = 0
         self.intertemporal_connections_ = None
+        self.intratemporal_connections_ = dict()
+        self.timepoint_identifiers_ = dict()
+        self.tracks = OrderedDict()
         self.compiled = False
     # Add timepoint
-    def add_timepoint(self, t, data, **additional_edge_attributes):
+    def add_timepoint(self, t, data, id=None, **additional_edge_attributes):
         """
         """
+        if self.compiled:
+            print("You are adding new timepoints to a compiled TemporalGraph.  Please recompile.", file=sys.stderr)
+            self.compiled = False
         assert is_number(t), "`t` must be a numeric type"
         if isinstance(data, pd.DataFrame):
             data = dense_to_condensed(data)
 
+        self.intratemporal_connections_[t] = data.copy() #! Is this a good idea to copy and have pos/neg weights?
         graph = nx.Graph(name=t)
         for edge, connection in data.items():
             edge_attrs = {"weight":abs(connection), "sign":np.sign(connection)}
@@ -952,43 +1011,105 @@ class TemporalGraph(object):
                 edge_attrs[field] = data[edge]
             graph.add_edge(*tuple(edge),**edge_attrs)
 
+        self.timepoint_identifiers_[t] = id
         self.graphs[t] = graph
+
+    # Add tracks
+    def add_track(self, name, data, alpha=0.618, color="black", pad=0.1618, percent_of_figure = 20, ylim=None, plot_type="bar", spines=["top", "bottom", "left", "right"], fillna=0, plot_kws=dict(), label_kws=dict(),  bar_width="auto", check_missing_values=False, convert_to_hex=False, horizontal_kws=dict(), horizontal_lines=[]):
+        """
+        type(track) should be a pd.Series
+        """
+        assert self.compiled, "Please compile to continue."
+
+        # Keywords
+        if plot_type == "bar":
+            _plot_kws = {"linewidth":1.382, "alpha":alpha, "width":max(0.1618, len(self.timepoints_)/30) if bar_width == "auto" else bar_width}
+        elif plot_type == "area":
+            _plot_kws = {"linewidth":0.618, "alpha":0.5}
+        else:
+            _plot_kws = {}
+        _plot_kws.update(plot_kws)
+        _horizontal_kws = {"linewidth":1, "linestyle":"-", "color":"black"}
+        _horizontal_kws.update(horizontal_kws)
+        _label_kws = {"fontsize":15, "rotation":0,  "ha":"right", "va":"center"}
+        _label_kws.update(label_kws)
+
+        # Color of the track
+        if color is None:
+            color = "black"
+        if isinstance(color,str):
+            color = pd.Series([color]*len(self.timepoints_), index=self.timepoints_)
+        if is_dict(color):
+            color = pd.Series(color, index=index)
+        if convert_to_hex:
+            _sampleitem_ = color[0]
+            assert mpl.colors.is_color_like(_sampleitem_), f"{_sampleitem_} is not color-like"
+            if is_rgb_like(_sampleitem_):
+                color = color.map(rgb2hex)
+        # Check for missing values
+        if check_missing_values:
+            assert set(data.index) == set(self.timepoints_), "`data.index` is not the same set as `self.timepoints_`"
+            assert set(color.index) == set(self.timepoints_), "`color.index` is not the same set as `self.timepoints_`"
+        if plot_type in ["area","line"]:
+            if color.nunique() > 1:
+                print("Warning: `area` and `line` plots can only be one color.  Defaults to first color in iterable.", file=sys.stderr)
+        # Horizontal lines
+        if is_number(horizontal_lines):
+            horizontal_lines = [horizontal_lines]
+        # Convert to ticks
+        data = data[self.timepoints_]
+        color = color[self.timepoints_]
+        # Store data
+        self.tracks[name] = {"data":data, "color":color, "pad":pad, "size":f"{percent_of_figure}%", "plot_type":plot_type, "plot_kws":_plot_kws,  "ylim":ylim, "horizontal_lines":horizontal_lines, "horizontal_kws":_horizontal_kws, "spines":spines, "label_kws":_label_kws}
+        self.metadata["num_tracks"] += 1
+
+        return self
 
     def __repr__(self):
         header = "TemporalGraph(name = {}):".format(self.name)
 
-        return " \
-                {}\n\t* Timepoints: {} \
+        return "{}\n\t* Timepoints: {} \
                 \n\t* Compiled: {} \
+                \n\t* Tracks: {} \
                 ".format(
                     format_header(header),
-                    set(self.graphs.keys()),
+                    sorted(self.graphs.keys()),
                     self.compiled,
+                    self.metadata["num_tracks"],
                 )
 
     # Compile
-    def compile(self, intertemporal_connections=None, check_intermodal=True, **additional_edge_attributes):
+    def compile(self, intertemporal_connections=None, check_intermodal=True, verbose=False, **additional_edge_attributes):
         # Get nodes and intratemporal edges
         self.node_temporal_ = defaultdict(set)
         for (t, graph) in self.graphs.items():
             for node in graph.nodes():
                 self.node_temporal_[node].add(t)
         self.nodes_ = sorted(self.node_temporal_)
+        self.number_of_nodes_ = len(self.nodes_)
+        # No self.number_of_edges_ because we need to distinguish betweenn intratemporal and intertemporal
+
         self.intratemporal_edge_labels_ = pd.Index([*map(frozenset,itertools.combinations(self.nodes_, 2))], name=self.name)
-        self.timepoints_ = np.asarray(list(self.graphs))
+        self.timepoints_ = np.asarray(sorted(self.graphs))
+
 
         # Encode nodes for teneto
         self.encoding_ = {node:i for i, node in enumerate((self.nodes_), start=0)}
         self.decoding_ = {i:node for node, i in self.encoding_.items()}
 
         # Temporal networks
-        print(format_header("Adding intratemporal edges:", "-"), file=sys.stderr)
-        self.teneto_network_ = teneto.TemporalNetwork(desc=self.description, nettype="wu", starttime=min(self.graphs), N=len(self.nodes_), T=len(self.graphs))
+        if verbose:
+            print(format_header("Adding intratemporal edges:", "-"), file=sys.stderr)
+        self.teneto_network_ = TemporalNetwork(desc=self.description, nettype="wu", starttime=min(self.graphs), N=len(self.nodes_), T=len(self.graphs))
         self.temporal_graph_ = nx.OrderedDiGraph(name=self.name)
         encoded_edges = list()
         decoded_edges = list()
         for t, graph in self.graphs.items():
-            for node_i,node_j, attrs in tqdm(graph.edges(data=True), "t={}".format(t)):
+            if verbose:
+                iterable = tqdm(graph.edges(data=True), "t={}".format(t))
+            else:
+                iterable = graph.edges(data=True)
+            for node_i,node_j, attrs in iterable:
                 # Teneto
                 edge_data = [self.encoding_[node_i], self.encoding_[node_j], t, attrs["weight"]]
                 encoded_edges.append(edge_data)
@@ -997,6 +1118,9 @@ class TemporalGraph(object):
                 decoded_edges.append(edge_data)
                 edge_data = [(node_j, t), (node_i, t), attrs]
                 decoded_edges.append(edge_data)
+        self.intratemporal_connections_  = pd.DataFrame(self.intratemporal_connections_ )
+        self.intratemporal_connections_.index.name = "Edge"
+        self.intratemporal_connections_.columns.name = "$t$"
 
         # Intertemporal connections
         self.intertemporal_connections_ = intertemporal_connections
@@ -1027,7 +1151,6 @@ class TemporalGraph(object):
 
             self.intertemporal_connections_ = True
 
-
         # Tento
         self.teneto_network_.add_edge(encoded_edges)
 
@@ -1038,18 +1161,22 @@ class TemporalGraph(object):
         self.compiled = True
         return self
 
-    def get_intratemporal_connections(self, t=None):
-        pass
+    def get_intratemporal_connections(self, t=None, mode="connection"):
+        assert_acceptable_arguments(mode, {"connection", "weight", "sign"})
+        if t is not None:
+            connections = self.intratemporal_connections_[t]
+        else:
+            connections = pd.DataFrame(self.intratemporal_connections_)
+        if mode == "connection":
+            return connections
+        if mode == "weight":
+            return connections.abs()
+        if mode == "sign":
+            return np.sign(connections)
+
+        return df_intratemporal_connections
     def get_intertemporal_connections(self):
-        pass
-    def plot_network(self):
-        pass
-    def plot_slice(self):
-        pass
-    def plot_hive(self):
-        pass
-    def plot_graphlets(self):
-        pass
+        return self.intertemporal_connections_
 
     def compute_measure(self, measure:str, level:str="global", **measure_kws):
         """
@@ -1059,9 +1186,7 @@ class TemporalGraph(object):
 
         #! Clean up this code...
         """
-#         # Supress stdout
-#         f_stdout = sys.stdout
-#         sys.stdout = open(os.devnull, "w")
+        assert self.compiled, "Please compile to continue."
         calc_incompatible_measures = {"intercontacttimes", "local_variation", "shortest_temporal_path","temporal_degree_centrality","temporal_participation_coeff"}
         if measure not in calc_incompatible_measures:
             measure_kws["calc"] = level
@@ -1100,6 +1225,341 @@ class TemporalGraph(object):
         if show_warning:
             warnings.warn("Unable to determine labels.  Returning unlabeled data.")
             output = data
-#         # Get original stdout
-#         sys.stdout = f_stdout
+
         return output
+
+    def _plot_track_mpl(self, name, divider, xlim, xticks, ylim, show_track_ticks, show_track_labels, track_label_kws):
+        ax = divider.append_axes("bottom", size=self.tracks[name]["size"], pad=self.tracks[name]["pad"])
+        data = self.tracks[name]["data"]
+        c = self.tracks[name]["color"]
+        kws = self.tracks[name]["plot_kws"]
+        # Set timepoint positions
+        timepoint_positions = pd.Series(range_like(self.timepoints_), self.timepoints_)
+        data.index = data.index.map(lambda x:timepoint_positions[x])
+        c.index = c.index.map(lambda x:timepoint_positions[x])
+
+        if self.tracks[name]["plot_type"] == "bar":
+            ax.bar(data.index, data.values, color=c, **kws)
+            kws_outline = kws.copy()
+            del kws_outline["alpha"]
+            ax.bar(data.index, data.values, color="none", edgecolor=c, **kws_outline)
+        else:
+            if self.tracks[name]["plot_type"] == "area":
+                data.plot(kind="area", color=c.values, ax=ax, **kws)
+                data.plot(kind="line", color=c.values, alpha=1, ax=ax)
+            else:
+                data.plot(kind=self.tracks[name]["plot_type"], color=c.values, ax=ax,  **kws)
+        if len(self.tracks[name]["horizontal_lines"]):
+            for y_pos in self.tracks[name]["horizontal_lines"]:
+                ax.axhline(y_pos, **self.tracks[name]["horizontal_kws"])
+        # Spines
+        for spine in ["top", "bottom", "left", "right"]:
+            if spine not in self.tracks[name]["spines"]:
+                ax.spines[spine].set_visible(False)
+        ax.set_xlim(xlim)
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([])
+        if self.tracks[name]["ylim"] is not None:
+            ax.set_ylim(ylim)
+        if not show_track_ticks:
+            ax.set_yticklabels([])
+        if show_track_labels:
+            ax.set_ylabel(name, **track_label_kws)
+        return ax
+
+    # Arc plots
+    def plot_arcs(self,
+                  # Network
+                  nodelist=None,
+                  node_positions=None,
+                  node_colors=None,
+                  node_outline_color=None,
+                  edge_colors=None,
+                  node_relabel=None,
+                  node_sizes=100,
+                  edge_linestyle="-",
+                  edgecolor_negative='#278198',
+                  edgecolor_positive='#dc3a23',
+
+                  # Show
+                  show_nodes=True,
+                  show_node_labels=True,
+                  show_timepoints=True,
+                  show_timepoint_identifiers=True,
+                  show_xgrid=False,
+                  show_ygrid=True,
+                  show_border=False,
+                  show_tracks=True,
+                  show_track_ticks=True,
+                  show_track_labels=True,
+
+                  # Plotting
+                  style="seaborn-white",
+                  figsize=(13,8),
+                  background_color=None,
+                  ax=None,
+                  edge_alpha=0.5,
+                  node_alpha=0.75,
+                  node_fontsize=12,
+                  timepoint_fontsize=15,
+                  xlabel="$t$",
+                  ylabel=None,
+                  title=True,
+
+                  # Keywords
+                  fig_kws=dict(),
+                  label_kws = dict(),
+                  node_kws=dict(),
+                  edge_kws=dict(),
+                  node_tick_kws=dict(),
+                  timepoint_tick_kws=dict(),
+                  grid_kws=dict(),
+                  timepoint_identifier_kws=dict(),
+                  title_kws=dict(),
+
+                  # Miscellaneous
+                  clip_edgeweight=5,
+                  granularity=100,
+                  func_edgeweight=None,
+                  curve_scaling_factor=1,
+                  pad_timepoint_identifier="auto",
+                  pad_timepoints="auto",
+                 ):
+
+        """
+        `node_sizes` and `node_colors` can either be a single value, a pd.DataFrame with index as nodes and columns as timepoints, or a nested dictionary with {timepoint: {node: value}}
+        """
+        # This code has been adapted from https://teneto.readthedocs.io/en/latest/_modules/teneto/plot/slice_plot.html#slice_plot
+
+        assert self.compiled, "Please compile to continue."
+        if style in ["dark",  "black", "night",  "sith", "sun"]:
+            style = "dark_background"
+        if style in ["light", "white", "day", "jedi", "moon"] :
+            style = "seaborn-white"
+        if node_outline_color is None:
+            if style == "dark_background":
+                node_outline_color = "white"
+            else:
+                node_outline_color = "black"
+        # ========
+        # Defaults
+        # ========
+        # Figure
+        _fig_kws = {"figsize":figsize}
+        _fig_kws.update(fig_kws)
+
+        # Title
+        _title_kws = {"fontsize":18, "fontweight":"bold"}
+        _title_kws.update(title_kws)
+
+        # Axis label
+        _label_kws = {"fontsize":15, "fontweight":"bold"}
+        _label_kws.update(label_kws)
+
+        # Timepoint ticks
+        _timepoint_tick_kws = {"fontsize":timepoint_fontsize}
+        _timepoint_tick_kws.update(timepoint_tick_kws)
+
+        # Node ticks
+        _node_tick_kws = {"fontsize":node_fontsize}
+        _node_tick_kws.update(node_tick_kws)
+
+        # Timepoint identifier
+        _timepoint_identifier_kws = {"fontsize":12, "ha":"center", "va":"bottom"}
+        _timepoint_identifier_kws.update(timepoint_identifier_kws)
+
+        # Grids
+        _grid_kws = {"linewidth":0.1618}
+        _grid_kws.update(grid_kws)
+
+        # Node plotting
+        _node_kws = {"linewidth":1.618, "edgecolor":node_outline_color, "alpha":node_alpha, "zorder":1}
+        _node_kws.update(node_kws)
+        # Edge plotting
+        _edge_kws = {"alpha":edge_alpha, "zorder":_node_kws["zorder"]+2, "linestyle":edge_linestyle}
+        _edge_kws.update(edge_kws)
+
+        # =====
+        # Nodes
+        # =====
+        if nodelist is None:
+            nodelist = self.nodes_
+        num_query_nodes = len(nodelist)
+
+        if node_positions is None:
+            node_positions = pd.Series(range(num_query_nodes), nodelist)
+        assert set(nodelist) <= set(self.nodes_), "Not all nodes in `nodelist` are in `self.nodes_`"
+        node_positions = node_positions[nodelist]
+
+        if node_relabel is None:
+            node_relabel = dict(zip(nodelist, nodelist))
+
+        # Node sizes
+        # ----------
+        # Default sizes
+        if is_number(node_sizes):
+            A = np.empty((num_query_nodes, len(self.timepoints_)))
+            A[:] = node_sizes
+            node_sizes = pd.DataFrame(A, index=nodelist, columns=self.timepoints_)
+        node_sizes = pd.DataFrame(node_sizes)
+        assert set(node_sizes.index) >= set(nodelist), "Not all nodes in `nodelist` have a size in `node_sizes`"
+        node_sizes = node_sizes.loc[nodelist]
+
+        # Node colors
+         # ----------
+        if node_colors is None:
+            if style == "dark_background":
+                node_colors = "white"
+            else:
+                node_colors = "black"
+        # Default colors
+        if is_color(node_colors):
+            A = np.empty((num_query_nodes, len(self.timepoints_))).astype(object)
+            A[:] = node_colors
+            node_colors = pd.DataFrame(A, index=nodelist, columns=self.timepoints_)
+        node_colors = pd.DataFrame(node_colors)
+        assert set(node_colors.index) >= set(nodelist), "Not all nodes in `nodelist` have a size in `node_sizes`"
+        node_colors = node_colors.loc[nodelist]
+
+        # Edge colors
+        # ----------
+        if edge_colors is None:
+            edge_colors = self.get_intratemporal_connections(mode="sign")
+            edge_colors[edge_colors.values == 1.0] = edgecolor_positive
+            edge_colors[edge_colors.values == -1.0] = edgecolor_negative
+            if style == "dark_background":
+                edge_colors[edge_colors.values == 0] = "black"
+            else:
+                edge_colors[edge_colors.values == 0] = "white"
+
+
+        # Plotting
+        # ----------
+        with plt.style.context(style):
+            if ax is None:
+                fig, ax = plt.subplots(**_fig_kws)
+            else:
+                fig = plt.gcf()
+            # Axis collection
+            axes = [ax]
+
+            # Set ticks
+            ax.set_xticks(range(len(self.timepoints_)))
+            ax.set_yticks(node_positions.values)
+
+            # Plot each timepoint
+            for t_i, t in enumerate(self.timepoints_):
+
+                # Plot nodes
+                if show_nodes:
+                    ax.scatter(
+                            x=np.ones(len(nodelist))*t_i,
+                            y=node_positions.values,
+                            c=node_colors[t],
+                            s=node_sizes[t],
+                            **_node_kws,
+                    )
+
+                # Plot arcs
+                edges = self.intratemporal_connections_[t].dropna().abs()
+                edges = edges[lambda x: x > 0]
+
+                if func_edgeweight is not None: # Tranform edge weights
+                    edges = func_edgeweight(edges)
+                if clip_edgeweight is not None:
+                    edges = np.clip(edges, a_min=None, a_max=clip_edgeweight)
+                edge_colors_for_timepoint = edge_colors[t] # Change name of this
+                for edge, weight in edges.items():
+                    node_a, node_b = list(edge)
+                    bvx, bvy = bezier_points(
+                        p1=(t_i, node_positions[node_a]),
+                        p2=(t_i, node_positions[node_b]),
+                        control=num_query_nodes*(1/curve_scaling_factor),
+                        granularity=granularity,
+                    )
+                    ax.plot(bvx, bvy, linewidth=weight, color=edge_colors_for_timepoint[edge], **_edge_kws)
+
+
+            tracks_visible = False
+            if show_tracks:
+                divider = make_axes_locatable(ax)
+                for name in self.tracks:
+                    if "edgecolor" in self.tracks[name]["plot_kws"]:
+                        if self.tracks[name]["plot_kws"]["edgecolor"] == "auto":
+                            self.tracks[name]["plot_kws"]["edgecolor"] = {True:"white", False:"black"}[style == "dark_background"]
+                    args_track = dict(
+                        name=name,
+                        divider=divider,
+                        xlim=ax.get_xlim(),
+                        xticks=ax.get_xticks(),
+                        ylim=self.tracks[name]["ylim"],
+                        show_track_ticks=show_track_ticks,
+                        show_track_labels=show_track_labels,
+                        track_label_kws=self.tracks[name]["label_kws"],
+                    )
+                    ax_track = self._plot_track_mpl( **args_track)
+                    axes.append(ax_track)
+                    ax.set_xticklabels([])
+                    tracks_visible = True
+
+
+            # Show temporal identifiers
+            if show_timepoint_identifiers:
+                ax.autoscale(False)
+                if all([tracks_visible, pad_timepoint_identifier == "auto"]):
+                    pad_timepoint_identifier = -1
+                else:
+                    pad_timepoint_identifier = -0.382
+                for t_i, t in enumerate(self.timepoints_):
+                    id = self.timepoint_identifiers_[t]
+                    if id is not None:
+                        axes[-1].text(x=t_i, y=min(axes[-1].get_ylim()) + pad_timepoint_identifier, s=id, **_timepoint_identifier_kws)
+
+
+            # Set tick labels
+            if show_timepoints:
+                if all([tracks_visible, pad_timepoints == "auto"]):
+                    pad_timepoints = -0.5
+                else:
+                    pad_timepoints = -0.05
+
+                axes[-1].set_xticklabels(self.timepoints_, y=pad_timepoints, **_timepoint_tick_kws)
+
+            if show_node_labels:
+                ax.set_yticklabels(list(map(lambda node: node_relabel[node] if node in node_relabel else node, nodelist)), **_node_tick_kws)
+
+            # Grids and border
+            if show_xgrid:
+                ax.xaxis.grid(show_xgrid, **_grid_kws)
+            if show_ygrid:
+                ax.yaxis.grid(show_ygrid, **_grid_kws)
+            if not show_border: # Not using ax.axis('off') becuase it removes facecolor
+                for spine in ax.spines.values():
+                    spine.set_visible(False)
+
+            # Background color
+            if background_color is not None:
+                ax.set_facecolor(background_color)
+            # Labels
+            if xlabel:
+                axes[-1].set_xlabel(xlabel, **_label_kws)
+            if ylabel:
+                ax.set_ylabel(ylabel, **_label_kws)
+            # Title
+            if title == True:
+                title = self.name
+            if title:
+                ax.set_title(title, **_title_kws)
+
+            return fig, axes
+
+
+    def plot_network(self):
+        assert self.compiled, "Please compile to continue."
+        print("Not available in this version.", file=sys.stderr)
+        pass
+
+    def plot_hive(self):
+        assert self.compiled, "Please compile to continue."
+        print("Not available in this version.", file=sys.stderr)
+        pass
