@@ -5,6 +5,7 @@
 import os, sys
 from collections import defaultdict, OrderedDict
 import pandas as pd
+import numpy as np
 from statsmodels.sandbox.stats.multicomp import multipletests
 # Soothsayer
 from ..utils import is_dict
