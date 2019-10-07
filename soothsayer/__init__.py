@@ -62,7 +62,7 @@ from .io import io
 # Microbiome
 from .microbiome import microbiome
 # Networks
-from .networks import networks, Hive, TemporalGraph
+from .networks import networks, Hive, TemporalNetwork
 # Ordination
 from .ordination import ordination, PrincipalComponentAnalysis, PrincipalCoordinatesAnalysis, Manifold
 # Regression
@@ -86,7 +86,7 @@ from .visuals import visuals
 _submodules = ["core", "classification", "db", "feature_extraction", "hierarchy", "io", "microbiome",  "networks", "ordination", "regression", "statistics", "symmetry", "transmute", "tree", "utils", "visuals"]
 _core = ["Dataset"]
 _hierarchy = ["Agglomerative", "Topology"]
-_networks = ["Hive", "TemporalGraph"]
+_networks = ["Hive", "TemporalNetwork"]
 _ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold"]
 _symmetry = ["Symmetric"]
 _utils = ["Chromatic", "Command"]
