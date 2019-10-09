@@ -1212,7 +1212,7 @@ def main(argv=None):
             cv_labels = list(map(lambda x: "cv={}".format(x+1), range(len(opts.cv))))
         # Are there 3 columns with a header with the first column being the name of cross-validation set?
         if _tmp_ncols_cv == 3:
-            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0).applymap(literal_eval).loc[:,"Training", "Testing"]
+            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0).applymap(literal_eval).loc[:,["Training", "Testing"]]
             cv_labels = opts.cv.index
             opts.cv = opts.cv.values.tolist()
 
