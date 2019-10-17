@@ -8,7 +8,10 @@ import os, sys, time, multiprocessing
 # ==============================================================================
 from rpy2 import robjects, rinterface
 from rpy2.robjects.packages import importr
-from rpy2.rinterface import RRuntimeError
+try:
+    from rpy2.rinterface import RRuntimeError
+except ImportError:
+    from rpy2.rinterface_lib.embedded import RRuntimeError
 from rpy2.robjects import pandas2ri
 pandas2ri.activate()
 R = robjects.r

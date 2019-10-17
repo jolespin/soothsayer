@@ -28,8 +28,114 @@ from ..io import write_object
 
 
 
-__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold", "TemporalNetwork"]
+__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold", "TemporalNetwork", "Edge"]
 __all__ = sorted(__all__)
+
+# Network Edge
+class Edge(tuple):
+
+    """
+    # ------------
+    # Create edges
+    # ------------
+    edge_1 = Edge(["Anakin", "Darth Vader"], weight=-0.618, directed=False)
+    edge_2 = Edge(["Darth Sidious", "Darth Vader"], weight=0.8, directed=True, affiliation="Sith")
+    edge_3 = Edge(["Darth Plagueis", "Darth Plagueis"], weight=1, affiliation="Sith")
+
+    # --------------
+    # Representation
+    # --------------
+
+    print(edge_1)
+    # Edge(Anakin --- Darth Vader, w=-0.61800)
+
+    print(edge_2)
+    # Edge(Darth Sidious --> Darth Vader, w=0.80000)
+
+    print(edge_3)
+    # Edge(Darth Plagueis === Darth Plagueis, w=1.00000)
+
+    # --------
+    # Metadata
+    # --------
+    print(edge_2.metadata)
+    # {'affiliation': 'Sith'}
+
+    # -----------------
+    # Set comprehension
+    # -----------------
+    edge_1 & edge_2
+    # frozenset({'Darth Vader'})
+
+    print(edge_1 | edge_2 | edge_3)
+    # frozenset({'Anakin', 'Darth Plagueis', 'Darth Sidious', 'Darth Vader'})
+
+    print(edge_1 < {"Anakin", "Darth Vader", "Darth Tenebrous"})
+    # True
+
+    """
+    # Instantiate
+    def __new__(self, edge, weight=1, directed=False, **metadata):
+        return super(Edge, self).__new__(self,tuple(edge))
+
+    def __init__(self, edge, weight=1, directed=False, **metadata):
+        # Store metadata
+        self.metadata = metadata
+        # Self-loops
+        self.self_loop = False
+        if len(set(edge)) == 1:
+            edge = [edge[0], edge[0]]
+            directed = None
+            self.self_loop = True
+        # Edge
+        self.directed = directed
+        if self.directed:
+            self.edge = tuple(self)
+        else:
+            self.edge = tuple(sorted(self))
+        self.sign = np.sign(weight)
+        self.weight = abs(weight)
+        # Nodes
+        self.nodes = frozenset(edge)
+        # Dtypes
+        self.dtypes = dict(zip(self, (map(type, self))))
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self.edge[key]
+        else:
+            return self.metadata[key]
+
+    def __repr__(self):
+        return "Edge(%s %s %s, w=%0.5f)"%(self.edge[0], {True:"-->", False:"---", None:"==="}[self.directed], self.edge[1], self.weight*self.sign)
+
+    # Override set specials
+    def __le__(self, other):
+        return all(e in other for e in self)
+
+    def __lt__(self, other):
+        iterable = frozenset(other)
+        return self <= other and self != other
+
+    def __ge__(self, other):
+        return all(e in self for e in other)
+
+    def __gt__(self, other):
+        other = frozenset(other)
+        return self >= other and self != other
+    def __and__(self, other):
+        other = frozenset(other)
+        return self.nodes.intersection(other)
+    def __or__(self, other):
+        other = frozenset(other)
+        return self.nodes.union(other)
+
+    def __rand__(self, other):
+        other = frozenset(other)
+        return other.intersection(self.nodes)
+    def __ror__(self, other):
+        other = frozenset(other)
+        return other.union(self.nodes)
 # =======================================================
 # Hive
 # =======================================================

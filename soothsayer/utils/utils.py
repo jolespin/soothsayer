@@ -25,7 +25,7 @@ __all__ = ["to_precision", "format_duration", "get_timestamp", "dataframe_to_mat
 "dict_filter", "dict_reverse", "dict_expand", "dict_fill", "dict_build", "dict_collapse","dict_tree",
 "rgb_to_rgba", "map_colors", "infer_cmap", "infer_vmin_vmax", "infer_continuous_type", "scalarmapping_from_data", "Chromatic", "create_logfile", "determine_mode_for_logfiles",
 "is_dict", "is_rgb_like", "is_nonstring_iterable","is_dict_like", "is_color", "is_graph", "is_all_same_type", "is_number", "is_query_class","is_symmetrical", "is_in_namespace",
-"format_mpl_legend_handles", "LEGEND_KWS", "DIVERGING_KWS", "CMAP_DIVERGING", "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
+"format_mpl_legend_handles", "LEGEND_KWS", "DIVERGING_KWS", "CMAP_DIVERGING","COLOR_NEGATIVE", "COLOR_POSITIVE",  "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
 "pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","contains","consecutive_replace", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath","join_as_strings",
 ]
 __all__ = sorted(__all__)
@@ -35,8 +35,9 @@ __all__ = sorted(__all__)
 # Defaults
 # =============
 LEGEND_KWS = {'fontsize': 15, 'frameon': True, 'facecolor': 'white', 'edgecolor': 'black', 'loc': 'center left', 'bbox_to_anchor': (1, 0.5)}
-DIVERGING_KWS = dict(h_neg=220, h_pos=15, sep=20, n=11, s=90, l=50)
+DIVERGING_KWS = dict(h_neg=220, h_pos=15, sep=20, s=90, l=50)
 CMAP_DIVERGING = sns.diverging_palette(**DIVERGING_KWS, as_cmap=True)
+COLOR_NEGATIVE, COLOR_POSITIVE = sns.diverging_palette(**DIVERGING_KWS, n=2).as_hex()
 
 # ===========
 # Assertions

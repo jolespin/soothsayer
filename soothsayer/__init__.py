@@ -36,7 +36,7 @@
 import datetime
 __version__= "2019.10"
 #datetime.datetime.utcnow().strftime("%Y.%m")
-__version_specific__ = "2019.10.04" #datetime.datetime.utcnow().strftime("%Y.%m.%d")
+__version_specific__ = "2019.10.17" #datetime.datetime.utcnow().strftime("%Y.%m.%d")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
 __url__ = "https://github.com/jolespin/soothsayer"
