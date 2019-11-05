@@ -4,7 +4,7 @@
 _________________________________
 
 #### Current Version:
-*v2019.09*
+*v2019.11*
 
 #### Citation:
 *Espinoza, *Dupont et al. 2019 (In Review)
