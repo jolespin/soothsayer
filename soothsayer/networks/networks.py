@@ -28,7 +28,7 @@ from ..io import write_object
 
 
 
-__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold", "TemporalNetwork", "Edge"]
+__all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "signed", "determine_soft_threshold","cluster_modularity", "TemporalNetwork", "Edge"]
 __all__ = sorted(__all__)
 
 # Network Edge
@@ -1029,6 +1029,69 @@ def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True
                 if title:
                     fig.suptitle(title, fontsize=18, fontweight="bold", y=pad)
         return fig, ax, df_sft
+
+# Cluster modularity matrix
+def cluster_modularity(df:pd.DataFrame, node_type="node", iteration_type="iteration"):
+    """
+
+    n_louvain = 100
+
+    louvain = dict()
+    for rs in tqdm(range(n_louvain), "Louvain"):
+        louvain[rs] = community.best_partition(graph_unsigned, random_state=rs)
+    df = pd.DataFrame(louvain)
+
+    # df.head()
+    # 	0	1	2	3	4	5	6	7	8	9
+    # a	0	0	0	0	0	0	0	0	0	0
+    # b	1	1	1	1	1	1	1	1	1	1
+    # c	2	2	2	2	2	2	2	2	2	2
+    # d	3	3	3	3	3	3	3	3	3	3
+    # e	4	1	1	4	1	4	4	1	4	1
+
+    cluster_modularity(df).head()
+    iteration  0  1  2  3  4  5  6  7  8  9
+    node
+    (b, a)     0  0  0  0  0  0  0  0  0  0
+    (c, a)     0  0  0  0  0  0  0  0  0  0
+    (d, a)     0  0  0  0  0  0  0  0  0  0
+    (e, a)     0  0  0  0  0  0  0  0  0  0
+    (a, f)     0  0  0  0  0  0  0  0  0  0
+    """
+
+    # Adapted from @code-different:
+    # https://stackoverflow.com/questions/58566957/how-to-transform-a-dataframe-of-cluster-class-group-labels-into-a-pairwise-dataf
+
+
+    # `x` is a table of (n=nodes, p=iterations)
+    nodes = df.index
+    iterations = df.columns
+    x = df.values
+    n,p = x.shape
+
+    # `y` is an array of n tables, each having 1 row and p columns
+    y = x[:, None]
+
+    # Using numpy broadcasting, `z` contains the result of comparing each
+    # table in `y` against `x`. So the shape of `z` is (n x n x p)
+    z = x == y
+
+    # Reshaping `z` by merging the first two dimensions
+    data = z.reshape((z.shape[0] * z.shape[1], z.shape[2]))
+
+    # Redundant pairs
+    redundant_pairs = list(map(lambda node:frozenset([node]), nodes))
+
+    # Create pairwise clustering matrix
+    df_pairs = pd.DataFrame(
+        data=data,
+        index=pd.Index(list(map(frozenset, itertools.product(nodes,nodes))), name=node_type),
+        columns=pd.Index(iterations, name=iteration_type),
+        dtype=int,
+    ).drop(redundant_pairs, axis=0)
+
+
+    return df_pairs[~df_pairs.index.duplicated(keep="first")]
 
 # Temporal Networks
 class TemporalNetwork(object):

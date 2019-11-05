@@ -26,7 +26,8 @@ __all__ = ["to_precision", "format_duration", "get_timestamp", "dataframe_to_mat
 "rgb_to_rgba", "map_colors", "infer_cmap", "infer_vmin_vmax", "infer_continuous_type", "scalarmapping_from_data", "Chromatic", "create_logfile", "determine_mode_for_logfiles",
 "is_dict", "is_rgb_like", "is_nonstring_iterable","is_dict_like", "is_color", "is_graph", "is_all_same_type", "is_number", "is_query_class","is_symmetrical", "is_in_namespace",
 "format_mpl_legend_handles", "LEGEND_KWS", "DIVERGING_KWS", "CMAP_DIVERGING","COLOR_NEGATIVE", "COLOR_POSITIVE",  "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
-"pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","contains","consecutive_replace", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath","join_as_strings",
+"pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","pd_dropduplicates_index", "contains","consecutive_replace", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath","join_as_strings",
+"get_repr",
 ]
 __all__ = sorted(__all__)
 
@@ -323,6 +324,13 @@ def consecutive_replace(x:str, *patterns):
         x = x.replace(a,b)
     return x
 
+# Get repr for custom classes
+def get_repr(class_name, instance_name=None, *args):
+    header = "{}(name = {})".format(class_name, instance_name)
+    info = format_header(header)
+    for field in args:
+        info += "\n\t* {}".format(field)
+    return info
 # ============
 # Dictionaries
 # ============
@@ -1097,6 +1105,14 @@ def pd_dataframe_extend_index(index_extended, df=None, fill=np.nan, axis=0):
         A = np.empty(( df.shape[0], len(idx_extend)))
         A[:] = np.nan
         return pd.concat([df, pd.DataFrame(A, index=df.index, columns=idx_extend)]).fillna(fill)
+
+# Drop duplicates index
+def pd_dropduplicates_index(data, keep="first", axis=0):
+    if axis in {0, None}:
+        return data[~data.index.duplicated(keep=keep)]
+    if axis == 1:
+        data = data.T
+        return data[~data.index.duplicated(keep=keep)].T
 
 # =======
 # Filters

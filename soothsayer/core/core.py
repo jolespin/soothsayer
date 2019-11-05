@@ -1,13 +1,18 @@
 import os, sys, datetime, copy
 from collections import OrderedDict
 import pandas as pd
-from ..utils import is_path_like, is_nonstring_iterable, pd_dataframe_extend_index
+from skbio.util._decorator import experimental, stable
+
+from ..utils import is_path_like, is_nonstring_iterable, pd_dataframe_extend_index, assert_acceptable_arguments
 from ..io import read_dataframe, write_object
 
 __all__ = ["Dataset"]
 __all__ = sorted(__all__)
 
+
+
 # Dataset
+@experimental(as_of="2019.06")
 class Dataset(object):
     def __init__(self, data:pd.DataFrame, metadata_observations:pd.DataFrame=None, metadata_attributes:pd.DataFrame=None, metadata_target_field=None, name=None, description=None, obsv_type=None, attr_type=None, metric_type=None, name_initial_data=None, check_index_overlap=True, alias_metadata_observations:str="m0", alias_metadata_attributes:str="m1", **additional_fields):
         """
@@ -75,16 +80,14 @@ class Dataset(object):
         if metadata_observations is None:
             metadata_observations = pd_dataframe_extend_index(data.index, pd.DataFrame(), axis=0)
         self.add_metadata(metadata_observations, axis="observations", metadata_target_field=metadata_target_field)
-        if self.alias_metadata_observations is not None:
-            setattr(self, str(self.alias_metadata_observations), self.metadata_observations)
+
 
 
         # Metadata attributes
         if metadata_attributes is None:
             metadata_attributes = pd_dataframe_extend_index(data.columns, pd.DataFrame(), axis=0)
         self.add_metadata(metadata_attributes, axis="attributes", metadata_target_field=None)
-        if self.alias_metadata_attributes is not None:
-            setattr(self, str(self.alias_metadata_attributes), self.metadata_attributes)
+
 
     def __repr__(self):
         class_name = str(self.__class__).split(".")[-1][:-2]
@@ -153,6 +156,9 @@ class Dataset(object):
                 self.y_field = metadata_target_field
                 self.y = self.metadata_observations[self.y_field]
 
+            if self.alias_metadata_observations is not None:
+                setattr(self, str(self.alias_metadata_observations), self.metadata_observations)
+
         # Metadata attributes
         if axis in {"attrs", "attributes","columns", 1}:
             if self.check_index_overlap:
@@ -164,6 +170,8 @@ class Dataset(object):
                 self.metadata_attributes = self.metadata_attributes.to_frame()
             if self.check_index_overlap:
                 self.metadata_attributes = self.metadata_attributes.loc[initial_data_attributes]
+            if self.alias_metadata_attributes is not None:
+                setattr(self, str(self.alias_metadata_attributes), self.metadata_attributes)
         return self
 
     # Add data versions
@@ -317,25 +325,27 @@ class Dataset(object):
         self.columns_version = attribute_subset
         return self
 
-    # Filter dataset
-    def filter(self, func_observations=None, func_attributes=None, name_version=None):
-        """
-        Filter a datasets
-        """
-        # If no version is specified then use the default
-        if name_version is None:
-            name_version = self.X_version
-        assert name_version in self.__database__, f"Cannot find `{name_version}`.  Please add it to the datasets via `add_version`"
-        df = self.__database__[name_version]["data"]
-        # Observations
-        idx_observations = df.index
-        if func_observations is not None:
-            idx_observations = [*filter(func_observations, idx_observations)]
-        # Attributes
-        idx_attributes = df.columns
-        if func_attributes is not None:
-            idx_attributes = [*filter(func_attributes, idx_attributes)]
-        return df.loc[idx_observations, idx_attributes]
+#     # Filter dataset
+#     def filter(self, func_observations=None, func_attributes=None, name_version=None):
+#         """
+#         Filter a datasets
+
+#         #! Revisit this
+#         """
+#         # If no version is specified then use the default
+#         if name_version is None:
+#             name_version = self.X_version
+#         assert name_version in self.__database__, f"Cannot find `{name_version}`.  Please add it to the datasets via `add_version`"
+#         df = self.__database__[name_version]["data"]
+#         # Observations
+#         idx_observations = df.index
+#         if func_observations is not None:
+#             idx_observations = [*filter(func_observations, idx_observations)]
+#         # Attributes
+#         idx_attributes = df.columns
+#         if func_attributes is not None:
+#             idx_attributes = [*filter(func_attributes, idx_attributes)]
+#         return df.loc[idx_observations, idx_attributes]
 
     # Write object to file
     def to_file(self, path:str, compression="infer"):
@@ -384,6 +394,27 @@ class Dataset(object):
     def __iter__(self):
         for name_version, d in self.__database__.items():
             yield name_version, d["data"]
+
+    def __call__(self, field, index=None, func_filter=None, func_map=None, axis=0):
+        assert_acceptable_arguments(axis, {0,1})
+        assert not is_nonstring_iterable(field), "`field` cannot be a non-string iterable"
+        if axis == 0:
+            assert self.metadata_observations is not None
+            assert field in self.metadata_observations.columns, "`{}` not in `metadata_observations`".format(field)
+            data = self.metadata_observations[field]
+        if axis == 1:
+            assert self.metadata_attributes is not None
+            assert field in self.metadata_attributes.columns, "`{}` not in `metadata_attributes`".format(field)
+            data = self.metadata_attributes[field]
+        if index is not None:
+            data = data[index]
+        if func_filter is not None:
+            data = data[func_filter]
+        if func_map is not None:
+            data = data.map(func_map)
+
+        return data
+
 
     def copy(self):
         return copy.deepcopy(self)
