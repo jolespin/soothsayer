@@ -27,7 +27,7 @@ __all__ = ["to_precision", "format_duration", "get_timestamp", "dataframe_to_mat
 "is_dict", "is_rgb_like", "is_nonstring_iterable","is_dict_like", "is_color", "is_graph", "is_all_same_type", "is_number", "is_query_class","is_symmetrical", "is_in_namespace",
 "format_mpl_legend_handles", "LEGEND_KWS", "DIVERGING_KWS", "CMAP_DIVERGING","COLOR_NEGATIVE", "COLOR_POSITIVE",  "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
 "pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","pd_dropduplicates_index", "contains","consecutive_replace", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath","join_as_strings",
-"get_repr",
+"get_repr","read_from_clipboard",
 ]
 __all__ = sorted(__all__)
 
@@ -39,6 +39,20 @@ LEGEND_KWS = {'fontsize': 15, 'frameon': True, 'facecolor': 'white', 'edgecolor'
 DIVERGING_KWS = dict(h_neg=220, h_pos=15, sep=20, s=90, l=50)
 CMAP_DIVERGING = sns.diverging_palette(**DIVERGING_KWS, as_cmap=True)
 COLOR_NEGATIVE, COLOR_POSITIVE = sns.diverging_palette(**DIVERGING_KWS, n=2).as_hex()
+# =========
+# Clipboard
+# =========
+def read_from_clipboard(sep="\n", into=list):
+    data = pd.io.clipboard.clipboard_get()
+    if sep is not None:
+        return into(filter(bool,
+                           map(lambda x:x.strip(),
+                               data.split(sep)
+                           )
+                   )
+               )
+    else:
+        return data
 
 # ===========
 # Assertions
