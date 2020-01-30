@@ -45,12 +45,7 @@ COLOR_NEGATIVE, COLOR_POSITIVE = sns.diverging_palette(**DIVERGING_KWS, n=2).as_
 def read_from_clipboard(sep="\n", into=list):
     data = pd.io.clipboard.clipboard_get()
     if sep is not None:
-        return into(filter(bool,
-                           map(lambda x:x.strip(),
-                               data.split(sep)
-                           )
-                   )
-               )
+        return into(filter(bool, map(lambda x:x.strip(), data.split(sep))))
     else:
         return data
 

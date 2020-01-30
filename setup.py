@@ -39,6 +39,7 @@ setup(name='soothsayer',
     "tzlocal",
     "statsmodels >= 0.10.0", #https://github.com/statsmodels/statsmodels/issues/5899 May need to use this separately: pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
     "teneto",
+    "mmh3",
 
       ],
      include_package_data=True,

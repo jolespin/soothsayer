@@ -34,9 +34,9 @@
 # Version
 # =======
 import datetime
-__version__= "2019.11"
+__version__= "2020.01"
 #datetime.datetime.utcnow().strftime("%Y.%m")
-__version_specific__ = "2019.11.26" #datetime.datetime.utcnow().strftime("%Y.%m.%d")
+__version_specific__ = "2020.01.30" #datetime.datetime.utcnow().strftime("%Y.%m.%d")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
 __url__ = "https://github.com/jolespin/soothsayer"
@@ -65,6 +65,8 @@ from .microbiome import microbiome
 from .networks import networks, Hive, TemporalNetwork
 # Ordination
 from .ordination import ordination, PrincipalComponentAnalysis, PrincipalCoordinatesAnalysis, Manifold
+# R Wrappers
+from .r_wrappers import r_wrappers
 # Regression
 from .regression import regression
 # Statistics
@@ -83,7 +85,7 @@ from .visuals import visuals
 # =======
 # Direct Exports
 # =======
-_submodules = ["core", "classification", "db", "feature_extraction", "hierarchy", "io", "microbiome",  "networks", "ordination", "regression", "statistics", "symmetry", "transmute", "tree", "utils", "visuals"]
+_submodules = ["core", "classification", "db", "feature_extraction", "hierarchy", "io", "microbiome",  "networks", "ordination", "r_wrappers", "regression", "statistics", "symmetry", "transmute", "tree", "utils", "visuals"]
 _core = ["Dataset"]
 _hierarchy = ["Agglomerative", "Topology"]
 _networks = ["Hive", "TemporalNetwork"]

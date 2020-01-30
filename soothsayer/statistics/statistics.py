@@ -10,6 +10,8 @@ from statsmodels.sandbox.stats.multicomp import multipletests
 # Soothsayer
 from ..utils import is_dict
 
+__all__ = ["p_adjust", "statistically_significant_symbols"]
+
 # Adjust p-values
 def p_adjust(p_values:pd.Series, method="fdr", name=None, **kwargs):
     """
@@ -53,8 +55,42 @@ def p_adjust(p_values:pd.Series, method="fdr", name=None, **kwargs):
         assert  num_nan == 0, "Please remove the {} missing values".format(num_nan)
         return multipletests(p_values, method=method, **kwargs)[1]
 
+# Statistically significant symbols
+def statistically_significant_symbols(p:pd.Series, not_significant="ns", return_pvalues=False):
+    """
+    # Lexicon
+    # ns
+    # P > 0.05
+    # *
+    # P ≤ 0.05
+    # **
+    # P ≤ 0.01
+    # ***
+    # P ≤ 0.001
+    # ****
+    #  P ≤ 0.0001 (For the last two choices only)
 
-
+    Future:  Make this customizable
+    """
+    if not hasattr(p, "__iter__"):
+        if p > 0.05:
+            return not_significant
+        symbol = ""
+        if p <= 0.05:
+            symbol += "*"
+        if p <= 0.01:
+            symbol += "*"
+        if p <= 0.001:
+            symbol += "*"
+        if p <= 0.0001:
+            symbol += "*"
+        return symbol
+    else:
+        symbols =  pd.Series(p).map(lambda x:statistically_significant_symbols(x, not_significant=not_significant))
+        if return_pvalues:
+            return pd.concat([symbols.to_frame("symbol"), p.to_frame("p_value")], axis=1)
+        else:
+            return symbols
 
 
 

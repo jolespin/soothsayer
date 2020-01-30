@@ -4,14 +4,17 @@ import pandas as pd
 import numpy as np
 import ete3
 import skbio
+import mmh3
 from scipy import stats
+from scipy.spatial.distance import squareform
 from tqdm import tqdm
+from ..symmetry import Symmetric
 from ..io import write_object, read_fasta, read_textfile
-from ..utils import pd_dataframe_matmul, format_path, pd_series_collapse, is_dict_like, is_query_class, fragment, assert_acceptable_arguments
+from ..utils import pd_dataframe_matmul, format_path, pd_series_collapse, is_dict_like, is_query_class, is_symmetrical, fragment, assert_acceptable_arguments
 from ..transmute.normalization import normalize
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
-__all__ = ["PhylogenomicFunctionalComponents",  "phylogenomically_binned_functional_potential", "mcr_from_directory", "get_taxonomy_lineage_from_identifier", "get_taxonomy_identifier_from_name", "infer_taxonomy", "alpha_diversity", "otu_to_level", "reverse_complement", "count_kmers", "prevalence", "get_intergenic_sequences"]
+__all__ = ["PhylogenomicFunctionalComponents",  "phylogenomically_binned_functional_potential", "mcr_from_directory", "get_taxonomy_lineage_from_identifier", "get_taxonomy_identifier_from_name", "infer_taxonomy", "alpha_diversity", "beta_diversity", "otu_to_level", "reverse_complement","hash_kmer", "count_kmers", "prevalence", "get_intergenic_sequences"]
 __all__ = sorted(__all__)
 
 # Extract intergenic sequences
@@ -533,6 +536,47 @@ def alpha_diversity(X:pd.DataFrame, metric="richness", taxonomy:pd.DataFrame=Non
         df_level_metric.index.name = f"id_{obsv_type}"
         return df_level_metric
 
+
+# Compute the beta diversity
+def beta_diversity(X:pd.DataFrame, y:pd.Series, label_intra="Intra", label_inter="Inter", label_metric="Distance", class_type="Class"):
+    """
+    X: a symmetric pd.DataFrame distance matrix with a diagonal of 0
+    y: a pd.Series of class labels
+    """
+    if isinstance(X, Symmetric):
+        X = X.to_dense()
+    # Assertions
+    assert is_symmetrical(X, tol=1e-10), "X must be symmetric"
+    assert np.all(X.index == X.columns), "X.index != X.columns"
+    assert set(X.index) <= set(y.index), "Not all elements in X.index are in y.index"
+    assert np.all(X.notnull()), "X cannot contain any NaN.  Please preprocess the data accordingly"
+
+    # Get indexable arrays
+    idx_labels = X.index
+    loc_labels = np.arange(X.shape[0])
+    A = X.values
+
+    # Calculate the diversity
+    diversity_data = defaultdict(dict)
+    for id_class, idx_class in pd_series_collapse(y[idx_labels], type_collection=pd.Index).items():
+        loc_class = idx_class.map(lambda x:idx_labels.get_loc(x)).values
+        loc_nonclass = np.delete(loc_labels, loc_class)
+        # Intra
+        intra_distances = squareform(A[loc_class,:][:,loc_class])
+        diversity_data[(id_class, label_intra)] = pd.Series(intra_distances)
+        # Inter
+        inter_distances = A[loc_class,:][:,loc_nonclass].ravel()
+        diversity_data[(id_class, label_inter)] = pd.Series(inter_distances)
+
+    # Create output
+    df_beta_diversity = pd.DataFrame(diversity_data)
+    df_beta_diversity.columns.names = [class_type, "Diversity"]
+    return df_beta_diversity
+
+
+
+
+
 # Reverse Complement
 def reverse_complement(seq:str):
     """
@@ -544,8 +588,31 @@ def reverse_complement(seq:str):
     rev_comp = comp[::-1]
     return rev_comp
 
-# K-mer frequency counter
-def count_kmers(sequences, K=5, frequency=True, collapse_reverse_complement=False, pseudocount=1, fill_missing_kmers=False):
+# Murmurhash of K-mer
+def hash_kmer(kmer, random_state=0):
+    """
+    Adapted from the following source:
+    https://sourmash.readthedocs.io/en/latest/kmers-and-minhash.html
+    """
+    kmer = kmer.upper()
+
+    # Calculate the reverse complement
+    r_kmer = reverse_complement(kmer)
+
+    # Determine whether original k-mer or reverse complement is lesser
+    if kmer < r_kmer:
+        canonical_kmer = kmer
+    else:
+        canonical_kmer = r_kmer
+
+    # Calculate murmurhash using a hash seed
+    hash = mmh3.hash(canonical_kmer, seed=random_state, signed=False)
+#     if hash < 0:
+#         hash += 2**64
+
+    return hash
+
+def count_kmers(sequences, K=4, frequency=True, collapse_reverse_complement=False, pseudocount=0, fill_missing_kmers=False):
     """
     sequences: (1) a sequence string, (2) a dict_like of (id,seq) pairs, or (3) path to fasta
     collapse_reverse_complement reduces data dimensionality
@@ -572,20 +639,22 @@ def count_kmers(sequences, K=5, frequency=True, collapse_reverse_complement=Fals
             else:
                 kmer_collapse[kmer] = kmer
         return kmer_collapse
-    def _count(seq:str, K=5, frequency=True, collapse_reverse_complement=False,  pseudocount=1, name=None):
+
+    def _count(seq:str, K, frequency, collapse_reverse_complement,  pseudocount, name=None):
         """
         Collapse only works for nondegenerate kmers
         """
         seq = seq.upper()
         alphabet = {"A", "C", "G", "T"}
-        query_alphabet = set(list(seq))
+        #query_alphabet = set(list(seq))
         # degenerate_kmers = {'B', 'D', 'H', 'K', 'M', 'N', 'R', 'S', 'V', 'W', 'Y'}
-        assert query_alphabet <= alphabet, "This cannot be used with degenerate characters"
+        #assert query_alphabet <= alphabet, "This cannot be used with degenerate characters"
 
         # Count kmers
         kmer_counts = defaultdict(int)
         for kmer in fragment(seq=seq, K=K, step=1, overlap=True):
-            kmer_counts[kmer] += 1
+            if set(kmer) <= alphabet:
+                kmer_counts[kmer] += 1
         kmer_counts = pd.Series(kmer_counts, name=name) + pseudocount
 
         # Collapse double stranded

@@ -68,12 +68,16 @@ class CoreLinearModel(object):
         statistics_data = OrderedDict([
             ("t_values",model_results.tvalues),
             ("p_values",model_results.pvalues),
-            ("{}_values".format(multiple_comparison_method), p_adjust(model_results.pvalues, method=multiple_comparison_method)),
             ("std_err", model_results.bse),
             ("coef", model_results.params),
             ("[0.025", model_results.conf_int().iloc[:,0]),
             ("0.975]", model_results.conf_int().iloc[:,1]),
             ])
+        if multiple_comparison_method is not None:
+            statistics_data["{}_values".format(multiple_comparison_method)] = p_adjust(model_results.pvalues, method=multiple_comparison_method)
+
+
+
 
         # Model
         model_data = {
@@ -359,7 +363,7 @@ class CoreLinearModel(object):
 class MixedEffectsLinearModel(CoreLinearModel):
     """
     import soothsayer as sy
-    
+
     # Testing Mixed Linear Model
     X_iris, y_iris = sy.utils.get_iris_data(return_data=["X","y"], noise=47)
     # Training Data

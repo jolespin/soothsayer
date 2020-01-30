@@ -4,10 +4,10 @@
 _________________________________
 
 #### Current Version:
-*v2019.11*
+*v2020.01*
 
 #### Citation:
-*Espinoza, *Dupont et al. 2019 (In Review)
+*Espinoza, *Dupont et al. 2020 (In Review)
 
 #### Case studies, tutorials and usage:
 Documentation coming soon. .. ... ..... ........
