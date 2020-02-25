@@ -37,13 +37,21 @@ def read_clustalo_distmat(path:str):
     path = format_path(path)
     with open(path, "r") as f:
         for i, line in enumerate(f):
-            if not line.startswith("#"):
+            line = line.strip()
+            conditions = [
+                line.startswith("#"),
+            ]
+            try:
+                int(line)
+                conditions.append(True)
+            except ValueError:
+                pass
+            if not any(conditions):
                 break
     df_tmp = pd.read_csv(path, sep="\t", index_col=0, header=None, skiprows=i)
     tmp = df_tmp.index.map(lambda line:[x for x in line.split(" ") if len(x) > 0])
     if ":" in tmp[0][0]:
         tmp = tmp.map(lambda x:x[1:])
-
     data = OrderedDict()
     try:
         for line in tmp:
@@ -52,7 +60,7 @@ def read_clustalo_distmat(path:str):
         df_dism.index = df_dism.columns
         return df_dism
     except ValueError:
-        warnings.warn("Could not accurately parse clustal distance matrix.  Returning raw data instead.")
+        print("Could not accurately parse clustal distance matrix.  Returning raw data instead.", file=sys.stderr)
         return tmp
 
 # VizBin corrdinates
