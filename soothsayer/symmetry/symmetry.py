@@ -35,7 +35,7 @@ from ..transmute.conversion import linkage_to_newick, name_ete_nodes
 from ..r_wrappers.packages.WGCNA import bicor
 from ..utils import is_symmetrical, force_symmetry
 
-__all__ = ["Symmetric", "pairwise", "pairwise_tree_distance", "pairwise_logfc", "dense_to_condensed"]
+__all__ = ["Symmetric", "pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise_logfc", "dense_to_condensed"]
 __all__ = sorted(__all__)
 
 
@@ -402,12 +402,37 @@ def pairwise_tree_distance(tree, topology_only=True):
     np.fill_diagonal(df_dism_tree.values, 0)
     return df_dism_tree
 
-# Pairwise log fold-change
-def pairwise_logfc(X, idx_ctrl, idx_treatment, func_log=np.log2, name_ctrl="control", name_treatment="treatment"):
+# Pairwise difference
+def pairwise_difference(X:pd.DataFrame, idx_ctrl, idx_treatment, name_ctrl="control", name_treatment="treatment"):
     """
     Positive values means they are greater in idx_treatment than in idx_ctrl.
     Negative values means they are greater in idx_ctrl than in idx_treatment.
     """
+    # Init
+    idx_attr = X.columns
+
+    idx_ctrl = sorted(idx_ctrl)
+    idx_treatment = sorted(idx_treatment)
+
+    # Groups
+    A_ctrl = X.loc[idx_ctrl,:].values
+    A_treatment = X.loc[idx_treatment,:].values
+
+    # Pairwise profiles
+    diff_profiles = np.vstack(A_treatment[:, np.newaxis] - A_ctrl)
+
+    # Labels
+    idx_pairwise_labels = itertools.product(idx_treatment, idx_ctrl)
+    names = [name_treatment, name_ctrl]
+    return pd.DataFrame(diff_profiles, index=pd.MultiIndex.from_tuples(idx_pairwise_labels, names=names), columns=idx_attr)
+
+# Pairwise log fold-change
+def pairwise_logfc(X:pd.DataFrame, idx_ctrl, idx_treatment, func_log=np.log2, name_ctrl="control", name_treatment="treatment"):
+    """
+    Positive values means they are greater in idx_treatment than in idx_ctrl.
+    Negative values means they are greater in idx_ctrl than in idx_treatment.
+    """
+    # return pairwise_difference(func_log(X), idx_ctrl=idx_ctrl, idx_treatment=idx_treatment, name_ctrl=name_ctrl, name_treatment=name_treatment) # MUST TEST THIS MORE FIRST BUT IT SHOULD WORK
     # Init
     idx_attr = X.columns
 

@@ -9,6 +9,7 @@ import networkx as nx
 import pandas as pd
 import ete3
 import skbio
+from ..utils import dataframe_to_matrixstring
 from ..transmute.conversion import ete_to_skbio, nx_to_ete, name_ete_nodes
 
 __all__ = ["create_tree"]
