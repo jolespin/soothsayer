@@ -1,0 +1,29 @@
+# Note, once I have more time and create soothsayer v1.0 then I will make all of this formatted consistently
+
+# Changes:
+# ========
+* 2020.04.30 Make soothsayer_visuals its own package
+
+
+# Clairvoyance: 
+# =============
+* Remove name in output files
+* Add weights in the synopsis file
+* Remove feature type from synopsis names
+
+# Bugs:
+# =====
+* 2019.12.06 For some reason adjusting something in regression broke the ability to do sy.r_wrappers.philr.normalize_philr  but you can still do from soothsayer.r_wrappers import philr
+
+# __future__:
+* Make HierarchicalClassifier its own package
+# Make soothsayer_visuals its own package
+# Make soothsayer_networks its own package?
+* Make PGFCs generalizable 
+* Made depndencies of many utilities on soothsayer_utils instead.  Need to do this with other submodules as well
+* Hive plot, fix the labels and make option for being more circule instead of super long
+* Add all of the checkm markers in the database. 
+* Change `create_pca_model` to something else...
+* Collapse topology so it uses Agglomerative instead
+* Clean up the coloring (map_colors, scalarmapping_from_data, etc.)
+
