@@ -17,7 +17,7 @@
 # =======
 # https://opensource.org/licenses/BSD-3-Clause
 #
-# Copyright 2018 Josh L. Espinoza
+# Copyright 2018-2020 Josh L. Espinoza
 #
 # Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 #
@@ -33,10 +33,9 @@
 # =======
 # Version
 # =======
-import datetime
-__version__= "2020.01"
+import sys
+__version__= "2020.04.30"
 #datetime.datetime.utcnow().strftime("%Y.%m")
-__version_specific__ = "2020.01.30" #datetime.datetime.utcnow().strftime("%Y.%m.%d")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
 __url__ = "https://github.com/jolespin/soothsayer"
@@ -78,7 +77,7 @@ from .transmute import transmute
 # Tree
 from .tree import tree
 # Utilities
-from .utils import utils, Chromatic, Command
+from .utils import utils, Chromatic
 # Visualizations
 from .visuals import visuals
 
@@ -91,7 +90,9 @@ _hierarchy = ["Agglomerative", "Topology"]
 _networks = ["Hive", "TemporalNetwork"]
 _ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold"]
 _symmetry = ["Symmetric"]
-_utils = ["Chromatic", "Command"]
+_utils = ["Chromatic"]
 
 __all__ = _submodules + _core + _hierarchy + _networks + _ordination + _symmetry + _utils
 __all__ = sorted(__all__)
+
+print("Soothsayer_v{}".format(__version__), file=sys.stderr)

@@ -21,14 +21,20 @@ from palettable.cmocean.sequential import Tempo_8
 # Datasets
 from sklearn.datasets import load_iris
 
-__all__ = ["to_precision", "format_duration", "get_timestamp", "dataframe_to_matrixstring", "pad_left", "iterable_depth", "flatten", "get_unique_identifier", "infer_compression", "format_filename", "format_path","format_header", "boolean",
-"dict_filter", "dict_reverse", "dict_expand", "dict_fill", "dict_build", "dict_collapse","dict_tree",
-"rgb_to_rgba", "map_colors", "infer_cmap", "infer_vmin_vmax", "infer_continuous_type", "scalarmapping_from_data", "Chromatic", "create_logfile", "determine_mode_for_logfiles",
-"is_dict", "is_rgb_like", "is_nonstring_iterable","is_dict_like", "is_color", "is_graph", "is_all_same_type", "is_number", "is_query_class","is_symmetrical", "is_in_namespace",
-"format_mpl_legend_handles", "LEGEND_KWS", "DIVERGING_KWS", "CMAP_DIVERGING","COLOR_NEGATIVE", "COLOR_POSITIVE",  "get_coords_contour", "get_coords_centroid", "get_parameters_ellipse", "add_cbar_from_data", "configure_scatter",
-"pd_series_collapse", "is_path_like", "pd_series_filter", "pd_dataframe_matmul", "pd_series_to_groupby_to_dataframe","pd_dataframe_query","pd_dropduplicates_index", "contains","consecutive_replace", "force_symmetry","range_like","generate_random_sequence","fragment","pd_dataframe_extend_index","is_file_like","get_iris_data","assert_acceptable_arguments","filter_compositional","is_function","Command","get_directory_size","DisplayablePath","join_as_strings",
-"get_repr","read_from_clipboard",
-]
+# Soothsayer
+import soothsayer_utils as syu
+
+functions_from_soothsayer_utils = [
+'assert_acceptable_arguments', 'boolean', 'consecutive_replace', 'contains', 'dict_build', 'dict_collapse', 'dict_expand', 'dict_fill', 'dict_filter', 'dict_reverse', 'dict_tree',
+'flatten', 'format_duration', 'format_header', 'format_path', 'fragment',  'get_timestamp', 'get_unique_identifier', 'hash_kmer', 'infer_compression', 'is_all_same_type',
+'is_dict', 'is_dict_like', 'is_file_like', 'is_function', 'is_in_namespace', 'is_nonstring_iterable', 'is_number', 'is_path_like', 'is_query_class', 'iterable_depth', 'join_as_strings',
+'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages"]
+
+__all__ = {'pd_series_to_groupby_to_dataframe', 'pd_dropduplicates_index', 'generate_random_sequence', 'get_iris_data', 'is_color', 'add_cbar_from_data', 'get_coords_contour', 'get_repr', 'get_parameters_ellipse', 'DIVERGING_KWS', 'determine_mode_for_logfiles', 'create_logfile', 'is_symmetrical', 'pd_dataframe_matmul', 'dataframe_to_matrixstring', 'infer_cmap', 'pd_dataframe_extend_index', 'configure_scatter', 'CMAP_DIVERGING', 'pd_series_collapse', 'is_graph', 'format_filename', 'pd_series_filter', 'map_colors', 'rgb_to_rgba', 'LEGEND_KWS', 'force_symmetry', 'is_rgb_like', 'COLOR_POSITIVE', 'Chromatic', 'COLOR_NEGATIVE', 'infer_vmin_vmax', 'pd_dataframe_query', 'get_coords_centroid', 'filter_compositional', 'scalarmapping_from_data', 'infer_continuous_type', 'format_mpl_legend_handles'}
+
+for function_name in functions_from_soothsayer_utils:
+    globals()[function_name] = getattr(syu, function_name)
+    __all__.add(function_name)
 __all__ = sorted(__all__)
 
 
@@ -39,52 +45,20 @@ LEGEND_KWS = {'fontsize': 15, 'frameon': True, 'facecolor': 'white', 'edgecolor'
 DIVERGING_KWS = dict(h_neg=220, h_pos=15, sep=20, s=90, l=50)
 CMAP_DIVERGING = sns.diverging_palette(**DIVERGING_KWS, as_cmap=True)
 COLOR_NEGATIVE, COLOR_POSITIVE = sns.diverging_palette(**DIVERGING_KWS, n=2).as_hex()
-# =========
-# Clipboard
-# =========
-def read_from_clipboard(sep="\n", into=list):
-    data = pd.io.clipboard.clipboard_get()
-    if sep is not None:
-        return into(filter(bool, map(lambda x:x.strip(), data.split(sep))))
-    else:
-        return data
+
+
+# # ===========
+# # Assertions
+# # ===========
 
 # ===========
-# Assertions
-# ===========
-def assert_acceptable_arguments(query, target, operation="le", message=f"Invalid option provided.  Please refer to the following for acceptable arguments:"):
-    """
-    le: operator.le(a, b) : <=
-    eq: operator.eq(a, b) : ==
-    ge: operator.ge(a, b) : >=
-    """
-    if not is_nonstring_iterable(query):
-        query = [query]
-    query = set(query)
-    target = set(target)
-    func_operation = getattr(operator, operation)
-    assert func_operation(query,target), "{}\n{}".format(message, target)
-# ===========
-# Types
-# ===========
-def is_function(obj):
-    return hasattr(obj, "__call__")
-def is_file_like(obj):
-    return hasattr(obj, "read")
-def is_dict(obj):
-    return isinstance(obj, Mapping)
+# # Types
+# # ===========
 def is_rgb_like(c):
     condition_1 = type(c) != str
     condition_2 = len(c) in [3,4]
     return all([condition_1, condition_2])
-def is_nonstring_iterable(obj):
-    condition_1 = hasattr(obj, "__iter__")
-    condition_2 =  not type(obj) == str
-    return all([condition_1,condition_2])
-def is_dict_like(obj):
-    condition_1 = is_dict(obj)
-    condition_2 = isinstance(obj, pd.Series)
-    return any([condition_1, condition_2])
+
 def is_color(obj):
     # Note: This can't handle values that are RGB in (0-255) only (0,1)
     try:
@@ -99,66 +73,9 @@ def is_color(obj):
         return verdict
 def is_graph(obj):
     return hasattr(obj, "has_edge")
-def is_all_same_type(iterable):
-    iterable_types = set(map(lambda obj:type(obj), iterable))
-    return len(iterable_types) == 1
+
 def is_number(x, num_type = np.number):
     return np.issubdtype(type(x), num_type)
-def is_query_class(x,query, case_sensitive=False):
-    # Format single search queries
-    if type(query) == str:
-        query = [query]
-    # Remove case if necessary
-    x_classname = str(x.__class__)
-    if not case_sensitive:
-        x_classname = x_classname.lower()
-        query = map(lambda q:q.lower(),query)
-    # Check if any of the tags in query are in the input class
-    verdict = any(q in x_classname for q in query)
-    return verdict
-def is_path_like(obj, path_must_exist=True):
-    condition_1 = type(obj) == str
-    condition_2 = hasattr(obj, "absolute")
-    condition_3 = hasattr(obj, "path")
-    obj_is_path_like = any([condition_1, condition_2, condition_3])
-    if path_must_exist:
-        if obj_is_path_like:
-            return os.path.exists(obj)
-        else:
-            return False
-    else:
-        return obj_is_path_like
-# def is_symmetrical(X:pd.DataFrame, tol=None):
-#     if X.shape[0] != X.shape[1]:
-#         return False
-#     if X.shape[0] == X.shape[1]:
-#         if tol is None:
-#             return np.all(np.tril(X) == np.triu(X).T)
-#         if tol:
-#             return (np.tril(X) - np.triu(X).T).ravel().min() < tol
-def is_in_namespace(variable_names, namespace, func_logic=all):
-    """
-    Check if variable names are in the namespace (i.e. globals())
-    """
-    assert hasattr(variable_names, "__iter__"), f"`variable_names` should be either a single string on an object or an iterable of strings of variable names"
-    if type(variable_names) == str:
-        variable_names = [variable_names]
-    namespace = set(namespace)
-    return func_logic(map(lambda x: x in namespace, variable_names))
-# Boolean
-def boolean(x, true_values={"true", "t", "yes", "1"}, false_values={"false", "f", "no", "0"}, assertion_message="Please choose either: 'True' or 'False'"):
-    """
-    Not case sensitive
-    """
-    x = str(x).lower()
-    option = None
-    if x in list(map(str,true_values)):
-        option = True
-    if x in list(map(str,false_values)):
-        option = False
-    assert option is not None, assertion_message
-    return option
-
 
 # =============
 # Checks
@@ -184,105 +101,11 @@ def generate_random_sequence(size:int=100, alphabet=["A","T", "C", "G"], weights
     rs = np.random.RandomState(random_state)
     x = np.random.choice(alphabet, size=size, replace=True, p=weights)
     return "".join(x)
-# Truncate a float by a certain precision
-def to_precision(x, precision=5, into=float):
-    return into(("{0:.%ie}" % (precision-1)).format(x))
-# Get duration
-def format_duration(start_time):
-    """
-    Adapted from @john-fouhy:
-    https://stackoverflow.com/questions/538666/python-format-timedelta-to-string
-    """
-    duration = time.time() - start_time
-    hours, remainder = divmod(duration, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return "{:02}:{:02}:{:02}".format(int(hours), int(minutes), int(seconds))
-# Get current timestamp
-def get_timestamp(fmt="%Y-%m-%d %H:%M:%S"):
-    return datetime.datetime.utcnow().strftime(fmt)
+
 # For ete3 ClusterNode
 def dataframe_to_matrixstring(df):
     return df.to_csv(None, sep="\t",index_label="#Names")
-# Left padding
-def pad_left(x, block_size=3, fill=0):
-    """
-    Pad a string representation of digits
-    """
-    if len(x) > block_size:
-        return x
-    else:
-        right = np.array(list(str(x)))
-        left = np.repeat(str(fill), block_size - right.size )
-        return "".join(np.concatenate([left, right]))
-# Join as strings
-def join_as_strings(*args, delimiter:str="_" ):
-    return delimiter.join(list(map(str, args)))
-# =============
-# Iterables
-# =============
-# Fragment a sequence string
-def fragment(seq:str, K:int=5, step:int=1, overlap:bool=False):
-    K = int(K)
-    step = int(step)
-    if not overlap:
-        step = K
-    iterable = range(0, len(seq) - K + 1, step)
-    for i in iterable:
-        frag = seq[i:i+K]
-        yield frag
 
-# Get depth of an iterable
-def iterable_depth(arg, exclude=None):
-    # Adapted from the following SO post:
-    # https://stackoverflow.com/questions/6039103/counting-depth-or-the-deepest-level-a-nested-list-goes-to
-    # @marco-sulla
-    exclude = set([str])
-    if exclude is not None:
-        if not hasattr(exclude, "__iter__"):
-            exclude = [exclude]
-        exclude.update(exclude)
-
-    if isinstance(arg, tuple(exclude)):
-        return 0
-
-    try:
-        if next(iter(arg)) is arg:  # avoid infinite loops
-            return 1
-    except TypeError:
-        return 0
-
-    try:
-        depths_in = map(lambda x: iterable_depth(x, exclude), arg.values())
-    except AttributeError:
-        try:
-            depths_in = map(lambda x: iterable_depth(x, exclude), arg)
-        except TypeError:
-            return 0
-    try:
-        depth_in = max(depths_in)
-    except ValueError:
-        depth_in = 0
-
-    return 1 + depth_in
-
-# Flatten nested iterables
-def flatten(nested_iterable, into=list, **args_iterable):
-    # Adapted from @wim:
-    # https://stackoverflow.com/questions/16312257/flatten-an-iterable-of-iterables
-    def _func_recursive(nested_iterable):
-        for x in nested_iterable:
-            if hasattr(x, "__iter__") and not isinstance(x, str):
-                yield from flatten(x)
-            else:
-                yield x
-    # Unpack data
-    data_flattened = [*_func_recursive(nested_iterable)]
-    # Convert type
-    return into(data_flattened, **args_iterable)
-
-# Range like input data
-def range_like(data, start=0):
-    return np.arange(len(data)) + start
 
 # =====
 # Formatting
@@ -310,28 +133,7 @@ def format_filename(name, replace="_"):
     idx_nonalnum = [*map(lambda x: x.isalnum() == False,  Ar_name)]
     Ar_name[idx_nonalnum] = replace
     return "".join(Ar_name)
-# Format file path
-def format_path(path, into=str):
-    assert not is_file_like(path), "`path` cannot be file-like"
-    if hasattr(path, "absolute"):
-        path = str(path.absolute())
-    if hasattr(path, "path"):
-        path = str(path.path)
-    return into(path)
 
-# Format header for printing
-def format_header(text:str, line_character="=", n=None):
-    if n is None:
-        n = len(text)
-    line = n*line_character
-    return "{}\n{}\n{}".format(line, text, line)
-# Consecutive replace on a string
-def consecutive_replace(x:str, *patterns):
-    if len(patterns) == 1:
-        patterns = patterns[0]
-    for (a,b) in patterns:
-        x = x.replace(a,b)
-    return x
 
 # Get repr for custom classes
 def get_repr(class_name, instance_name=None, *args):
@@ -340,65 +142,6 @@ def get_repr(class_name, instance_name=None, *args):
     for field in args:
         info += "\n\t* {}".format(field)
     return info
-# ============
-# Dictionaries
-# ============
-# Dictionary as a tree
-def dict_tree():
-    """
-    Source: https://gist.github.com/hrldcpr/2012250
-    """
-    return defaultdict(dict_tree)
-
-# Reverse a dictionary
-def dict_reverse(d):
-    into = type(d)
-    data = [(v,k) for k,v in d.items()]
-    return into(data)
-
-# Expand dictionary
-def dict_expand(d, into=pd.Series, *args):
-    """
-    Convert {group:[elements]} ==> {element[i]:group[j]}
-    """
-    return into(OrderedDict((r,p) for p,q in d.items() for r in q), *args)
-
-# Fill dictionary
-def dict_fill(d, index, filler_value="#FFFFF0", into=dict):
-    data = [(k,filler_value) for k in index if k not in d] + list(d.items()) #"#8e8f99"
-    return into(data)
-
-# Build a dictionary from repeated elements
-def dict_build(input_data, into=dict):
-    """
-    input_data: [(value, iterable)]
-    d_output: {key_in_iterable:value}
-    """
-    d_output = OrderedDict()
-    for value, iterable in input_data:
-        for key in iterable:
-            d_output[key] = value
-    return into(d_output)
-
-# Fold dictionary
-def dict_collapse(d, into=dict):
-    """
-    Folds dictionary into dict of lists
-    """
-    d_collapsed = defaultdict(list)
-    for k,v in d.items():
-        d_collapsed[v].append(k)
-    return into(d_collapsed)
-
-# Subset a dictionary
-def dict_filter(d, keys, into=dict):
-    """
-    keys can be an iterable or function
-    """
-    if hasattr(keys, "__call__"):
-        f = keys
-        keys = filter(f, d.keys())
-    return into(map(lambda k:(k,d[k]), keys))
 
 
 # ======
@@ -1085,7 +828,7 @@ def pd_dataframe_query(df:pd.DataFrame, conditions, mode="all"):
     masks = list()
     for key, condition in conditions.items():
         masks.append(df[key].map(condition))
-    idx_query = pd.DataFrame(masks).sum(axis=0).compress(lambda x: x >= tol).index
+    idx_query = pd.DataFrame(masks).sum(axis=0)[lambda x: x >= tol].index
     return df.loc[idx_query,:]
 
 # Matrix Multiplication
@@ -1123,24 +866,10 @@ def pd_dropduplicates_index(data, keep="first", axis=0):
         data = data.T
         return data[~data.index.duplicated(keep=keep)].T
 
-# =======
-# Filters
-# =======
-def contains(query, include, exclude=None):
-    """
-    Is anything from `include` in `query` that doesn't include anything from `exclude`
-    `query` can be any iterator that is not a generator
-    """
-    if type(include) == str:
-        include = [include]
-    condition_A = any(x in query for x in include)
-    if exclude is not None:
-        if type(exclude) == str:
-            exclude = [exclude]
-        condition_B = all(x not in query for x in exclude)
-        return all([condition_A, condition_B])
-    else:
-        return condition_A
+# # =======
+# # Filters
+# # =======
+
 
 # Filter composition 2D data
 def filter_compositional(
@@ -1167,7 +896,7 @@ def filter_compositional(
 
 
     def _get_elements(data,tol,operation):
-        return data.compress(lambda x: operation(x,tol)).index
+        return data[lambda x: operation(x,tol)].index
 
     def _filter_depth(X, tol, operation):
         data = X.sum(axis=1)
@@ -1257,340 +986,3 @@ def get_iris_data(return_data=["X", "y", "colors"], noise=None, return_target_na
         return output[0]
     else:
         return tuple(output)
-# ===============
-# Shell utilities
-# ===============
-# View directory structures
-class DisplayablePath(object):
-    """
-    Display the tree structure of a directory.
-
-    Implementation adapted from the following sources:
-        * Credits to @abstrus
-        https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
-    """
-    display_filename_prefix_middle = '├──'
-    display_filename_prefix_last = '└──'
-    display_parent_prefix_middle = '    '
-    display_parent_prefix_last = '│   '
-
-    def __init__(self, path, parent_path, is_last):
-        self.path = pathlib.Path(str(path))
-        self.parent = parent_path
-        self.is_last = is_last
-        if self.parent:
-            self.depth = self.parent.depth + 1
-        else:
-            self.depth = 0
-
-    @property
-    def displayname(self):
-        if self.path.is_dir():
-            return self.path.name + '/'
-        return self.path.name
-
-    @classmethod
-    def make_tree(cls, root, parent=None, is_last=False, criteria=None):
-        root = pathlib.Path(str(root))
-        criteria = criteria or cls._default_criteria
-
-        displayable_root = cls(root, parent, is_last)
-        yield displayable_root
-
-        children = sorted(list(path
-                               for path in root.iterdir()
-                               if criteria(path)),
-                          key=lambda s: str(s).lower())
-        count = 1
-        for path in children:
-            is_last = count == len(children)
-            if path.is_dir():
-                yield from cls.make_tree(path,
-                                         parent=displayable_root,
-                                         is_last=is_last,
-                                         criteria=criteria)
-            else:
-                yield cls(path, displayable_root, is_last)
-            count += 1
-
-    @classmethod
-    def _default_criteria(cls, path):
-        return True
-
-    @property
-    def displayname(self):
-        if self.path.is_dir():
-            return self.path.name + '/'
-        return self.path.name
-
-    def displayable(self):
-        if self.parent is None:
-            return self.displayname
-
-        _filename_prefix = (self.display_filename_prefix_last
-                            if self.is_last
-                            else self.display_filename_prefix_middle)
-
-        parts = ['{!s} {!s}'.format(_filename_prefix,
-                                    self.displayname)]
-
-        parent = self.parent
-        while parent and parent.parent is not None:
-            parts.append(self.display_parent_prefix_middle
-                         if parent.is_last
-                         else self.display_parent_prefix_last)
-            parent = parent.parent
-
-        return ''.join(reversed(parts))
-
-    # Additions by Josh L. Espinoza for Soothsayer
-    @classmethod
-    def get_ascii(cls, root):
-        ascii_output = list()
-        paths = cls.make_tree(root)
-        for path in paths:
-            ascii_output.append(path.displayable())
-        return "\n".join(ascii_output)
-    @classmethod
-    def view_directory_tree(cls, root, file=sys.stdout):
-        print(cls.get_ascii(root), file=file)
-
-# Directory size
-def get_directory_size(path_directory='.'):
-    """
-    Adapted from @Chris:
-    https://stackoverflow.com/questions/1392413/calculating-a-directorys-size-using-python
-    """
-    path_directory = format_path(path_directory)
-
-    total_size = 0
-    seen = {}
-    for dirpath, dirnames, filenames in os.walk(path_directory):
-        for f in filenames:
-            fp = os.path.join(dirpath, f)
-            try:
-                stat = os.stat(fp)
-            except OSError:
-                continue
-
-            try:
-                seen[stat.st_ino]
-            except KeyError:
-                seen[stat.st_ino] = True
-            else:
-                continue
-
-            total_size += stat.st_size
-
-    return total_size
-
-# Bash commands
-class Command(object):
-    """
-    Run bash commands and stuff.
-
-    Recommended usage:
-    ------------------
-    with open("test_commands.sh", "w") as f_cmds:
-        cmd = Command("echo ':)' > testing_output.txt", name="TEST", f_cmds=f_cmds)
-        cmd.run(epilogue="footer", prologue="header", checkpoint="testing_output.txt.checkpoint")
-
-    or
-
-    f_cmds = open("test_commands.sh", "w")
-    cmd = Command("echo ':)'' > testing_output.txt", name="TEST", f_cmds=f_cmds)
-    cmd.run(epilogue="footer", prologue="header", checkpoint="testing_output.txt.checkpoint")
-    f_cmds.close()
-
-    Just in case you need a quick one-liner [not recommended but works]:
-    -------------------------------------------------------------------
-    cmd = Command("echo ':)'' > testing_output.txt", name="TEST", f_cmds="test_commands.sh")
-    cmd.run(epilogue="footer", prologue="header", checkpoint="testing_output.txt.checkpoint").close()
-
-    or
-
-    cmd = Command("echo ':)'' > testing_output.txt", name="TEST", f_cmds="test_commands.sh")
-    cmd.run(epilogue="footer", prologue="header", checkpoint="testing_output.txt.checkpoint")
-    cmd.close()
-
-    Future:
-    -------
-    * Create an object called ExecutablePipeline that wraps Command objects together
-    * Something like this:
-        ep = ExecutablePipeline(name="RNA-seq mapping", description="Quality trim, remove contaminants, and map reads to reference")
-        # This method
-        ep.create_step(name="kneaddata", pos=1, checkpoint="path/to/checkpoint", write_stdout="path/to/stdout", write_stderr="path/to/stderr", write_returncode="path/to/returncode")
-        ep["kneaddata"].set_inputs(*?)
-        ep["kneaddata"].set_outputs(*?)
-        # or this method
-        ep.create_step(name="kneaddata", pos=1, checkpoint="path/to/checkpoint", write_stdout="path/to/stdout", write_stderr="path/to/stderr", write_returncode="path/to/returncode", inputs=*?, outputs=*?)
-        ep.execute(?*)
-
-    Here is an example for constructing pipelines:
-    -------------------------------------------------------------------
-    # =========
-    # Utility
-    # =========
-    def process_command(cmd, f_cmds, logfile_name, description, directories, io_filepaths):
-        start_time = time.time()
-        # Info
-        program = logfile_name.split("_")[-1]
-        print(description, file=sys.stdout)
-        print("Input: ", io_filepaths[0], "\n", "Output: ", io_filepaths[1], sep="", file=sys.stdout)
-        print("Command: ", " ".join(cmd), file=sys.stdout)
-        executable = Command(cmd, name=logfile_name, description=description, f_cmds=f_cmds)
-        executable.run(
-            prologue=format_header(program, "_"),
-            dry="infer",
-            errors_ok=False,
-            error_message="Check the following files: {}".format(os.path.join(directories["log"], "{}.*".format(logfile_name))),
-            checkpoint=os.path.join(directories["checkpoints"], "{}".format(logfile_name)),
-            write_stdout=os.path.join(directories["log"], "{}.o".format(logfile_name)),
-            write_stderr=os.path.join(directories["log"], "{}.e".format(logfile_name)),
-            write_returncode=os.path.join(directories["log"], "{}.returncode".format(logfile_name)),
-            f_verbose=sys.stdout,
-        )
-        print("Duration: {}".format(executable.duration_), file=sys.stdout)
-        return executable
-    # =========
-    # Kneaddata
-    # =========
-    program = "kneaddata"
-
-    # Add to directories
-    output_directory = directories[("intermediate", program)] = create_directory(os.path.join(directories["intermediate"], "{}_output".format(program)))
-
-    # Info
-    step = "1"
-    logfile_name = "{}_{}".format(step, program)
-    description = "{}. {} | Removing human associated reads and quality trimming".format(step, program)
-
-    # i/o
-    input_filepath = [opts.r1, opts.r2]
-    output_filename = ["kneaddata_repaired_1.fastq.gz", "kneaddata_repaired_2.fastq.gz"]
-    output_filepath = list(map(lambda filename: os.path.join(output_directory, filename), output_filename))
-    io_filepaths = [input_filepath,  output_filepath]
-
-    # Parameters
-    params = {
-        "reads_r1":input_filepath[0],
-        "reads_r2":input_filepath[1],
-        "output_directory":output_directory,
-        "opts":opts,
-        "directories":directories,
-    }
-    cmd = get_kneaddata_cmd(**params)
-    process = process_command(cmd, f_cmds=f_cmds, logfile_name=logfile_name, description=description, directories=directories, io_filepaths=io_filepaths)
-    sys.stdout.flush()
-
-    """
-    def __init__(self, *args, name=None, description=None, f_cmds=sys.stdout):
-        if len(args) == 1:
-            args = args[0]
-            if isinstance(args, str):
-                args = [args]
-        cmd = " ".join(args)
-        self.cmd = cmd
-        if not is_file_like(f_cmds):
-            f_cmds = open(f_cmds, "w")
-        self.f_cmds = f_cmds
-        self.name = name
-        self.description = description
-
-    def __repr__(self):
-        class_name = str(self.__class__)[17:-2]
-        return '{}(name={}, description={}, cmd="{}")'.format(class_name, self.name, self.description, self.cmd)
-    def close(self):
-        self.f_cmds.close()
-        return self
-    def _write_output(self, data, filepath):
-        if filepath is not None:
-            if not is_file_like(filepath):
-                filepath = format_path(filepath)
-                f_out = open(filepath, "w")
-            else:
-                f_out = filepath
-            print(data, file=f_out)
-            if f_out not in {sys.stdout, sys.stderr}:
-                f_out.close()
-
-    # Run command
-    def run(self, prologue=None, epilogue=None, errors_ok=False, dry="infer", checkpoint=None, write_stdout=None, write_stderr=None, write_returncode=None, close_file=False, checkpoint_message_notexists="Running...", checkpoint_message_exists="Loading...", error_message=None, f_verbose=sys.stdout):
-        """
-        Should future versions should have separate prologue and epilogue for f_cmds and f_verbose?
-        """
-        # ----------
-        # Checkpoint
-        # ----------
-        if checkpoint is not None:
-            checkpoint = format_path(checkpoint)
-        if dry == "infer":
-            dry = False
-            if checkpoint is not None:
-                if os.path.exists(checkpoint):
-                    dry = True
-                    if checkpoint_message_exists is not None:
-                        print(checkpoint_message_exists, file=f_verbose)
-                        f_verbose.flush()
-                else:
-                    if checkpoint_message_notexists is not None:
-                        print(checkpoint_message_notexists, file=f_verbose)
-                        f_verbose.flush()
-
-        # ----
-        # Info
-        # ----
-        if self.f_cmds is not None:
-            # Prologue
-            if prologue is not None:
-                self.prologue_ = prologue
-                print("#", prologue, file=self.f_cmds)
-            # Command
-            print(self.cmd, file=self.f_cmds)
-            # Epilogue
-            if epilogue is not None:
-                self.epilogue_ = epilogue
-                print("#", epilogue, file=self.f_cmds)
-            self.f_cmds.flush()
-            if self.f_cmds not in {sys.stdout, sys.stderr}:
-                os.fsync(self.f_cmds.fileno())
-        # Run
-        if not dry:
-            start_time = time.time()
-            self.process_ = subprocess.Popen(self.cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            self.process_.wait()
-            self.returncode_ = self.process_.returncode
-            self.duration_ = format_duration(start_time)
-
-            # stdout
-            self.stdout_ = self.process_.stdout.read()
-            if isinstance(self.stdout_, bytes):
-                self.stdout_ = self.stdout_.decode("utf-8")
-            self._write_output(data=self.stdout_, filepath=write_stdout)
-            # stderr
-            self.stderr_ = self.process_.stderr.read()
-            if isinstance(self.stderr_, bytes):
-                self.stderr_ = self.stderr_.decode("utf-8")
-            self._write_output(data=self.stderr_, filepath=write_stderr)
-            # Return code
-            self._write_output(data=self.returncode_, filepath=write_returncode)
-
-            # Check
-            if not errors_ok:
-                if self.returncode_ != 0:
-                    # print('\nThe following command failed with returncode = {}:\n"{}"'.format(self.returncode_, self.cmd), file=f_verbose)
-                    if error_message is not None:
-                        print(error_message, file=f_verbose)
-                    sys.exit(self.returncode_)
-
-            # Create checkpoint
-            if checkpoint is not None:
-                if self.returncode_ == 0:
-                    duration = format_duration(start_time)
-                    with open(checkpoint, "w") as f_checkpoint:
-                        print(get_timestamp(), duration, file=f_checkpoint)
-        # Close file object
-        if self.f_cmds not in {None, sys.stdout, sys.stderr}:
-            if close_file:
-                self.close()
-        return self

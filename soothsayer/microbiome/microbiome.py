@@ -202,7 +202,7 @@ class PhylogenomicFunctionalComponents(object):
         # Datasets
         self.datasets = OrderedDict()
     def __repr__(self):
-        class_name = str(self.__name__)
+        class_name = str(self.__class__).split(".")[-1][:-2]
         return f"{class_name}(name:{self.name}, num_datasets:{len(self.datasets)}, num_pgfcs:{self.metadata.shape[0]})"
 
     # Assign ORFS to each PGFC
@@ -461,7 +461,7 @@ def infer_taxonomy(
         max_score = scores.max()
         d_seqgroup_inferred[id_seqgroup]["score"] = max_score
         if max_score < 1:
-            max_scoring_taxa = scores.compress(lambda x: x == max_score).index
+            max_scoring_taxa = scores[lambda x: x == max_score].index
             if max_scoring_taxa.size > 1:
                 inferred_taxonomy = list(max_scoring_taxa) # Added 2018-11-30
             else:

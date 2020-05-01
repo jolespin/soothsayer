@@ -17,11 +17,12 @@ from scipy import stats
 from scipy.spatial.distance import squareform
 from teneto import TemporalNetwork as TenetoTemporalNetwork
 from tqdm import tqdm
+from skbio.util._decorator import experimental, stable
 
 # Soothsayer
 from ..symmetry import *
 from ..utils import *
-from ..r_wrappers.packages.WGCNA import TOMsimilarity, pickSoftThreshold_fromSimilarity
+from ..r_wrappers.packages.WGCNA import pickSoftThreshold_fromSimilarity
 from ..visuals import plot_scatter, bezier_points
 from ..transmute.normalization import normalize_minmax
 from ..io import write_object
@@ -32,6 +33,7 @@ __all__ = ["Hive", "intramodular_connectivity", "topological_overlap_measure", "
 __all__ = sorted(__all__)
 
 # Network Edge
+@experimental(as_of="2019.08")
 class Edge(tuple):
 
     """
@@ -900,7 +902,7 @@ def intramodular_connectivity(kernel, clusters:pd.Series, include_self_loops=Fal
     #kWithin
     _data = list()
     for cluster in clusters.unique():
-        idx_attrs = clusters.compress(lambda x: x == cluster).index
+        idx_attrs = clusters[lambda x: x == cluster].index
         kWithin__cluster = kernel.loc[idx_attrs,idx_attrs].sum(axis=1)
         _data.append(kWithin__cluster)
     data_connectivity["kWithin"] = pd.concat(_data)
@@ -921,7 +923,7 @@ def signed(X):
     return (X + 1)/2
 
 # Topological overlap
-def topological_overlap_measure(adjacency):
+def topological_overlap_measure(adjacency, tol=1e-10):
     """
     Compute the topological overlap for a weighted adjacency matrix
 
@@ -969,7 +971,7 @@ def topological_overlap_measure(adjacency):
         node_labels = adjacency.index
 
     # Check input type
-    assert is_symmetrical(adjacency, tol=1e-10), "`adjacency` is not symmetric"
+    assert is_symmetrical(adjacency, tol=tol), "`adjacency` is not symmetric"
     assert np.all(adjacency >= 0), "`adjacency` weights must ≥ 0"
 
     # Compute TOM

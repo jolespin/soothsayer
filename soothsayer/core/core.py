@@ -26,7 +26,7 @@ class Dataset(object):
         ds_iris = Dataset(X_iris, name="Iris", metadata_observations=y_iris, description="iris dataset", obsv_type="iris samples", attr_type="leaf lengths", metric_type="cm")
         ds_iris.add_version(name_version="zscore", data=normalize(X_iris, "zscore", axis=0), notes="normalized across axis=0")
         ds_iris.set_metadata_target("Species")
-        ds_iris.add_indexing_subset("versicolor", ds_iris.y.compress(lambda x: x == "virginica").index, axis=0)
+        ds_iris.add_indexing_subset("versicolor", ds_iris.y[lambda x: x == "virginica"].index, axis=0)
         ds_iris.add_indexing_subset("sepal", ['sepal_length', 'sepal_width'], axis=1)
 
         # Initial dataset

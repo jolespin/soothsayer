@@ -27,15 +27,15 @@ except ImportError:
     print("Could not import `linkage` from `fastcluster` and using `scipy.cluster.hierarchy.linkage` instead", file=sys.stderr)
 
 # Statistics and Miscellaneous Machine Learning
-from astropy.stats import biweight_midcorrelation, median_absolute_deviation
+# from astropy.stats import biweight_midcorrelation, median_absolute_deviation
 from sklearn.metrics.pairwise import pairwise_distances
 
 # Soothsayer
 from ..transmute.conversion import linkage_to_newick, name_ete_nodes
-from ..r_wrappers.packages.WGCNA import bicor
-from ..utils import is_symmetrical, force_symmetry
+# from ..r_wrappers.packages.WGCNA import bicor
+from ..utils import is_symmetrical, force_symmetry, assert_acceptable_arguments
 
-__all__ = ["Symmetric", "pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise_logfc", "dense_to_condensed"]
+__all__ = ["Symmetric", "pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise_logfc","pairwise_biweight_midcorrelation", "dense_to_condensed", "condensed_to_dense"]
 __all__ = sorted(__all__)
 
 
@@ -46,9 +46,23 @@ def dense_to_condensed(X, name=None, assert_symmetry=True, tol=None):
     if assert_symmetry:
         assert is_symmetrical(X, tol=tol), "`X` is not symmetric with tol=`{}`".format(tol)
     labels = X.index
-    index=pd.Index([*map(frozenset,itertools.combinations(labels, 2))], name=name)
+    index=pd.Index(list(map(frozenset,itertools.combinations(labels, 2))), name=name)
     data = distance.squareform(X, checks=False)
     return pd.Series(data, index=index, name=name)
+
+def condensed_to_dense(y:pd.Series, fill_diagonal=np.nan, index=None):
+    # Need to optimize this
+    data = defaultdict(dict)
+    for edge, w in y.iteritems():
+        node_a, node_b = tuple(edge)
+        data[node_a][node_b] = data[node_b][node_a] = w
+    for node in data:
+        data[node][node] = fill_diagonal
+    df_dense = pd.DataFrame(data)
+    if index is None:
+        index = data.keys()
+    df_dense = df_dense.loc[index,index]
+    return df_dense
 
 # Symmetrical dataframes represented as augment pd.Series
 class Symmetric(object):
@@ -334,10 +348,10 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="
             fill_diagonal = 0.0
             break
         # Biweight midcorrelation
-        if metric == "bicor":
-            metric = biweight_midcorrelation
+        if metric in {"bicor", "biweight_midcorrelation"}:
             try:
-                df_dense = bicor(X_copy.T, condensed=False, self_interactions=True)
+                # df_dense = bicor(X_copy.T, condensed=False, self_interactions=True)
+                df_dense = pairwise_biweight_midcorrelation(X_copy.T)
                 break
             except:
                 pass
@@ -453,3 +467,87 @@ def pairwise_logfc(X:pd.DataFrame, idx_ctrl, idx_treatment, func_log=np.log2, na
     idx_pairwise_labels = itertools.product(idx_treatment, idx_ctrl)
     names = [name_treatment, name_ctrl]
     return pd.DataFrame(logfc_profiles, index=pd.MultiIndex.from_tuples(idx_pairwise_labels, names=names), columns=idx_attr)
+
+# Biweight midcorrelation
+def pairwise_biweight_midcorrelation(X, use_numba="infer", verbose=False):
+    """
+    X: {np.array, pd.DataFrame}
+
+    Code adapted from the following sources:
+        * https://stackoverflow.com/questions/61090539/how-can-i-use-broadcasting-with-numpy-to-speed-up-this-correlation-calculation/61219867#61219867
+        * https://github.com/olgabot/pandas/blob/e8caf4c09e1a505eb3c88b475bc44d9389956585/pandas/core/nanops.py
+
+    Special thanks to the following people:
+        * @norok2 (https://stackoverflow.com/users/5218354/norok2) for optimization (vectorization and numba)
+        * @olgabot (https://github.com/olgabot) for NumPy implementation
+
+    Benchmarking:
+        * iris_features (4,4)
+            * numba: 159 ms ± 2.85 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+            * numpy: 276 µs ± 3.45 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+        * iris_samples: (150,150)
+            * numba: 150 ms ± 7.57 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+            * numpy: 686 µs ± 18.8 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+
+    Future:
+        * Handle missing values
+
+    """
+    # Data
+    result = None
+    labels = None
+    if isinstance(X, pd.DataFrame):
+        labels = X.columns
+        X = X.values
+
+    def _base_computation(A):
+        n, m = A.shape
+        A = A - np.median(A, axis=0, keepdims=True)
+        v = 1 - (A / (9 * np.median(np.abs(A), axis=0, keepdims=True))) ** 2
+        est = A * v ** 2 * (v > 0)
+        norms = np.sqrt(np.sum(est ** 2, axis=0))
+        return n, m, est, norms
+
+    # Check if numba is available
+    assert_acceptable_arguments(use_numba, {True, False, "infer"})
+    if use_numba == "infer":
+        if "numba" in sys.modules:
+            use_numba = True
+        else:
+            use_numba = False
+        if verbose:
+            print("Numba is available:", use_numba, file=sys.stderr)
+
+    # Compute using numba
+    if use_numba:
+        assert "numba" in sys.modules
+        from numba import jit
+
+        def _biweight_midcorrelation_numba(A):
+            @jit
+            def _condensed_to_dense(n, m, est, norms, result):
+                for i in range(m):
+                    for j in range(i + 1, m):
+                        x = 0
+                        for k in range(n):
+                            x += est[k, i] * est[k, j]
+                        result[i, j] = result[j, i] = x / norms[i] / norms[j]
+            n, m, est, norms = _base_computation(A)
+            result = np.empty((m, m))
+            np.fill_diagonal(result, 1.0)
+            _condensed_to_dense(n, m, est, norms, result)
+            return result
+
+        result = _biweight_midcorrelation_numba(X)
+    # Compute using numpy
+    else:
+        def _biweight_midcorrelation_numpy(A):
+            n, m, est, norms = _base_computation(A)
+            return np.einsum('mi,mj->ij', est, est) / norms[:, None] / norms[None, :]
+        result = _biweight_midcorrelation_numpy(X)
+
+    # Add labels
+    if labels is not None:
+        result = pd.DataFrame(result, index=labels, columns=labels)
+
+    return result

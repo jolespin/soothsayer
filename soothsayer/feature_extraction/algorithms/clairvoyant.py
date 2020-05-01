@@ -294,7 +294,7 @@ class Clairvoyant(object):
 
         self.shape_ = self.kernel_.shape
         max_accuracy = self.extract_hyperparameters()["accuracy"].max()
-        idx_maxacu = self.extract_hyperparameters()["accuracy"].compress(lambda x: x == max_accuracy).index
+        idx_maxacu = self.extract_hyperparameters()["accuracy"][lambda x: x == max_accuracy].index
         if len(idx_maxacu) > 1:
             if self.model_type == "logistic":
                 # Prefer l2 with higher C

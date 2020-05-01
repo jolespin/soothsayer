@@ -422,7 +422,7 @@ class Agglomerative(object):
                         return idx_leaves_query
 
                     else:
-                        return self.leaf_attributes[field].compress(lambda x: x == query).index
+                        return self.leaf_attributes[field][lambda x: x == query].index
 
             else:
                 return pd_series_collapse(self.leaf_attributes[field], type_collection=pd.Index)

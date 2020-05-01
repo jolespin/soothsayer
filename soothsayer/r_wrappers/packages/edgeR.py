@@ -14,14 +14,20 @@ from soothsayer.utils import *
 # ==============================================================================
 # R Imports
 # ==============================================================================
-from rpy2 import robjects, rinterface
+# from rpy2 import robjects, rinterface
+from rpy2 import robjects as ro
+from rpy2 import rinterface as ri
+
 from rpy2.robjects.packages import importr
-from rpy2.rinterface import RRuntimeError
+try:
+    from rpy2.rinterface import RRuntimeError
+except ImportError:
+    from rpy2.rinterface_lib.embedded import RRuntimeError
 from rpy2.robjects import pandas2ri
 pandas2ri.activate()
-R = robjects.r
-NULL = robjects.rinterface.NULL
-rinterface.set_writeconsole_regular(None)
+R = ro.r
+NULL = ri.NULL
+#rinterface.set_writeconsole_regular(None)
 
 # R packages
 edgeR = R_package_retrieve("edgeR")
@@ -63,7 +69,7 @@ def normalize_edgeR(X:pd.DataFrame, method:str="tmm", length:pd.Series=None, p=0
     idx_obsvs = X.columns
 
     # Convert pd.DataFrame to R-object
-    rX = pandas2ri.py2ri(X)
+    rX = pandas_to_rpy2(X)
     d = edgeR.DGEList(counts=rX)
 
     # Calculate NormFactors
@@ -71,6 +77,6 @@ def normalize_edgeR(X:pd.DataFrame, method:str="tmm", length:pd.Series=None, p=0
 
     # Normalized counts
     normalized_counts = edgeR.cpm(normalization_factors)
-    X_tmm = pd.DataFrame(pandas2ri.ri2py(normalized_counts), index=idx_attrs, columns=idx_obsvs).T
+    X_tmm = pd.DataFrame(rpy2_to_pandas(normalized_counts), index=idx_attrs, columns=idx_obsvs).T
 
     return X_tmm

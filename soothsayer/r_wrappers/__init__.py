@@ -5,5 +5,5 @@ from .packages import philr
 from .packages import edgeR
 from .packages import metagenomeSeq
 
-__all__ = ["dynamicTreeCut", "WGCNA", "philr", "edgeR", "metagenomeSeq" ,"R_package_retrieve", "R_packages"]
+__all__ = ["dynamicTreeCut", "WGCNA", "philr", "edgeR", "metagenomeSeq" ,"R_package_retrieve", "R_packages", "pandas_to_rpy2", "rpy2_to_pandas"]
 __all__ = sorted(__all__)

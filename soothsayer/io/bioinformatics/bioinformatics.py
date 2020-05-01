@@ -370,38 +370,34 @@ def _read_gtf_gff_base(path, compression, record_type, verbose):
     df_base.columns = ["seq_record", "source", "seq_type", "pos_start", "pos_end", ".1", "sense", ".2", "data_fields"]
     return df_base
 
-# Read GFF3 files
 def read_gff3(path:str, compression="infer", record_type=None, verbose = True, reset_index=False, name=True):
+    def f(x):
+        fields = x.split(";")
+        data = dict()
+        for item in fields:
+            k, v = item.split("=")
+            data[k] = v
+        return data
     path = format_path(path)
     if verbose:
-        print(f"Reading gff3 file:",path,sep="\t", file=sys.stderr)
+        print("Reading gff3 file:",path,sep="\t", file=sys.stderr)
     accepted_recordtypes = {"exon", "gene", "transcript", "protein", None}
-    assert record_type in accepted_recordtypes, f"Unrecognized record_type.  Please choose from the following: {accepted_recordtypes}"
+    assert record_type in accepted_recordtypes, "Unrecognized record_type.  Please choose from the following: {}".format(accepted_recordtypes)
 
     # Read the gff3 file
     df_base = _read_gtf_gff_base(path, compression, record_type, verbose)
 
     try:
-        # Splitting fields
-        if verbose:
-            # Should make this less confusing like the gtf reader
-            iterable_fields = tqdm(enumerate(df_base.iloc[:,-1].map(lambda x:dict([y.split("=") for y in x.split(";")])).as_matrix()), "Splitting fields")
-        else:
-            iterable_fields = enumerate(df_base.iloc[:,-1].map(lambda x:dict([y.split("=") for y in x.split(";")])).as_matrix())
-
-        df_fields = pd.DataFrame(OrderedDict([(i,pd.Series(v)) for i,v in iterable_fields])).T
-        df_gff3 = pd.concat([df_base.iloc[:,:7], df_fields], axis=1)
-
+        df_fields = pd.DataFrame(df_base["data_fields"].map(f).to_dict()).T
+        df_gff3 = pd.concat([df_base[["seq_record", "source", "seq_type", "pos_start", "pos_end", ".1", "sense", ".2"]], df_fields], axis=1)
          # Contains identifier
         if "ID" in df_gff3.columns:
-            df_gff3["seq_id"] = np.nan
-            mask_notnull = df_gff3["ID"].notnull()
-            df_gff3["seq_id"][mask_notnull] = df_gff3["ID"][mask_notnull].map(lambda id:id.split(":")[1])
-
+            df_gff3["seq_id"] = df_gff3["ID"].map(lambda x: "-".join(x.split("-")[1:]) if not pd.isnull(x) else x)
         if reset_index:
             df_gff3 = df_gff3.reset_index(drop=True)
     except IndexError:
-        warnings.warn("Could not successfully parse file")
+        warnings.warn("Could not successfully parse file: {}".format(path))
+        df_gff3 = df_base
 
     # Path index
     if name is not None:
@@ -423,10 +419,8 @@ def read_gtf(path:str, compression="infer", record_type=None, verbose = True, re
     df_base = _read_gtf_gff_base(path, compression, record_type, verbose)
 
     # Splitting fields
-    if verbose:
-        iterable_fields = tqdm(df_base.iloc[:,-1].iteritems(), "Splitting fields")
-    else:
-        iterable_fields =  df_base.iloc[:,-1].iteritems()
+    iterable_fields =  df_base.iloc[:,-1].iteritems()
+
     # Parse fields
     dataframe_build = dict()
     for i, gtf_data in iterable_fields:

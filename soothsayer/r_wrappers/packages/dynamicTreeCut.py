@@ -13,14 +13,20 @@ from soothsayer.utils import *
 # ==============================================================================
 # R Imports
 # ==============================================================================
-from rpy2 import robjects, rinterface
+# from rpy2 import robjects, rinterface
+from rpy2 import robjects as ro
+from rpy2 import rinterface as ri
+
 from rpy2.robjects.packages import importr
-from rpy2.rinterface import RRuntimeError
+try:
+    from rpy2.rinterface import RRuntimeError
+except ImportError:
+    from rpy2.rinterface_lib.embedded import RRuntimeError
 from rpy2.robjects import pandas2ri
 pandas2ri.activate()
-R = robjects.r
-NULL = robjects.rinterface.NULL
-rinterface.set_writeconsole_regular(None)
+R = ro.r
+NULL = ri.NULL
+#rinterface.set_writeconsole_regular(None)
 
 # R packages
 dynamicTreeCut = R_package_retrieve("dynamicTreeCut")
@@ -46,9 +52,9 @@ def cutree_dynamic(kernel, cut_method="hybrid", method="ward", minClusterSize=20
     if is_query_class(kernel, "Symmetric"):
         kernel = kernel.to_dense()
     if isinstance(kernel, pd.DataFrame):
-        rkernel = pandas2ri.py2ri(kernel)
+        rkernel = pandas_to_rpy2(kernel)
 
     Z = fastcluster.hclust(R["as.dist"](rkernel), method=method)
     treecut_output = dynamicTreeCut.cutreeDynamic(dendro=Z, method=cut_method, distM=rkernel, minClusterSize = minClusterSize, **args)
-    Se_treecut = pd.Series(pandas2ri.ri2py(treecut_output), index=kernel.index, name=name).astype(int)
+    Se_treecut = pd.Series(rpy2_to_pandas(treecut_output), index=kernel.index, name=name).astype(int)
     return (Se_treecut - 1).sort_values() # Make outliers -1 and largest cluster 0

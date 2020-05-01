@@ -4,7 +4,7 @@
 _________________________________
 
 #### Current Version:
-*v2020.01*
+*v2020.04.30*
 
 #### Citation:
 *Espinoza, *Dupont et al. 2020 (In Review)
@@ -19,7 +19,7 @@ Documentation coming soon. .. ... ..... ........
 **Please refer to the [installation manual](install/README.md) for installation details.**  
 It will make the installation process *much easier* due to all of the dependencies. 
 
-* conda: https://anaconda.org/jolespin/soothsayer
+* <s>conda: https://anaconda.org/jolespin/soothsayer</s>
 
 * pip: https://pypi.org/project/soothsayer
 
