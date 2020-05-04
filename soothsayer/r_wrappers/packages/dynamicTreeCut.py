@@ -23,7 +23,7 @@ try:
 except ImportError:
     from rpy2.rinterface_lib.embedded import RRuntimeError
 from rpy2.robjects import pandas2ri
-pandas2ri.activate()
+# pandas2ri.activate()
 R = ro.r
 NULL = ri.NULL
 #rinterface.set_writeconsole_regular(None)

@@ -16,12 +16,13 @@ rpy2_version_minor = int(rpy2_version.split(".")[1])
 # rpy2_version_micro = int(rpy2.__version__[2])
 if rpy2_version_major == 2:
     from rpy2.rinterface import RRuntimeError
+    pandas2ri.activate()
     ri.set_writeconsole_regular(None) # How do I do this v3?
 if rpy2_version_major == 3:
     from rpy2.rinterface_lib.embedded import RRuntimeError
     from rpy2.robjects.conversion import localconverter
 assert rpy2_version_major > 1, "Please update your rpy2 version"
-pandas2ri.activate()
+
 R = ro.r
 NULL = ri.NULL
 

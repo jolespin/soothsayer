@@ -46,11 +46,6 @@ DIVERGING_KWS = dict(h_neg=220, h_pos=15, sep=20, s=90, l=50)
 CMAP_DIVERGING = sns.diverging_palette(**DIVERGING_KWS, as_cmap=True)
 COLOR_NEGATIVE, COLOR_POSITIVE = sns.diverging_palette(**DIVERGING_KWS, n=2).as_hex()
 
-
-# # ===========
-# # Assertions
-# # ===========
-
 # ===========
 # # Types
 # # ===========
@@ -869,8 +864,6 @@ def pd_dropduplicates_index(data, keep="first", axis=0):
 # # =======
 # # Filters
 # # =======
-
-
 # Filter composition 2D data
 def filter_compositional(
     X:pd.DataFrame,

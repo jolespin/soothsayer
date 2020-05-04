@@ -285,6 +285,15 @@ def transform_xlr(X:pd.DataFrame, reference_components=None, centroid="log_mean"
             reference_components = columns
         reference_components = list(map(lambda component: columns.get_loc(component), reference_components))
         X_is_labeled = True
+        
+    # Check centroid
+    if X_is_labeled:
+        if not isinstance(centroid, str):
+            if is_dict(centroid):
+                centroid = pd.Series(centroid)
+            assert isinstance(centroid, pd.Series), "If `centroid` is dict-like/pd.Series then `X` must be a `pd.DataFrame`."
+            assert set(centroid.index) >= set(index), "Not all indicies from `centroid` are available in `X.index`."
+            centroid = centroid[index].values
 
     # Check for zeros
     X_contains_zeros = False
@@ -325,15 +334,6 @@ def transform_xlr(X:pd.DataFrame, reference_components=None, centroid="log_mean"
             centroid = np.asarray(list(map(lambda x:np.percentile(x, centroid), X_log[:,reference_components])))
     else:
         assert any([is_dict_like(centroid), np.ndarray]), "If centroid is not a string or a numeric value then it must be either a dict-like/pd.Series (labeled) or numpy array (unlabeled)"
-
-    # Labeled vector
-    if is_dict(centroid):
-        centroid = pd.Series(centroid)
-
-    if X_is_labeled:
-        assert isinstance(centroid, pd.Series), "If `centroid` is dict-like/pd.Series then `X` must be a `pd.DataFrame`."
-        assert set(centroid.index) >= set(index), "Not all indicies from `centroid` are available in `X.index`."
-        centroid = centroid[index].values
 
     # Check dimensions
     assert len(centroid) == X_log.shape[0], "Dimensionality is not compatible: centroid.size != X.shape[0]."

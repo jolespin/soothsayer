@@ -33,8 +33,9 @@
 # =======
 # Version
 # =======
-import sys
-__version__= "2020.04.30"
+import sys, time
+__version__= "2020.05.04"
+__moniker__ = "May the 4th be with you"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
@@ -42,7 +43,7 @@ __url__ = "https://github.com/jolespin/soothsayer"
 __cite__ = "https://github.com/jolespin/soothsayer"
 __license__ = "BSD-3"
 __developmental__ = True
-
+t0 = time.time()
 # =======
 # Shortcuts
 # =======
@@ -95,4 +96,4 @@ _utils = ["Chromatic"]
 __all__ = _submodules + _core + _hierarchy + _networks + _ordination + _symmetry + _utils
 __all__ = sorted(__all__)
 
-print("Soothsayer_v{}".format(__version__), file=sys.stderr)
+print("Soothsayer_v{} | {}".format(__version__, utils.format_duration(t0)), file=sys.stderr)
