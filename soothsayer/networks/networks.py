@@ -986,6 +986,7 @@ def topological_overlap_measure(adjacency, tol=1e-10):
         return pd.DataFrame(A_tom, index=node_labels, columns=node_labels)
 
 # Soft threshold curves
+@Suppress(show_stdout=False, show_stderr=True)
 def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True, query_powers = np.append(np.arange(1,10), np.arange(10,30,2)), style="seaborn-white", scalefree_threshold=0.85, pad=1.0, markeredgecolor="black"):
         """
         WGCNA: intramodularConnectivity

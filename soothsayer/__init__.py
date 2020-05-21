@@ -34,7 +34,7 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.05.04"
+__version__= "2020.05.20"
 __moniker__ = "May the 4th be with you"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
@@ -91,7 +91,7 @@ _hierarchy = ["Agglomerative", "Topology"]
 _networks = ["Hive", "TemporalNetwork"]
 _ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold"]
 _symmetry = ["Symmetric"]
-_utils = ["Chromatic"]
+_utils = ["Chromatic", "Suppress"]
 
 __all__ = _submodules + _core + _hierarchy + _networks + _ordination + _symmetry + _utils
 __all__ = sorted(__all__)

@@ -30,13 +30,26 @@ except ImportError:
 # from astropy.stats import biweight_midcorrelation, median_absolute_deviation
 from sklearn.metrics.pairwise import pairwise_distances
 
-# Soothsayer
-from ..transmute.conversion import linkage_to_newick, name_ete_nodes
-# from ..r_wrappers.packages.WGCNA import bicor
-from ..utils import is_symmetrical, force_symmetry, assert_acceptable_arguments
+# Compositional
+import compositional as coda
 
-__all__ = ["Symmetric", "pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise_logfc","pairwise_biweight_midcorrelation", "dense_to_condensed", "condensed_to_dense"]
+# Soothsayer
+from ..transmute.conversion import linkage_to_newick
+# from ..r_wrappers.packages.WGCNA import bicor
+from ..utils import is_symmetrical, force_symmetry, assert_acceptable_arguments, name_tree_nodes
+
+__all__ = {"Symmetric", "pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise_logfc","pairwise_biweight_midcorrelation", "dense_to_condensed", "condensed_to_dense"}
+
+functions_from_compositional = {"pairwise_vlr", "pairwise_rho","pairwise_phi"}
+
+
+for function_name in functions_from_compositional:
+    globals()[function_name] = getattr(coda, function_name)
+    __all__.add(function_name)
+
 __all__ = sorted(__all__)
+
+
 
 
 # =======================================================
@@ -243,7 +256,7 @@ class Symmetric(object):
         if not hasattr(self,"newick"):
             self.newick = linkage_to_newick(self.Z, self.labels)
         tree = into(newick=self.newick, name=self.name)
-        return name_ete_nodes(tree, node_prefix)
+        return name_tree_nodes(tree, node_prefix)
 
     def as_graph(self, graph=None):
         if graph is None:

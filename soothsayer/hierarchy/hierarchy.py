@@ -36,7 +36,7 @@ from ..r_wrappers.packages.dynamicTreeCut import cutree_dynamic
 from ..utils import *
 from ..ordination import PrincipalComponentAnalysis, eigenprofiles_from_data
 from ..symmetry import Symmetric, pairwise
-from ..transmute.conversion import linkage_to_newick, dism_to_linkage, ete_to_nx, name_ete_nodes
+from ..transmute.conversion import linkage_to_newick, dism_to_linkage, ete_to_nx
 from ..networks import intramodular_connectivity
 from ..tree import create_tree
 
@@ -179,7 +179,7 @@ class Agglomerative(object):
         self.tree = tree_type(newick=self.newick, **_tree_kws)
         self.tree.name = name # Hack for using ete3.ClusterTree objects b/c there's no name argument
         self._relabel_tree(self.tree, self._relabel)
-        name_ete_nodes(self.tree, node_prefix="y")
+        name_tree_nodes(self.tree, node_prefix="y")
         self.dendrogram = sp_hierarchy.dendrogram(self.Z, labels=self.linkage_labels, no_plot=True)
 
         # Colors
@@ -951,7 +951,7 @@ class Agglomerative(object):
 
                 newick = self.tree.write(is_leaf_fn=self.is_cluster_node, format=0)
                 # tree_clusters = self.tree_type(newick)
-                # name_ete_nodes(tree_clusters, node_prefix="y")
+                # name_tree_nodes(tree_clusters, node_prefix="y")
                 tree_clusters = create_tree(newick=newick, into=self.tree_type, force_bifuraction=True)
 
                 for node in tree_clusters.traverse():

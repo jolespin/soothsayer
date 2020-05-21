@@ -31,7 +31,6 @@ setup(name='soothsayer',
     "xarray >= 0.10.3",
     "tqdm >=4.19",
     "openpyxl >= 2.5",
-    # "astropy >= 3.0",
     "rpy2 >= 2.9.4", # 3?
     "matplotlib_venn",
     "palettable >= 3.0.0",
@@ -40,8 +39,12 @@ setup(name='soothsayer',
     "statsmodels >= 0.10.0", #https://github.com/statsmodels/statsmodels/issues/5899 May need to use this separately: pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
     "teneto",
     "mmh3",
-    "soothsayer_utils >= 2020.4.30",
-    # gneiss
+    # Extensions
+    "soothsayer_utils >= 2020.5.20",
+    "compositional >= 2020.5.19",
+    # Deprecated
+    # "gneiss", # Removed dependency and moved gneiss as optional in compositional
+    # "astropy >= 3.0", # Removed depenency and reimplemented biweight midcorrelation
 
       ],
      include_package_data=True,

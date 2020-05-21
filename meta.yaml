@@ -1,5 +1,5 @@
 {% set name = "soothsayer" %}
-{% set version = "2019.10" %}
+{% set version = "2019.12" %}
 
 package:
   name: {{ name|lower }}
@@ -22,5 +22,5 @@ about:
   license: BSD-3
   license_family: BSD
   license_file: license.txt
-  summary: 'High-level API for (bio-)informatics'
+  summary: 'High-level package for (bio-)informatics'
   description: 'This module contains analytical tools and sophisticated plotting methods for informatics datasets.'

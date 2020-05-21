@@ -250,7 +250,7 @@ class HierarchicalClassifier(BaseEstimator, ClassifierMixin):
         for label, path in paths.items():
             path = [self.obsv_type] + list(path)
             self.paths[label] = path
-            self.graph.add_path(path, name=label)
+            nx.add_path(self.graph, path, name=label)
         root_submodel = set([*map(lambda x:x[1], self.paths.values())])
         assert len(root_submodel) == 1, "There are too many root submodels.  Please make sure that all the nodes start at the same point.  This should be the 2nd note in the path.  e.g., input -> node-1 | then the nodes can branch out.  Try using the `Topology` object and the `get_paths` option for correct formatting."
         self.root_submodel = list(root_submodel)[0]

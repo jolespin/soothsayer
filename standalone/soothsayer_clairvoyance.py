@@ -3,7 +3,6 @@
 # =============================
 # Creator: Josh L. Espinoza (J. Craig Venter Institute)
 # Date[0]:Init: 2018-April-02
-# Date[-1]:Current: 2018-August-28
 # =============================
 # BSD License
 # =============================
@@ -44,6 +43,7 @@
 # (8) Adding log info (2018-May-31)
 # (9) Fixed loading previous data (2018-June-05)
 # (10) Removing `linear` method, adding `early_stopping`, and making cross-validation go from smallest to largest
+# (11) Fixed the .compress compatibility for pandas v1.x
 # ==============================
 # Current
 # ==============================
@@ -58,15 +58,13 @@
 # The scores_ file has a .1 appended to the n_features_included b/c of the set_index.  This needs to be fixed after running this on model_v5.4b.  The fix will be easy, just don't include n_features_included and then change the best_results to X.shape[1] - n_features_excluded
 
 # Version
-__version_clairvoyance__ = "v0.3_2018-08-28"
+__version_clairvoyance__ = "v2020.05.18"
 
 # Built-ins
 import os, sys, re, multiprocessing, itertools, argparse, subprocess, time, logging, datetime, shutil, copy, warnings
 from collections import *
 from io import StringIO, TextIOWrapper, BytesIO
-from ast import literal_eval
 import pickle, gzip, bz2, zipfile
-# warnings.simplefilter(action='ignore', category=FutureWarning) # FutureWarning: Series.compress(condition) is deprecated. Use 'Series[condition]' or 'np.asarray(series).compress(condition)' instead.
 # warnings.simplefilter(action='ignore', category=UserWarning) # UserWarning: Attempting to set identical left==right results in singular transformations; automatically expanding
 warnings.filterwarnings("ignore")
 os.environ['KMP_DUPLICATE_LIB_OK']='True' # In case you have 2 versions of OMP installed
@@ -620,7 +618,7 @@ class Clairvoyant(object):
 
         self.shape_ = self.kernel_.shape
         max_accuracy = self.extract_hyperparameters()["accuracy"].max()
-        idx_maxacu = self.extract_hyperparameters()["accuracy"].compress(lambda x: x == max_accuracy).index
+        idx_maxacu = self.extract_hyperparameters()["accuracy"][lambda x: x == max_accuracy].index
         if len(idx_maxacu) > 1:
             if self.model_type == "logistic":
                 # Prefer l2 with higher C
@@ -1208,11 +1206,11 @@ def main(argv=None):
             _tmp_ncols_cv = len(f.read().split("\n")[0].split("\t"))
         # Is it just 2 columns (train, test) with no header?
         if  _tmp_ncols_cv == 2:
-            opts.cv = pd.read_csv(opts.cv, header=None, sep="\t").applymap(literal_eval).values.tolist()
+            opts.cv = pd.read_csv(opts.cv, header=None, sep="\t").applymap(eval).values.tolist()
             cv_labels = list(map(lambda x: "cv={}".format(x+1), range(len(opts.cv))))
         # Are there 3 columns with a header with the first column being the name of cross-validation set?
         if _tmp_ncols_cv == 3:
-            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0).applymap(literal_eval).loc[:,["Training", "Testing"]]
+            opts.cv = pd.read_csv(opts.cv, sep="\t", index_col=0).applymap(eval).loc[:,["Training", "Testing"]]
             cv_labels = opts.cv.index
             opts.cv = opts.cv.values.tolist()
 

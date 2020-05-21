@@ -4,13 +4,13 @@ import pandas as pd
 import numpy as np
 import ete3
 import skbio
-import mmh3
+# import mmh3
 from scipy import stats
 from scipy.spatial.distance import squareform
 from tqdm import tqdm
 from ..symmetry import Symmetric
 from ..io import write_object, read_fasta, read_textfile
-from ..utils import pd_dataframe_matmul, format_path, pd_series_collapse, is_dict_like, is_query_class, is_symmetrical, fragment, assert_acceptable_arguments
+from ..utils import pd_dataframe_matmul, format_path, pd_series_collapse, is_dict_like, is_query_class, is_symmetrical, fragment, assert_acceptable_arguments, hash_kmer
 from ..transmute.normalization import normalize
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
@@ -588,27 +588,27 @@ def reverse_complement(seq:str):
     rev_comp = comp[::-1]
     return rev_comp
 
-# Murmurhash of K-mer
-def hash_kmer(kmer, random_state=0):
-    """
-    Adapted from the following source:
-    https://sourmash.readthedocs.io/en/latest/kmers-and-minhash.html
-    """
-    kmer = kmer.upper()
+# # Murmurhash of K-mer
+# def hash_kmer(kmer, random_state=0):
+#     """
+#     Adapted from the following source:
+#     https://sourmash.readthedocs.io/en/latest/kmers-and-minhash.html
+#     """
+#     kmer = kmer.upper()
 
-    # Calculate the reverse complement
-    r_kmer = reverse_complement(kmer)
+#     # Calculate the reverse complement
+#     r_kmer = reverse_complement(kmer)
 
-    # Determine whether original k-mer or reverse complement is lesser
-    if kmer < r_kmer:
-        canonical_kmer = kmer
-    else:
-        canonical_kmer = r_kmer
+#     # Determine whether original k-mer or reverse complement is lesser
+#     if kmer < r_kmer:
+#         canonical_kmer = kmer
+#     else:
+#         canonical_kmer = r_kmer
 
-    # Calculate murmurhash using a hash seed
-    hash = mmh3.hash(canonical_kmer, seed=random_state, signed=False)
-#     if hash < 0:
-#         hash += 2**64
+#     # Calculate murmurhash using a hash seed
+#     hash = mmh3.hash(canonical_kmer, seed=random_state, signed=False)
+# #     if hash < 0:
+# #         hash += 2**64
 
     return hash
 

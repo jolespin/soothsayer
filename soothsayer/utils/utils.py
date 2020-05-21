@@ -28,9 +28,16 @@ functions_from_soothsayer_utils = [
 'assert_acceptable_arguments', 'boolean', 'consecutive_replace', 'contains', 'dict_build', 'dict_collapse', 'dict_expand', 'dict_fill', 'dict_filter', 'dict_reverse', 'dict_tree',
 'flatten', 'format_duration', 'format_header', 'format_path', 'fragment',  'get_timestamp', 'get_unique_identifier', 'hash_kmer', 'infer_compression', 'is_all_same_type',
 'is_dict', 'is_dict_like', 'is_file_like', 'is_function', 'is_in_namespace', 'is_nonstring_iterable', 'is_number', 'is_path_like', 'is_query_class', 'iterable_depth', 'join_as_strings',
-'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages"]
+'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages", "Suppress",
+]
 
-__all__ = {'pd_series_to_groupby_to_dataframe', 'pd_dropduplicates_index', 'generate_random_sequence', 'get_iris_data', 'is_color', 'add_cbar_from_data', 'get_coords_contour', 'get_repr', 'get_parameters_ellipse', 'DIVERGING_KWS', 'determine_mode_for_logfiles', 'create_logfile', 'is_symmetrical', 'pd_dataframe_matmul', 'dataframe_to_matrixstring', 'infer_cmap', 'pd_dataframe_extend_index', 'configure_scatter', 'CMAP_DIVERGING', 'pd_series_collapse', 'is_graph', 'format_filename', 'pd_series_filter', 'map_colors', 'rgb_to_rgba', 'LEGEND_KWS', 'force_symmetry', 'is_rgb_like', 'COLOR_POSITIVE', 'Chromatic', 'COLOR_NEGATIVE', 'infer_vmin_vmax', 'pd_dataframe_query', 'get_coords_centroid', 'filter_compositional', 'scalarmapping_from_data', 'infer_continuous_type', 'format_mpl_legend_handles'}
+__all__ = {
+    # Tree
+    "infer_tree_type", "check_polytomy", "is_leaf","name_tree_nodes","prune_tree",
+    # Need to organize these
+    'pd_series_to_groupby_to_dataframe', 'pd_dropduplicates_index', 'generate_random_sequence', 'get_iris_data', 'is_color', 'add_cbar_from_data', 'get_coords_contour', 'get_repr', 'get_parameters_ellipse', 'DIVERGING_KWS', 'determine_mode_for_logfiles', 'create_logfile', 'is_symmetrical', 'pd_dataframe_matmul', 'dataframe_to_matrixstring', 'infer_cmap', 'pd_dataframe_extend_index', 'configure_scatter', 'CMAP_DIVERGING', 'pd_series_collapse', 'is_graph', 'format_filename', 'pd_series_filter', 'map_colors', 'rgb_to_rgba', 'LEGEND_KWS', 'force_symmetry', 'is_rgb_like', 'COLOR_POSITIVE', 'Chromatic', 'COLOR_NEGATIVE', 'infer_vmin_vmax', 'pd_dataframe_query', 'get_coords_centroid', 'filter_compositional', 'scalarmapping_from_data', 'infer_continuous_type', 
+    'format_mpl_legend_handles',
+    }
 
 for function_name in functions_from_soothsayer_utils:
     globals()[function_name] = getattr(syu, function_name)
@@ -87,6 +94,88 @@ def is_symmetrical(X, tol=None):
 def force_symmetry(X):
     return (X + X.T)/2
 
+# =============
+# Tree
+# =============
+
+
+# Tree
+def infer_tree_type(tree):
+    tree_type = None
+    query_type = str(tree.__class__).split("'")[1].split(".")[0]
+    if query_type in {"skbio"}:
+        tree_type = "skbio"
+    if query_type in {"ete3"}:
+        tree_type = "ete"
+    assert tree_type is not None, "Please use either skbio or ete3 tree.  Tree type deterined as {}".format(query_type)
+    return tree_type
+
+# Is node a leaf?
+def is_leaf(node, tree_type="infer"):
+    assert_acceptable_arguments(tree_type, {"ete", "infer", "skbio"})
+    if tree_type == "infer":
+        tree_type = infer_tree_type(node)
+    function_name = {"skbio":"is_tip", "ete":"is_leaf"}[tree_type]
+    return getattr(node, function_name)()
+
+# Check polytomy
+def check_polytomy(tree, tree_type="infer"):
+    assert_acceptable_arguments(tree_type, {"ete",  "infer", "skbio"})
+    if tree_type == "infer":
+        tree_type = infer_tree_type(tree)
+        
+    if tree_type == "ete":
+        # Check bifurcation
+        n_internal_nodes = len(list(filter(lambda node:node.is_leaf() == False, tree.traverse())))
+        n_leaves = len(list(filter(lambda node:node.is_leaf(), tree.traverse())))
+        if n_internal_nodes < (n_leaves - 1):
+            raise Exception("Please resolve tree polytomy and force bifurcation: Use `tree.resolve_polytomy()` before naming nodes for `ete`")
+
+    if tree_type == "skbio":
+        # Check bifurcation
+        n_internal_nodes = len(list(filter(lambda node:node.is_tip() == False, tree.traverse())))
+        n_leaves = len(list(filter(lambda node:node.is_tip(), tree.traverse())))
+        if n_internal_nodes < (n_leaves - 1):
+            raise Exception("Please resolve tree polytomy and force bifurcation: Use `tree.bifurcate()` before naming nodes for `skbio`")
+
+
+# Name tree nodes
+def name_tree_nodes(tree,  node_prefix:str="y", tree_type:str="infer", polytomy_ok=False, inplace=False):
+    """
+    tree can be skbio or any ete3 tree
+    """
+    assert_acceptable_arguments(tree_type, {"ete", "infer", "skbio"})
+
+    # In place or on a copy
+    if not inplace:
+        tree = tree.copy()
+    # Determine tree type
+    if tree_type == "infer":
+        tree_type = infer_tree_type(tree)
+
+    # Polytomy
+    if not polytomy_ok:
+        check_polytomy(tree=tree, tree_type=tree_type)
+    # Name tree nodes
+    intermediate_node_index = 1
+    for node in tree.traverse():
+        if not is_leaf(node):
+            node.name = f"{node_prefix}{intermediate_node_index}"
+            intermediate_node_index += 1
+    if not inplace:
+        return tree
+    
+# Prune tree
+def prune_tree(tree,  leaves, tree_type="infer"):
+    assert_acceptable_arguments(tree_type, {"ete",  "infer", "skbio"})
+    if tree_type == "infer":
+        tree_type = infer_tree_type(tree)
+    if tree_type == "ete":
+        tree.prune(leaves)
+    if tree_type == "skbio":
+        tree = tree.shear(leaves)
+        tree.prune()
+    return tree
 
 # =============
 # Miscellaneous

@@ -26,9 +26,10 @@ except ImportError:
     print("Could not import `linkage` from `fastcluster` and using `scipy.cluster.hierarchy.linkage` instead", file=sys.stderr)
 
 # Soothsayer
-from ..utils import dict_reverse
+from ..utils import dict_reverse, infer_tree_type, check_polytomy, is_leaf, name_tree_nodes 
 
-__all__ = ["dism_to_linkage", "linkage_to_newick", "dism_to_tree", "name_ete_nodes", "ete_to_skbio", "nx_to_ete", "ete_to_nx"]
+
+__all__ = ["dism_to_linkage", "linkage_to_newick", "dism_to_tree", "ete_to_skbio","skbio_to_ete", "nx_to_ete", "ete_to_nx"]
 
 # Create clusters
 def dism_to_linkage(df_dism, method="ward"):
@@ -42,9 +43,9 @@ def dism_to_linkage(df_dism, method="ward"):
     """
     #Linkage Matrix
     dist = squareform(df_dism.values)
-    return linkage(dist,method=method)
+    return linkage(dist,method=method)# Convert dendrogram to Newick
 
-# Convert dendrogram to Newick
+# Linkage to newick
 def linkage_to_newick(Z, labels):
     """
     Input :  Z = linkage matrix, labels = leaf labels
@@ -54,7 +55,7 @@ def linkage_to_newick(Z, labels):
     """
     tree = sp_hierarchy.to_tree(Z, False) #scipy.sp_hierarchy.to_tree
     def build_newick(node, newick, parentdist, leaf_names):
-        if node.is_leaf():
+        if node.is_leaf(): # This is for SciPy not for ete or skbio so `is_leaf` utility function does not apply
             return f"{leaf_names[node.id]}:{(parentdist - node.dist)/2}{newick}"
         else:
             if len(newick) > 0:
@@ -68,47 +69,51 @@ def linkage_to_newick(Z, labels):
     return build_newick(tree, "", tree.dist, labels)
 
 # Dissimilarity to ete
-def dism_to_tree(df_dism:pd.DataFrame, into=ete3.Tree, method="ward", name=None):
+def dism_to_tree(df_dism:pd.DataFrame, into=ete3.Tree, method="ward", node_prefix="y", name=None):
     """
     https://en.wikipedia.org/wiki/Newick_format
     Input: pd.DataFrame distance/dissimilarity matrix, diagonal must be 0, must be symmetrical
     Output: ete3 Tree
     """
-    # Check labels for tuples
+    # Encode
+    df_dism = df_dism.copy()
     labels = df_dism.index
-    encrypt=False
-    if any(map(lambda x:type(x) == tuple, labels)):
-        d_encode = dict(zip(labels, map(str,range(len(labels)))))
-        d_decode = dict_reverse(d_encode)
-        df_dism.index = df_dism.columns = labels = df_dism.index.map(lambda x: d_encode[x])
-        encrypt = True
+    d_encode = dict(zip(labels, map(str,range(len(labels)))))
+    d_decode = dict_reverse(d_encode)
+    df_dism.index = df_dism.columns = labels = labels.map(lambda x: d_encode[x])
     # Linkage
     Z = linkage(df_dism, method=method)
     # Newick
     newick = linkage_to_newick(Z, labels=labels)
-    tree = into(newick=newick)
-    tree.name= name
+    # Tree
+    tree_type = infer_tree_type(into())
+    if tree_type == "ete":
+        tree = into(newick=newick, quoted_node_names=True)
+    if tree_type == "skbio":
+        tree = skbio.TreeNode.read(StringIO(newick), convert_underscores=False)
+
+    if node_prefix is not None:
+        tree = name_tree_nodes(tree, node_prefix=node_prefix, tree_type=tree_type)
+    else:
+        tree.name = name
     # Decode
-    if encrypt:
-        for node in tree.traverse():
-            if node.is_leaf():
-                node.name = d_decode[node.name]
+    for node in tree.traverse():
+        if is_leaf(node):
+            node.name = d_decode[node.name]
     return tree
 
-# Name ete3 nodes
-def name_ete_nodes(tree,  node_prefix="y"):
-    intermediate_node_index = 1
-    for node in tree.traverse():
-        if not node.is_leaf():
-            node.name = f"{node_prefix}{intermediate_node_index}"
-            intermediate_node_index += 1
-    return tree
 
 # Convert ete3 to skbio
-def ete_to_skbio(tree, node_prefix="y"):
+def ete_to_skbio(tree, node_prefix=None, check_polytomy=True):
     if node_prefix is not None:
-        tree = name_ete_nodes(tree, node_prefix=node_prefix)
-    return skbio.TreeNode.read(StringIO(tree.write(format=1, format_root_node=True)))
+        tree = name_tree_nodes(tree,node_prefix=node_prefix, tree_type="ete", check_polytomy=check_polytomy)
+    return skbio.TreeNode.read(StringIO(tree.write(format=1, format_root_node=True)), convert_underscores=False)
+
+# Convert skbio to ete3
+def skbio_to_ete(tree, node_prefix=None, check_polytomy=True, into=ete3.Tree):
+    if node_prefix is not None:
+        tree = name_tree_nodes(tree,node_prefix=node_prefix, tree_type="skbio", check_polytomy=check_polytomy)
+    return into.from_skbio(tree)
 
 # Convert a NetworkX graph object to an ete3 Tree
 def nx_to_ete(G, deepcopy=True, into=ete3.Tree, root="infer", verbose=False):
@@ -174,7 +179,7 @@ def ete_to_nx(tree, create_using=None, node_prefix="infer"):
         else:
             node_prefix = None
     if node_prefix is not None:
-        tree = name_ete_nodes(tree, node_prefix=node_prefix)
+        tree = name_tree_nodes(tree, node_prefix=node_prefix)
     else:
         assert "" not in tree, "All nodes (including intermediate) must be named"
     # Construct graph

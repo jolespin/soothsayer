@@ -10,9 +10,10 @@ import pandas as pd
 import numpy as np
 
 # Compositional
-from skbio.stats.composition import clr, ilr
-from gneiss.composition import ilr_transform
+# from skbio.stats.composition import clr, ilr
+# from gneiss.composition import ilr_transform
 import ete3
+import compositional as coda
 
 # SciPy
 from scipy import stats
@@ -24,9 +25,19 @@ from ..r_wrappers.packages.edgeR import normalize_edgeR
 from ..r_wrappers.packages.metagenomeSeq import normalize_css
 # from soothsayer.r_wrappers.packages.philr import normalize_philr
 
+
 from ..utils import is_dict, assert_acceptable_arguments, is_number
 
-__all__ = ["normalize_minmax", "normalize_tss", "normalize_center", "normalize_zscore", "normalize_quantile", "normalize_boxcox",  "normalize", "normalize_expression" ,"transform_clr","transform_xlr", "transform_iqlr", "transform_ilr",]
+__all__ = {"normalize_minmax", "normalize_tss", "normalize_center", "normalize_zscore", "normalize_quantile", "normalize_boxcox",  "normalize", "normalize_expression"}
+
+functions_from_compositional = {"transform_clr","transform_xlr", "transform_iqlr", "transform_ilr"}
+
+for function_name in functions_from_compositional:
+    globals()[function_name] = getattr(coda, function_name)
+    __all__.add(function_name)
+
+__all__ = sorted(__all__)
+   
 
 # ==============================================================================
 # Normalization
@@ -210,199 +221,199 @@ def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None
     if method in  {"css"}:
         return normalize_css(X)
 
-# CLR Normalization
-def transform_clr(X, return_zeros_as_neginfinity=False):
-    """
-    Extension of CLR from skbio to handle zeros and NaN; though, this implementation will be slightly slower.
+# # CLR Normalization
+# def transform_clr(X, return_zeros_as_neginfinity=False):
+#     """
+#     Extension of CLR from skbio to handle zeros and NaN; though, this implementation will be slightly slower.
 
-    Please refer to the following for CLR documention:
-    http://scikit-bio.org/docs/latest/generated/skbio.stats.composition.clr.html#skbio.stats.composition.clr
+#     Please refer to the following for CLR documention:
+#     http://scikit-bio.org/docs/latest/generated/skbio.stats.composition.clr.html#skbio.stats.composition.clr
 
-    """
-    assert isinstance(X, (pd.Series, pd.DataFrame)), "Type must be either pd.Series or pd.DataFrame"
-    # X
-    if isinstance(X, pd.DataFrame):
+#     """
+#     assert isinstance(X, (pd.Series, pd.DataFrame)), "Type must be either pd.Series or pd.DataFrame"
+#     # X
+#     if isinstance(X, pd.DataFrame):
 
-        return transform_xlr(X, centroid="log_mean",return_zeros_as_neginfinity=return_zeros_as_neginfinity )
+#         return transform_xlr(X, centroid="log_mean",return_zeros_as_neginfinity=return_zeros_as_neginfinity )
 
-    # x
-    if isinstance(X, pd.Series):
-        # Get values
-        X_values = X.values
-        # Check for zeros
-        X_contains_zeros = False
-        num_zeros = np.any(X == 0).flatten().sum()
-        if num_zeros:
-            warnings.warn("N={} detected in `X`.  Masking them as NaN to perform nan-robust functions".format(num_zeros))
-            X_zero_mask = X == 0
-            X_values[X_zero_mask] = np.nan
-            X_contains_zeros = True
+#     # x
+#     if isinstance(X, pd.Series):
+#         # Get values
+#         X_values = X.values
+#         # Check for zeros
+#         X_contains_zeros = False
+#         num_zeros = np.any(X == 0).flatten().sum()
+#         if num_zeros:
+#             warnings.warn("N={} detected in `X`.  Masking them as NaN to perform nan-robust functions".format(num_zeros))
+#             X_zero_mask = X == 0
+#             X_values[X_zero_mask] = np.nan
+#             X_contains_zeros = True
 
-        # Transform
-        X_log = np.log(X)
-        centroid = np.nanmean(X_log, axis=-1)
-        X_transformed = X_log - centroid
+#         # Transform
+#         X_log = np.log(X)
+#         centroid = np.nanmean(X_log, axis=-1)
+#         X_transformed = X_log - centroid
 
-        # Output
-        if all([return_zeros_as_neginfinity, X_contains_zeros]):
-            X_transformed[X_zero_mask] = -np.inf
-        return pd.Series(X_transformed,index=X.index, name=X.name)
+#         # Output
+#         if all([return_zeros_as_neginfinity, X_contains_zeros]):
+#             X_transformed[X_zero_mask] = -np.inf
+#         return pd.Series(X_transformed,index=X.index, name=X.name)
 
-# ===========================
-# Compositional data analysis
-# ===========================
-# Extension of CLR to use different centroid, references, and zeros without pseudocounts
-def transform_xlr(X:pd.DataFrame, reference_components=None, centroid="log_mean", return_zeros_as_neginfinity=False):
-    """
-    Extension of CLR to incorporate custom metrics such as median and harmonic mean.
-    If you want CLR, please use skbio's implementation as it is faster.
-    This implementation is more versatile with more checks but that makes it slower if it done iteratively.
+# # ===========================
+# # Compositional data analysis
+# # ===========================
+# # Extension of CLR to use different centroid, references, and zeros without pseudocounts
+# def transform_xlr(X:pd.DataFrame, reference_components=None, centroid="log_mean", return_zeros_as_neginfinity=False):
+#     """
+#     Extension of CLR to incorporate custom metrics such as median and harmonic mean.
+#     If you want CLR, please use skbio's implementation as it is faster.
+#     This implementation is more versatile with more checks but that makes it slower if it done iteratively.
 
-    This was designed to handle zero values.  It computes the centroid metrics for all non-zero values (masked as nan)
-    and returns them either as nan (can be used with some correlation functions) or as -inf (for mathematical consistency)
+#     This was designed to handle zero values.  It computes the centroid metrics for all non-zero values (masked as nan)
+#     and returns them either as nan (can be used with some correlation functions) or as -inf (for mathematical consistency)
 
-    Documentation on CLR:
-    http://scikit-bio.org/docs/latest/generated/skbio.stats.composition.clr.html#skbio.stats.composition.clr
+#     Documentation on CLR:
+#     http://scikit-bio.org/docs/latest/generated/skbio.stats.composition.clr.html#skbio.stats.composition.clr
 
-    centroid: {log_median, log_mean, log_hmean, Type[Int]} If int, then that value is used as a percentile (e.g. median is 50)
+#     centroid: {log_median, log_mean, log_hmean, Type[Int]} If int, then that value is used as a percentile (e.g. median is 50)
 
-    Note: log_mean == arithmetic mean of logs == log of geometric mean
-    """
+#     Note: log_mean == arithmetic mean of logs == log of geometric mean
+#     """
 
-    assert np.all(X >= 0), "`X` cannot contain negative values because of log-transformation step."
-    assert len(X.shape) == 2, "`X` must be 2-Dimensional"
+#     assert np.all(X >= 0), "`X` cannot contain negative values because of log-transformation step."
+#     assert len(X.shape) == 2, "`X` must be 2-Dimensional"
 
-    # Check for labels
-    index = None
-    columns = None
-    X_values = X.astype(float)
-    X_is_labeled = False
-    if isinstance(X, pd.DataFrame):
-        index = X.index
-        columns = X.columns
-        X_values = X.values.astype(float)
-        if reference_components is None:
-            reference_components = columns
-        reference_components = list(map(lambda component: columns.get_loc(component), reference_components))
-        X_is_labeled = True
+#     # Check for labels
+#     index = None
+#     columns = None
+#     X_values = X.astype(float)
+#     X_is_labeled = False
+#     if isinstance(X, pd.DataFrame):
+#         index = X.index
+#         columns = X.columns
+#         X_values = X.values.astype(float)
+#         if reference_components is None:
+#             reference_components = columns
+#         reference_components = list(map(lambda component: columns.get_loc(component), reference_components))
+#         X_is_labeled = True
         
-    # Check centroid
-    if X_is_labeled:
-        if not isinstance(centroid, str):
-            if is_dict(centroid):
-                centroid = pd.Series(centroid)
-            assert isinstance(centroid, pd.Series), "If `centroid` is dict-like/pd.Series then `X` must be a `pd.DataFrame`."
-            assert set(centroid.index) >= set(index), "Not all indicies from `centroid` are available in `X.index`."
-            centroid = centroid[index].values
+#     # Check centroid
+#     if X_is_labeled:
+#         if not isinstance(centroid, str):
+#             if is_dict(centroid):
+#                 centroid = pd.Series(centroid)
+#             assert isinstance(centroid, pd.Series), "If `centroid` is dict-like/pd.Series then `X` must be a `pd.DataFrame`."
+#             assert set(centroid.index) >= set(index), "Not all indicies from `centroid` are available in `X.index`."
+#             centroid = centroid[index].values
 
-    # Check for zeros
-    X_contains_zeros = False
-    num_zeros = np.any(X == 0).flatten().sum()
-    if num_zeros:
-        warnings.warn("N={} detected in `X`.  Masking them as NaN to perform nan-robust functions".format(num_zeros))
-        X_zero_mask = X == 0
-        X_values[X_zero_mask] = np.nan
-        X_contains_zeros = True
+#     # Check for zeros
+#     X_contains_zeros = False
+#     num_zeros = np.any(X == 0).flatten().sum()
+#     if num_zeros:
+#         warnings.warn("N={} detected in `X`.  Masking them as NaN to perform nan-robust functions".format(num_zeros))
+#         X_zero_mask = X == 0
+#         X_values[X_zero_mask] = np.nan
+#         X_contains_zeros = True
 
-    # Log transformation
-    X_log = np.log(X_values)
+#     # Log transformation
+#     X_log = np.log(X_values)
 
-    # Centroid precomputed
-    if isinstance(centroid, str) or is_number(centroid):
+#     # Centroid precomputed
+#     if isinstance(centroid, str) or is_number(centroid):
 
-        # Centroid reference
-        median = {"log_median"}
-        geometric_mean = {"log_mean", "gmean_log" }
-        harmonic_mean = {"log_hmean"}
+#         # Centroid reference
+#         median = {"log_median"}
+#         geometric_mean = {"log_mean", "gmean_log" }
+#         harmonic_mean = {"log_hmean"}
 
-        if isinstance(centroid, str):
-            centroid = centroid.lower()
-            assert_acceptable_arguments(centroid, median  | geometric_mean | harmonic_mean)
+#         if isinstance(centroid, str):
+#             centroid = centroid.lower()
+#             assert_acceptable_arguments(centroid, median  | geometric_mean | harmonic_mean)
 
-            if centroid in median:
-                centroid = np.nanmedian(X_log[:,reference_components], axis=-1)
-            elif centroid in geometric_mean:
-                centroid = np.nanmean(X_log[:,reference_components], axis=-1)
-            elif centroid in harmonic_mean:
-                if X_contains_zeros:
-                    centroid = np.asarray(list(map(lambda x:stats.hmean(x[np.isfinite(x)]), X_log[:,reference_components])))
-                else:
-                    centroid = stats.hmean(X_log[:,reference_components], axis=-1)
+#             if centroid in median:
+#                 centroid = np.nanmedian(X_log[:,reference_components], axis=-1)
+#             elif centroid in geometric_mean:
+#                 centroid = np.nanmean(X_log[:,reference_components], axis=-1)
+#             elif centroid in harmonic_mean:
+#                 if X_contains_zeros:
+#                     centroid = np.asarray(list(map(lambda x:stats.hmean(x[np.isfinite(x)]), X_log[:,reference_components])))
+#                 else:
+#                     centroid = stats.hmean(X_log[:,reference_components], axis=-1)
 
-        # Percentiles
-        if is_number(centroid):
-            centroid = np.asarray(list(map(lambda x:np.percentile(x, centroid), X_log[:,reference_components])))
-    else:
-        assert any([is_dict_like(centroid), np.ndarray]), "If centroid is not a string or a numeric value then it must be either a dict-like/pd.Series (labeled) or numpy array (unlabeled)"
+#         # Percentiles
+#         if is_number(centroid):
+#             centroid = np.asarray(list(map(lambda x:np.percentile(x, centroid), X_log[:,reference_components])))
+#     else:
+#         assert any([is_dict_like(centroid), np.ndarray]), "If centroid is not a string or a numeric value then it must be either a dict-like/pd.Series (labeled) or numpy array (unlabeled)"
 
-    # Check dimensions
-    assert len(centroid) == X_log.shape[0], "Dimensionality is not compatible: centroid.size != X.shape[0]."
-    centroid = np.asarray(centroid).reshape(-1,1)
-    # Transform
-    X_transformed = X_log - centroid
+#     # Check dimensions
+#     assert len(centroid) == X_log.shape[0], "Dimensionality is not compatible: centroid.size != X.shape[0]."
+#     centroid = np.asarray(centroid).reshape(-1,1)
+#     # Transform
+#     X_transformed = X_log - centroid
 
-    # Output
-    if all([return_zeros_as_neginfinity, X_contains_zeros]):
-        X_transformed[X_zero_mask] = -np.inf
+#     # Output
+#     if all([return_zeros_as_neginfinity, X_contains_zeros]):
+#         X_transformed[X_zero_mask] = -np.inf
 
-    if X_is_labeled:
-        return pd.DataFrame(X_transformed, index=index, columns=columns)
-    else:
-        return X_transformed
+#     if X_is_labeled:
+#         return pd.DataFrame(X_transformed, index=index, columns=columns)
+#     else:
+#         return X_transformed
 
-# Interquartile range log-ratio transform
-def transform_iqlr(X:pd.DataFrame, percentile_range=(25,75), centroid="log_mean", interval_type="open", return_zeros_as_neginfinity=False):
-    """
-    Interquartile range log-ratio transform
-    interval: open = (a,b) and closed = [a,b].  open is used by `propr` R package:
-    https://github.com/tpq/propr/blob/2bd7c44bf59eaac6b4d329d38afd40ac83e2089a/R/2-proprCall.R#L31
-    """
-    assert_acceptable_arguments(query=[interval_type],target=["closed", "open"], operation="le")
-    percentile_range = tuple(sorted(percentile_range))
-    assert len(percentile_range) == 2, "percentile_range must have 2 elements"
-    assert isinstance(X, pd.DataFrame), "`transmute_iqlr` can currently only support pd.DataFrames and not np.arrays"
-    # Compute the variance of the CLR transform
-    clr_var = transform_xlr(X, centroid=centroid).var(axis=0)
-    # Remove non-finite values
-    clr_var = clr_var[np.isfinite(clr_var)]
-    # Calculate upper and lower bounds from percentiles
-    lower_bound, upper_bound = np.percentile(clr_var, percentile_range)
-    # Get the reference components
-    if interval_type == "open":
-        reference_components = clr_var[(lower_bound < clr_var) & (clr_var < upper_bound)].index
-    if interval_type == "closed":
-        reference_components = clr_var[(lower_bound <= clr_var) & (clr_var <= upper_bound)].index
-    return transform_xlr(X, reference_components=reference_components, centroid=centroid, return_zeros_as_neginfinity=return_zeros_as_neginfinity)
+# # Interquartile range log-ratio transform
+# def transform_iqlr(X:pd.DataFrame, percentile_range=(25,75), centroid="log_mean", interval_type="open", return_zeros_as_neginfinity=False):
+#     """
+#     Interquartile range log-ratio transform
+#     interval: open = (a,b) and closed = [a,b].  open is used by `propr` R package:
+#     https://github.com/tpq/propr/blob/2bd7c44bf59eaac6b4d329d38afd40ac83e2089a/R/2-proprCall.R#L31
+#     """
+#     assert_acceptable_arguments(query=[interval_type],target=["closed", "open"], operation="le")
+#     percentile_range = tuple(sorted(percentile_range))
+#     assert len(percentile_range) == 2, "percentile_range must have 2 elements"
+#     assert isinstance(X, pd.DataFrame), "`transmute_iqlr` can currently only support pd.DataFrames and not np.arrays"
+#     # Compute the variance of the CLR transform
+#     clr_var = transform_xlr(X, centroid=centroid).var(axis=0)
+#     # Remove non-finite values
+#     clr_var = clr_var[np.isfinite(clr_var)]
+#     # Calculate upper and lower bounds from percentiles
+#     lower_bound, upper_bound = np.percentile(clr_var, percentile_range)
+#     # Get the reference components
+#     if interval_type == "open":
+#         reference_components = clr_var[(lower_bound < clr_var) & (clr_var < upper_bound)].index
+#     if interval_type == "closed":
+#         reference_components = clr_var[(lower_bound <= clr_var) & (clr_var <= upper_bound)].index
+#     return transform_xlr(X, reference_components=reference_components, centroid=centroid, return_zeros_as_neginfinity=return_zeros_as_neginfinity)
 
-# ILR Transformation
-def transform_ilr(X:pd.DataFrame, tree=None, node_prefix="y", verbose=True):
-    """
-    if `tree` is None then orthonormal basis for Aitchison simplex defaults to J.J.Egozcue orthonormal basis.
-    """
-    assert isinstance(X, pd.DataFrame), "type(X) must be pd.DataFrame"
-    assert not np.any(X == 0), "`X` cannot contain any zero values because of the log-transform.  Give it a pseudocount. (X+1)"
+# # ILR Transformation
+# def transform_ilr(X:pd.DataFrame, tree=None, node_prefix="y", bifurcation_kws=dict(), verbose=True):
+#     """
+#     if `tree` is None then orthonormal basis for Aitchison simplex defaults to J.J.Egozcue orthonormal basis.
+#     """
+#     assert isinstance(X, pd.DataFrame), "type(X) must be pd.DataFrame"
+#     assert not np.any(X == 0), "`X` cannot contain any zero values because of the log-transform.  Give it a pseudocount. (X+1)"
 
-    # Supply tree
-    if tree is not None:
-        tree_set =  set(tree.get_leaf_names())
-        leaf_set_from_X = set(X.columns)
-        assert leaf_set_from_X <= tree_set, "`X` columns should be a subset of `tree` leaves"
-        tree = tree.copy(method="deepcopy")
-        if leaf_set_from_X < tree_set:
-            n_before_pruning = len(tree_set)
-            tree.prune(leaf_set_from_X)
-            if verbose:
-                print(f"Pruned {n_before_pruning - len(tree.get_leaves())} attributes to match X.columns", file=sys.stderr)
+#     # Supply tree
+#     if tree is not None:
+#         tree_set =  set(tree.get_leaf_names())
+#         leaf_set_from_X = set(X.columns)
+#         assert leaf_set_from_X <= tree_set, "`X` columns should be a subset of `tree` leaves"
+#         tree = tree.copy(method="deepcopy")
+#         if leaf_set_from_X < tree_set:
+#             n_before_pruning = len(tree_set)
+#             tree.prune(leaf_set_from_X)
+#             if verbose:
+#                 print(f"Pruned {n_before_pruning - len(tree.get_leaves())} attributes to match X.columns", file=sys.stderr)
 
-        if isinstance(tree, (ete3.Tree, ete3.PhyloTree, ete3.ClusterTree)):
-            # Check bifurcation
-            n_internal_nodes = len([*filter(lambda node:node.is_leaf() == False, tree.traverse())])
-            n_leaves = len([*filter(lambda node:node.is_leaf(), tree.traverse())])
-            if n_internal_nodes < (n_leaves - 1):
-                tree.resolve_polytomy(**bifurcation_kws)
-                if verbose:
-                    print("Resolving tree polytomy and forcing bifurcation", file=sys.stderr)
-            tree = ete_to_skbio(tree=tree, node_prefix=node_prefix)
-        return ilr_transform(table=X, tree=tree)
-    else:
-        return pd.DataFrame(ilr(X), index=X.index)
+#         if isinstance(tree, (ete3.Tree, ete3.PhyloTree, ete3.ClusterTree)):
+#             # Check bifurcation
+#             n_internal_nodes = len([*filter(lambda node:node.is_leaf() == False, tree.traverse())])
+#             n_leaves = len([*filter(lambda node:node.is_leaf(), tree.traverse())])
+#             if n_internal_nodes < (n_leaves - 1):
+#                 tree.resolve_polytomy(**bifurcation_kws)
+#                 if verbose:
+#                     print("Resolving tree polytomy and forcing bifurcation", file=sys.stderr)
+#             tree = ete_to_skbio(tree=tree, node_prefix=node_prefix)
+#         return ilr_transform(table=X, tree=tree)
+#     else:
+#         return pd.DataFrame(ilr(X), index=X.index)

@@ -3,7 +3,11 @@
 # Changes:
 # ========
 * 2020.04.30 Make soothsayer_visuals its own package
-
+* 2020.05.04 Adapted code to support py3.7/8 and rpy2 v3.x.  I only ran a few tests so hopefullyt his doesn't break
+* 2020.05.20 Fixed nx.add_path deprecation for Hierarchical Classifier
+* 2020.05.20 Created "infer_tree_type", "check_polytomy", "prune_tree", and "is_leaf" in utils. 
+* 2020.05.20 Changed "name_ete_nodes to "name_tree_nodes" (made skbio compatible) and moved to utils
+* 2020.05.20 Made dependency on `compositional`.  Replaced transform functions in `soothsayer.transmute.normalization` and added functions in `soothsayer.symmetry`.
 
 # Clairvoyance: 
 # =============

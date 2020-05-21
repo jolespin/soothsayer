@@ -65,7 +65,7 @@ wgcna = R_package_retrieve("WGCNA")
 
 def pickSoftThreshold_fromSimilarity(df_adj, query_powers):
     # Run pickSoftThreshold.fromSimilarity
-    query_powers = ro.FloatVector(list(query_powers))
+    query_powers = ro.IntVector(list(query_powers))
     r_adj = pandas_to_rpy2(df_adj)
     rDF_scalefreetopology = wgcna.pickSoftThreshold_fromSimilarity(R["as.matrix"](r_adj), powerVector = query_powers, verbose=0, moreNetworkConcepts=True)[1]
     return rpy2_to_pandas(rDF_scalefreetopology)
