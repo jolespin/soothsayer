@@ -34,8 +34,8 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.05.20"
-__moniker__ = "May the 4th be with you"
+__version__= "2020.05.28"
+__moniker__ = "Yerba mate"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"

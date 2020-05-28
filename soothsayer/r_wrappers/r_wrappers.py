@@ -57,8 +57,8 @@ def R_package_retrieve(package):
     except KeyError:
         try:
             R_packages[package] = importr(package)
-            if package == "WGCNA":
-                R_packages[package].enableWGCNAThreads(multiprocessing.cpu_count())
+            # if package == "WGCNA":
+            #     R_packages[package].enableWGCNAThreads(multiprocessing.cpu_count())
             return R_packages[package]
         except RRuntimeError:
             print(f"{package} is not available", file=sys.stderr)

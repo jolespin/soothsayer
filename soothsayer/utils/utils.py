@@ -35,7 +35,7 @@ __all__ = {
     # Tree
     "infer_tree_type", "check_polytomy", "is_leaf","name_tree_nodes","prune_tree",
     # Need to organize these
-    'pd_series_to_groupby_to_dataframe', 'pd_dropduplicates_index', 'generate_random_sequence', 'get_iris_data', 'is_color', 'add_cbar_from_data', 'get_coords_contour', 'get_repr', 'get_parameters_ellipse', 'DIVERGING_KWS', 'determine_mode_for_logfiles', 'create_logfile', 'is_symmetrical', 'pd_dataframe_matmul', 'dataframe_to_matrixstring', 'infer_cmap', 'pd_dataframe_extend_index', 'configure_scatter', 'CMAP_DIVERGING', 'pd_series_collapse', 'is_graph', 'format_filename', 'pd_series_filter', 'map_colors', 'rgb_to_rgba', 'LEGEND_KWS', 'force_symmetry', 'is_rgb_like', 'COLOR_POSITIVE', 'Chromatic', 'COLOR_NEGATIVE', 'infer_vmin_vmax', 'pd_dataframe_query', 'get_coords_centroid', 'filter_compositional', 'scalarmapping_from_data', 'infer_continuous_type', 
+    "pd_prepend_level_to_index", 'pd_series_to_groupby_to_dataframe', 'pd_dropduplicates_index', 'generate_random_sequence', 'get_iris_data', 'is_color', 'add_cbar_from_data', 'get_coords_contour', 'get_repr', 'get_parameters_ellipse', 'DIVERGING_KWS', 'determine_mode_for_logfiles', 'create_logfile', 'is_symmetrical', 'pd_dataframe_matmul', 'dataframe_to_matrixstring', 'infer_cmap', 'pd_dataframe_extend_index', 'configure_scatter', 'CMAP_DIVERGING', 'pd_series_collapse', 'is_graph', 'format_filename', 'pd_series_filter', 'map_colors', 'rgb_to_rgba', 'LEGEND_KWS', 'force_symmetry', 'is_rgb_like', 'COLOR_POSITIVE', 'Chromatic', 'COLOR_NEGATIVE', 'infer_vmin_vmax', 'pd_dataframe_query', 'get_coords_centroid', 'filter_compositional', 'scalarmapping_from_data', 'infer_continuous_type', 
     'format_mpl_legend_handles',
     }
 
@@ -869,6 +869,37 @@ def determine_mode_for_logfiles(path, force_overwrite):
 # ===========
 # Pandas
 # ===========
+# Prepend level to pandas index
+def pd_prepend_level_to_index(x, level_value, level_name=None):
+    """
+    Prepend a level to a pd.Series or pd.DataFrame
+    
+    Usage: 
+    data = list("ATG")
+    x = pd.Series(
+        data, 
+        index=pd.Index(range(0,len(data)), name="Position"),
+        name="START",
+    )
+    print(x)
+    # Position
+    # 0    A
+    # 1    T
+    # 2    G
+    # Name: START, dtype: object
+    print(pd_prepend_level_to_index(x, "Chr1", level_name="Chromosome"))
+    # Chromosome  Position
+    # Chr1        0           A
+    #             1           T
+    #             2           G
+    # Name: START, dtype: object
+    
+    Adapted from the following source:
+    https://stackoverflow.com/questions/14744068/prepend-a-level-to-a-pandas-multiindex
+    """
+    return pd.concat([x], keys=[level_value], names=[level_name])
+
+# Collapse a pandas series
 def pd_series_collapse(u:pd.Series, into=pd.Series, type_collection=set):
     """
     Input: Pandas Series object with redundant values (e.g. iris targets)
