@@ -10,28 +10,28 @@ import xarray as xr
 
 # Soothsayer
 from ..r_wrappers import *
-from soothsayer.utils import assert_acceptable_arguments
+from soothsayer.utils import assert_acceptable_arguments, check_packages
 
 # ==============================================================================
 # R Imports
 # ==============================================================================
-# from rpy2 import robjects, rinterface
-from rpy2 import robjects as ro
-from rpy2 import rinterface as ri
+if "rpy2" in sys.modules:
+    from rpy2 import robjects as ro
+    from rpy2 import rinterface as ri
 
-from rpy2.robjects.packages import importr
-try:
-    from rpy2.rinterface import RRuntimeError
-except ImportError:
-    from rpy2.rinterface_lib.embedded import RRuntimeError
-from rpy2.robjects import pandas2ri
-# pandas2ri.activate()
-R = ro.r
-NULL = ri.NULL
-#rinterface.set_writeconsole_regular(None)
+    from rpy2.robjects.packages import importr
+    try:
+        from rpy2.rinterface import RRuntimeError
+    except ImportError:
+        from rpy2.rinterface_lib.embedded import RRuntimeError
+    from rpy2.robjects import pandas2ri
+    # pandas2ri.activate()
+    R = ro.r
+    NULL = ri.NULL
+    #rinterface.set_writeconsole_regular(None)
 
 # R Packages
-propr = R_package_retrieve("propr")
+# propr = R_package_retrieve("propr")
 
 # ==============================================================================
 # Exports
@@ -42,6 +42,7 @@ __all__ = ["propr"]
 # Functions
 # ==============================================================================
 # Proportionality
+@check_packages(["propr"], language="r", import_into_backend=False)
 def proportionality(X:pd.DataFrame, metric="rho", transformation="clr", symmetrize=False,  permutations=100,  store_counts=False, store_transformed_components=True, name=None, into=OrderedDict, **kwargs):
     """
     https://github.com/tpq/propr
@@ -78,8 +79,9 @@ def proportionality(X:pd.DataFrame, metric="rho", transformation="clr", symmetri
     fdr
     A data.frame. Stores the FDR cutoffs for propr.
     """
-    # update_cutoffs=True, cutoff=np.linspace(0.05, 0.95, 4), n_jobs=-1,
-    
+    # Imports
+    propr = R_package_retrieve("propr")
+
     # Assert "into" types
     assert_acceptable_arguments([into], {dict, OrderedDict, namedtuple})
     # Run propr

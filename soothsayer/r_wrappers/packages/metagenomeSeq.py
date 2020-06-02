@@ -8,31 +8,31 @@ import pandas as pd
 
 # Soothsayer
 from ..r_wrappers import *
-from soothsayer.symmetry import *
-from soothsayer.utils import *
+# from soothsayer.symmetry import *
+from soothsayer.utils import check_packages
 
 # ==============================================================================
 # R Imports
 # ==============================================================================
-# from rpy2 import robjects, rinterface
-from rpy2 import robjects as ro
-from rpy2 import rinterface as ri
+if "rpy2" in sys.modules:
+    from rpy2 import robjects as ro
+    from rpy2 import rinterface as ri
 
-from rpy2.robjects.packages import importr
-try:
-    from rpy2.rinterface import RRuntimeError
-except ImportError:
-    from rpy2.rinterface_lib.embedded import RRuntimeError
-from rpy2.robjects import pandas2ri
-# pandas2ri.activate()
-R = ro.r
-NULL = ri.NULL
-#rinterface.set_writeconsole_regular(None)
+    from rpy2.robjects.packages import importr
+    try:
+        from rpy2.rinterface import RRuntimeError
+    except ImportError:
+        from rpy2.rinterface_lib.embedded import RRuntimeError
+    from rpy2.robjects import pandas2ri
+    R = ro.r
+    NULL = ri.NULL
+    #rinterface.set_writeconsole_regular(None)
 
 # R packages
-metagenomeSeq = R_package_retrieve("metagenomeSeq")
+# metagenomeSeq = R_package_retrieve("metagenomeSeq")
 
 # CSS Normalization
+@check_packages(["metagenomeSeq"], language="r", import_into_backend=False)
 def normalize_css(X):
     """
     metagenomeSeq: https://github.com/HCBravoLab/metagenomeSeq
@@ -40,12 +40,14 @@ def normalize_css(X):
     Calculates NormFactors via metagenomeSeq
     Scales counts with scaling factors
     """
+    metagenomeSeq = R_package_retrieve("metagenomeSeq")
+
     assert isinstance(X, pd.DataFrame), "type(X) must be pd.DataFrame"
     # metagenomeSeq = R_package_retrieve("metagenomeSeq")
     # Run R-Pipeline
     def run_css(X):
         # Convert pd.DataFrame to R-object
-        rX = pandas2ri.py2ri(X)
+        rX = pandas_to_rpy2(X)
         # Instantiate metagenomeSeq experiment
         obj = metagenomeSeq.newMRexperiment(rX)
         # Calculate NormFactors
@@ -53,7 +55,7 @@ def normalize_css(X):
         obj = metagenomeSeq.cumNorm(obj, p=p)#     # Calculate Library Size
         # CSS Normalization
         rDF_css = metagenomeSeq.MRcounts(obj, norm = True, log = False)
-        return pandas2ri.ri2py(rDF_css)
+        return rpy2_to_pandas(rDF_css)
 
     # Gene axis as rows
     X = X.T

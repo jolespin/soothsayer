@@ -34,7 +34,7 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.05.28"
+__version__= "2020.06.01b"
 __moniker__ = "Yerba mate"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
@@ -78,7 +78,7 @@ from .transmute import transmute
 # Tree
 from .tree import tree
 # Utilities
-from .utils import utils, Chromatic
+from .utils import utils, Chromatic, pv
 # Visualizations
 from .visuals import visuals
 
@@ -91,7 +91,7 @@ _hierarchy = ["Agglomerative", "Topology"]
 _networks = ["Hive", "TemporalNetwork"]
 _ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold"]
 _symmetry = ["Symmetric"]
-_utils = ["Chromatic", "Suppress"]
+_utils = ["Chromatic", "Suppress", "pv"]
 
 __all__ = _submodules + _core + _hierarchy + _networks + _ordination + _symmetry + _utils
 __all__ = sorted(__all__)

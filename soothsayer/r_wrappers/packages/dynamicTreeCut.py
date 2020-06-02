@@ -9,28 +9,28 @@ import numpy as np
 
 # Soothsayer
 from ..r_wrappers import *
-from soothsayer.utils import *
+from soothsayer.utils import check_packages, is_query_class
 # ==============================================================================
 # R Imports
 # ==============================================================================
-# from rpy2 import robjects, rinterface
-from rpy2 import robjects as ro
-from rpy2 import rinterface as ri
+if "rpy2" in sys.modules:
+    from rpy2 import robjects as ro
+    from rpy2 import rinterface as ri
 
-from rpy2.robjects.packages import importr
-try:
-    from rpy2.rinterface import RRuntimeError
-except ImportError:
-    from rpy2.rinterface_lib.embedded import RRuntimeError
-from rpy2.robjects import pandas2ri
-# pandas2ri.activate()
-R = ro.r
-NULL = ri.NULL
-#rinterface.set_writeconsole_regular(None)
+    from rpy2.robjects.packages import importr
+    try:
+        from rpy2.rinterface import RRuntimeError
+    except ImportError:
+        from rpy2.rinterface_lib.embedded import RRuntimeError
+    from rpy2.robjects import pandas2ri
+    # pandas2ri.activate()
+    R = ro.r
+    NULL = ri.NULL
+    #rinterface.set_writeconsole_regular(None)
 
 # R packages
-dynamicTreeCut = R_package_retrieve("dynamicTreeCut")
-fastcluster = R_package_retrieve("fastcluster")
+# dynamicTreeCut = R_package_retrieve("dynamicTreeCut")
+# fastcluster = R_package_retrieve("fastcluster")
 # ==============================================================================
 # Exports
 # ==============================================================================
@@ -38,12 +38,17 @@ __all__ = ["cutree_dynamic"]
 # ==============================================================================
 # dynamicTreeCut
 # ==============================================================================
+@check_packages(["dynamicTreeCut", "fastcluster"], language="r", import_into_backend=False)
 def cutree_dynamic(kernel, cut_method="hybrid", method="ward", minClusterSize=20, name=None, **args):
     """
     dynamicTreeCut: cutreeDynamic
         function (dendro, cutHeight = NULL, minClusterSize = 20, method = "hybrid",
                    distM = NULL, de <...> it = deepSplit, minModuleSize = minClusterSize))
     """
+    # Imports
+    dynamicTreeCut = R_package_retrieve("dynamicTreeCut")
+    fastcluster = R_package_retrieve("fastcluster")
+
     accepted_kernel_types = {"DataFrame", "Symmetric"}
     assert is_query_class(kernel, query=accepted_kernel_types), f"`kernel` type must be one of the following: {accepted_kernel_types}"
     # pd.DataFrame -> Symmetric

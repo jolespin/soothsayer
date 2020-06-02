@@ -15,14 +15,14 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from scipy.interpolate import interp1d
 from scipy import stats
 from scipy.spatial.distance import squareform
-from teneto import TemporalNetwork as TenetoTemporalNetwork
+# from teneto import TemporalNetwork as TenetoTemporalNetwork
 from tqdm import tqdm
 from skbio.util._decorator import experimental, stable
 
 # Soothsayer
 from ..symmetry import *
 from ..utils import *
-from ..r_wrappers.packages.WGCNA import pickSoftThreshold_fromSimilarity
+# from ..r_wrappers.packages.WGCNA import pickSoftThreshold_fromSimilarity
 from ..visuals import plot_scatter, bezier_points
 from ..transmute.normalization import normalize_minmax
 from ..io import write_object
@@ -986,7 +986,7 @@ def topological_overlap_measure(adjacency, tol=1e-10):
         return pd.DataFrame(A_tom, index=node_labels, columns=node_labels)
 
 # Soft threshold curves
-@Suppress(show_stdout=False, show_stderr=True)
+@check_packages(["WGCNA"], language="r", import_into_backend=False)
 def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True, query_powers = np.append(np.arange(1,10), np.arange(10,30,2)), style="seaborn-white", scalefree_threshold=0.85, pad=1.0, markeredgecolor="black"):
         """
         WGCNA: intramodularConnectivity
@@ -995,6 +995,9 @@ def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True
                        indent = indent)
         returns fig, ax, df_sft
         """
+        # Imports
+        from ..r_wrappers.packages.WGCNA import pickSoftThreshold_fromSimilarity
+
         # Check
         if is_query_class(similarity, "Symmetric"):
             df_adj = similarity.to_dense()
@@ -1004,7 +1007,8 @@ def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True
         assert df_adj.columns.value_counts().max() == 1, "Remove duplicate labels in columns"
 
         # Run pickSoftThreshold.fromSimilarity
-        df_sft = pickSoftThreshold_fromSimilarity(df_adj, query_powers)
+        with Suppress(show_stdout=False, show_stderr=True):
+            df_sft = pickSoftThreshold_fromSimilarity(df_adj, query_powers)
         df_sft["Scale-Free Topology Model Fit"] = -1*np.sign(df_sft.iloc[:,2])*df_sft.iloc[:,1]
         df_sft = df_sft.set_index("Power", drop=True)
         fig, ax = None, None
@@ -1257,7 +1261,10 @@ class TemporalNetwork(object):
                 )
 
     # Compile
+    @check_packages(["teneto"], language="python", import_into_backend=False)
     def compile(self, intertemporal_connections=None, check_intermodal=True, verbose=False, **additional_edge_attributes):
+        from teneto import TemporalNetwork as TenetoTemporalNetwork
+
         # Get nodes and intratemporal edges
         self.node_temporal_ = defaultdict(set)
         for (t, graph) in self.graphs.items():

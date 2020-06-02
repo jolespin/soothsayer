@@ -8,6 +8,8 @@
 * 2020.05.20 Created "infer_tree_type", "check_polytomy", "prune_tree", and "is_leaf" in utils. 
 * 2020.05.20 Changed "name_ete_nodes to "name_tree_nodes" (made skbio compatible) and moved to utils
 * 2020.05.20 Made dependency on `compositional`.  Replaced transform functions in `soothsayer.transmute.normalization` and added functions in `soothsayer.symmetry`.
+* 2020.05.20 Removed automatic maximum threads for WGCNA
+* 2020.06.01 Removed dependencies on R packages but rpy2 is still necessary
 
 # Clairvoyance: 
 # =============

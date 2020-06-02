@@ -2,37 +2,35 @@
 # Imports
 # ==============================================================================
 # Built-ins
-import os, sys, time, multiprocessing
+import os, sys, time
 
 import pandas as pd
 import numpy as np
 
 # Soothsayer
 from ..r_wrappers import *
-from soothsayer.utils import *
+from soothsayer.utils import check_packages
 
 # ==============================================================================
 # R Imports
 # ==============================================================================
-# from rpy2 import robjects, rinterface
-from rpy2 import robjects as ro
-from rpy2 import rinterface as ri
+if "rpy2" in sys.modules:
+    from rpy2 import robjects as ro
+    from rpy2 import rinterface as ri
 
-from rpy2.robjects.packages import importr
-try:
-    from rpy2.rinterface import RRuntimeError
-except ImportError:
-    from rpy2.rinterface_lib.embedded import RRuntimeError
-from rpy2.robjects import pandas2ri
-# pandas2ri.activate()
-R = ro.r
-NULL = ri.NULL
-#rinterface.set_writeconsole_regular(None)
-
-
+    from rpy2.robjects.packages import importr
+    try:
+        from rpy2.rinterface import RRuntimeError
+    except ImportError:
+        from rpy2.rinterface_lib.embedded import RRuntimeError
+    from rpy2.robjects import pandas2ri
+    # pandas2ri.activate()
+    R = ro.r
+    NULL = ri.NULL
+    #rinterface.set_writeconsole_regular(None)
 
 # R packages
-wgcna = R_package_retrieve("WGCNA")
+# WGCNA = R_package_retrieve("WGCNA")
 #
 # def TOMsimilarity(adjacency,  TOMType="unsigned",  TOMDenom="min"):
 #     """
@@ -59,13 +57,16 @@ wgcna = R_package_retrieve("WGCNA")
 #     if axis == 1: X_copy = X.copy()
 #     if axis == 0: X_copy = X.copy().T
 #     labels = X_copy.columns
-#     rDF_sim = wgcna.bicor(pandas_to_rpy2(X_copy))
+#     rDF_sim = WGCNA.bicor(pandas_to_rpy2(X_copy))
 #     df_bicor = pd.DataFrame(rpy2_to_pandas(rDF_sim), index=labels, columns=labels)
 #     return df_bicor
 
+@check_packages(["WGCNA"], language="r", import_into_backend=False)
 def pickSoftThreshold_fromSimilarity(df_adj, query_powers):
+    WGCNA = R_package_retrieve("WGCNA")
+
     # Run pickSoftThreshold.fromSimilarity
     query_powers = ro.IntVector(list(query_powers))
     r_adj = pandas_to_rpy2(df_adj)
-    rDF_scalefreetopology = wgcna.pickSoftThreshold_fromSimilarity(R["as.matrix"](r_adj), powerVector = query_powers, verbose=0, moreNetworkConcepts=True)[1]
+    rDF_scalefreetopology = WGCNA.pickSoftThreshold_fromSimilarity(R["as.matrix"](r_adj), powerVector = query_powers, verbose=0, moreNetworkConcepts=True)[1]
     return rpy2_to_pandas(rDF_scalefreetopology)

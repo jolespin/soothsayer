@@ -8,31 +8,30 @@ import pandas as pd
 
 # Soothsayer
 from ..r_wrappers import *
-from soothsayer.symmetry import *
-from soothsayer.utils import *
+# from soothsayer.symmetry import *
+from soothsayer.utils import check_packages, assert_acceptable_arguments
 
 # ==============================================================================
 # R Imports
 # ==============================================================================
-# from rpy2 import robjects, rinterface
-from rpy2 import robjects as ro
-from rpy2 import rinterface as ri
+if "rpy2" in sys.modules:
+    from rpy2 import robjects as ro
+    from rpy2 import rinterface as ri
 
-from rpy2.robjects.packages import importr
-try:
-    from rpy2.rinterface import RRuntimeError
-except ImportError:
-    from rpy2.rinterface_lib.embedded import RRuntimeError
-from rpy2.robjects import pandas2ri
-# pandas2ri.activate()
-R = ro.r
-NULL = ri.NULL
-#rinterface.set_writeconsole_regular(None)
+    from rpy2.robjects.packages import importr
+    try:
+        from rpy2.rinterface import RRuntimeError
+    except ImportError:
+        from rpy2.rinterface_lib.embedded import RRuntimeError
+    from rpy2.robjects import pandas2ri
+    R = ro.r
+    NULL = ri.NULL
 
 # R packages
-edgeR = R_package_retrieve("edgeR")
+# edgeR = R_package_retrieve("edgeR")
 
 # Normalize using various methods
+@check_packages(["edgeR"], language="r", import_into_backend=False)
 def normalize_edgeR(X:pd.DataFrame, method:str="tmm", length:pd.Series=None, p=0.75, **kws):
     """
     X: pd.DataFrame where rows are samples and columns are genes
@@ -45,6 +44,8 @@ def normalize_edgeR(X:pd.DataFrame, method:str="tmm", length:pd.Series=None, p=0
     edgeR: http://bioconductor.org/packages/release/bioc/html/edgeR.html
 
     """
+    edgeR = R_package_retrieve("edgeR")
+
     assert isinstance(X, pd.DataFrame), "type(df_counts) must be pd.DataFrame"
     # Method formatting
     assert_acceptable_arguments(query=[method.lower()], target={"tmm", "rle", "upperquartile", "getmm"})

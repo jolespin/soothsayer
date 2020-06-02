@@ -84,7 +84,7 @@ def create_tree(
 
     # Node prefix
     if node_prefix is not None:
-        tree = name_ete_nodes(tree, node_prefix=node_prefix)
+        tree = name_tree_nodes(tree, node_prefix=node_prefix)
     if not convert_to_skbio:
         return tree
     # skbio
