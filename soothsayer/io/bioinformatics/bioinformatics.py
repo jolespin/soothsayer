@@ -23,11 +23,29 @@ from Bio import SeqIO
 from soothsayer.utils import format_path, infer_compression, is_path_like, is_query_class, assert_acceptable_arguments
 from ..text import read_textfile, get_file_object
 
+# Soothsayer Utils
+import soothsayer_utils as syu
+functions_from_soothsayer_utils = [
+'read_fasta',
+"read_star_log",
+'read_hmmer',
+'read_gtf_gff_base',
+'read_gff3', 
+'read_gtf', 
+'read_ncbi_xml', 
+'write_fasta', 
+]
+
+for function_name in functions_from_soothsayer_utils:
+    globals()[function_name] = getattr(syu, function_name)
+
 # ======
 # Future
 # ======
 # (1) Add ability for `path` arguments to be `pathlib.Path`
 # (2) Add ability to process ~ in path
+
+
 
 # ==============
 # Bioinformatics
@@ -195,86 +213,86 @@ def read_checkm_qa(path:str, format=8, verbose=True, rename_columns=True, func_o
     if format == 8:
         return _read_format_qa_8(path, verbose)
 
-# Read Fasta File
-def read_fasta(path:str, description:bool=True, case="upper", func_header=None, into=pd.Series, compression="infer", name=None, verbose=True):
-    """
-    Reads in a single fasta file or a directory of fasta files into a dictionary.
-    """
-    # Get path
-    path = format_path(path)
+# # # Read Fasta File
+# # def read_fasta(path:str, description:bool=True, case="upper", func_header=None, into=pd.Series, compression="infer", name=None, verbose=True):
+# #     """
+# #     Reads in a single fasta file or a directory of fasta files into a dictionary.
+# #     """
+# #     # Get path
+# #     path = format_path(path)
 
-    # Assign pathname as name if there isn't one
-    if name is None:
-        name = path
+# #     # Assign pathname as name if there isn't one
+# #     if name is None:
+# #         name = path
 
-    # Open file object
-    f = get_file_object(path, mode="read", compression=compression, safe_mode=False, verbose=False)
+# #     # Open file object
+# #     f = get_file_object(path, mode="read", compression=compression, safe_mode=False, verbose=False)
 
-    # Read in fasta
-    d_id_seq = OrderedDict()
+# #     # Read in fasta
+# #     d_id_seq = OrderedDict()
 
-    if verbose:
-        seq_records = tqdm(SeqIO.FastaIO.SimpleFastaParser(f), f"Reading sequence file: {path}")
-    else:
-        seq_records = SeqIO.FastaIO.SimpleFastaParser(f)
+# #     if verbose:
+# #         seq_records = tqdm(SeqIO.FastaIO.SimpleFastaParser(f), f"Reading sequence file: {path}")
+# #     else:
+# #         seq_records = SeqIO.FastaIO.SimpleFastaParser(f)
 
-    # Verbose but faster
-    if case == "lower":
-        for header, seq in seq_records:
-            seq = seq.lower()
-            if not description:
-                header = header.split(" ")[0]
-            d_id_seq[header] = seq
-    if case == "upper":
-        for header, seq in seq_records:
-            seq = seq.upper()
-            if not description:
-                header = header.split(" ")[0]
-            d_id_seq[header] = seq
-    if case is None:
-        for header, seq in seq_records:
-            if not description:
-                header = header.split(" ")[0]
-            d_id_seq[header] = seq
+# #     # Verbose but faster
+# #     if case == "lower":
+# #         for header, seq in seq_records:
+# #             seq = seq.lower()
+# #             if not description:
+# #                 header = header.split(" ")[0]
+# #             d_id_seq[header] = seq
+# #     if case == "upper":
+# #         for header, seq in seq_records:
+# #             seq = seq.upper()
+# #             if not description:
+# #                 header = header.split(" ")[0]
+# #             d_id_seq[header] = seq
+# #     if case is None:
+# #         for header, seq in seq_records:
+# #             if not description:
+# #                 header = header.split(" ")[0]
+# #             d_id_seq[header] = seq
 
-    # Close File
-    f.close()
+# #     # Close File
+# #     f.close()
 
-    # Transform header
-    if func_header is not None:
-        d_id_seq = OrderedDict( [(func_header(id),seq) for id, seq in d_id_seq.items()])
-    sequences = into(d_id_seq)
-    if hasattr(sequences, "name"):
-        sequences.name = name
-    return sequences
+# #     # Transform header
+# #     if func_header is not None:
+# #         d_id_seq = OrderedDict( [(func_header(id),seq) for id, seq in d_id_seq.items()])
+# #     sequences = into(d_id_seq)
+# #     if hasattr(sequences, "name"):
+# #         sequences.name = name
+# #     return sequences
 
 
-# Writing sequence files
-def write_fasta(sequences, path:str, compression="infer"):
-    """
-    Sequence stats:
-    count    29999.000000
-    mean       310.621754
-    std       1339.422833
-    min         56.000000
-    25%         75.000000
-    50%        111.000000
-    75%        219.000000
-    max      54446.000000
+# # # Writing sequence files
+# # def write_fasta(sequences, path:str, compression="infer"):
+# #     """
+# #     Sequence stats:
+# #     count    29999.000000
+# #     mean       310.621754
+# #     std       1339.422833
+# #     min         56.000000
+# #     25%         75.000000
+# #     50%        111.000000
+# #     75%        219.000000
+# #     max      54446.000000
 
-    Benchmarks:
-    No compression: 47.2 ms ± 616 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
-    Gzip: 9.85 s ± 261 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-    Bzip2: 864 ms ± 16.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-    """
-    # path = format_path(path)
-    # if compression == "infer":
-    #     compression = infer_compression(path)
-    if is_query_class(path, ["stdout", "stderr", "streamwrapper"]):
-        path.writelines(f">{id}\n{seq}\n" for id, seq in sequences.items())
-    else:
-        with get_file_object(path, mode="write", compression=compression, safe_mode=False, verbose=False) as f:
-            f.writelines(f">{id}\n{seq}\n" for id, seq in sequences.items())
+# #     Benchmarks:
+# #     No compression: 47.2 ms ± 616 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+# #     Gzip: 9.85 s ± 261 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+# #     Bzip2: 864 ms ± 16.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+# #     """
+# #     # path = format_path(path)
+# #     # if compression == "infer":
+# #     #     compression = infer_compression(path)
+# #     if is_query_class(path, ["stdout", "stderr", "streamwrapper"]):
+# #         path.writelines(f">{id}\n{seq}\n" for id, seq in sequences.items())
+# #     else:
+# #         with get_file_object(path, mode="write", compression=compression, safe_mode=False, verbose=False) as f:
+# #             f.writelines(f">{id}\n{seq}\n" for id, seq in sequences.items())
 
 # Read blast output
 def read_blast(path:str, length_query=None, length_subject=None, sort_by="bitscore"):
@@ -341,124 +359,124 @@ def read_blast(path:str, length_query=None, length_subject=None, sort_by="bitsco
     if sort_by is not None:
         df_blast = df_blast.sort_values(by=sort_by, ascending=False).reset_index(drop=True)
 
-    return df_blast
-# Helper function for reading gtf and gff3
-def _read_gtf_gff_base(path, compression, record_type, verbose):
-    # Read the gff3 file
-    with get_file_object(path, mode="read", compression=compression, safe_mode=False, verbose=False) as f:
-        if verbose:
-            iterable_lines = tqdm(f.readlines(), "Processing lines")
-        else:
-            iterable_lines = f.readlines()
-        data= list()
-        if record_type is None:
-            for line in iterable_lines:
-                if not line.startswith("#"):
-                    line = line.strip("\n")
-                    if bool(line):
-                        base_fields = line.split("\t")
-                        data.append(base_fields)
-        else:
-            for line in iterable_lines:
-                if not line.startswith("#"):
-                    if f"{record_type}_id" in line:
-                        line = line.strip("\n")
-                        base_fields = line.split("\t")
-                        data.append(base_fields)
-    # Generate table
-    df_base = pd.DataFrame(data)
-    df_base.columns = ["seq_record", "source", "seq_type", "pos_start", "pos_end", ".1", "sense", ".2", "data_fields"]
-    return df_base
+#     return df_blast
+# # Helper function for reading gtf and gff3
+# def _read_gtf_gff_base(path, compression, record_type, verbose):
+#     # Read the gff3 file
+#     with get_file_object(path, mode="read", compression=compression, safe_mode=False, verbose=False) as f:
+#         if verbose:
+#             iterable_lines = tqdm(f.readlines(), "Processing lines")
+#         else:
+#             iterable_lines = f.readlines()
+#         data= list()
+#         if record_type is None:
+#             for line in iterable_lines:
+#                 if not line.startswith("#"):
+#                     line = line.strip("\n")
+#                     if bool(line):
+#                         base_fields = line.split("\t")
+#                         data.append(base_fields)
+#         else:
+#             for line in iterable_lines:
+#                 if not line.startswith("#"):
+#                     if f"{record_type}_id" in line:
+#                         line = line.strip("\n")
+#                         base_fields = line.split("\t")
+#                         data.append(base_fields)
+#     # Generate table
+#     df_base = pd.DataFrame(data)
+#     df_base.columns = ["seq_record", "source", "seq_type", "pos_start", "pos_end", ".1", "sense", ".2", "data_fields"]
+#     return df_base
 
-def read_gff3(path:str, compression="infer", record_type=None, verbose = True, reset_index=False, name=True):
-    def f(x):
-        fields = x.split(";")
-        data = dict()
-        for item in fields:
-            k, v = item.split("=")
-            data[k] = v
-        return data
-    path = format_path(path)
-    if verbose:
-        print("Reading gff3 file:",path,sep="\t", file=sys.stderr)
-    accepted_recordtypes = {"exon", "gene", "transcript", "protein", None}
-    assert record_type in accepted_recordtypes, "Unrecognized record_type.  Please choose from the following: {}".format(accepted_recordtypes)
+# def read_gff3(path:str, compression="infer", record_type=None, verbose = True, reset_index=False, name=True):
+#     def f(x):
+#         fields = x.split(";")
+#         data = dict()
+#         for item in fields:
+#             k, v = item.split("=")
+#             data[k] = v
+#         return data
+#     path = format_path(path)
+#     if verbose:
+#         print("Reading gff3 file:",path,sep="\t", file=sys.stderr)
+#     accepted_recordtypes = {"exon", "gene", "transcript", "protein", None}
+#     assert record_type in accepted_recordtypes, "Unrecognized record_type.  Please choose from the following: {}".format(accepted_recordtypes)
 
-    # Read the gff3 file
-    df_base = _read_gtf_gff_base(path, compression, record_type, verbose)
+#     # Read the gff3 file
+#     df_base = _read_gtf_gff_base(path, compression, record_type, verbose)
 
-    try:
-        df_fields = pd.DataFrame(df_base["data_fields"].map(f).to_dict()).T
-        df_gff3 = pd.concat([df_base[["seq_record", "source", "seq_type", "pos_start", "pos_end", ".1", "sense", ".2"]], df_fields], axis=1)
-         # Contains identifier
-        if "ID" in df_gff3.columns:
-            df_gff3["seq_id"] = df_gff3["ID"].map(lambda x: "-".join(x.split("-")[1:]) if not pd.isnull(x) else x)
-        if reset_index:
-            df_gff3 = df_gff3.reset_index(drop=True)
-    except IndexError:
-        warnings.warn("Could not successfully parse file: {}".format(path))
-        df_gff3 = df_base
+#     try:
+#         df_fields = pd.DataFrame(df_base["data_fields"].map(f).to_dict()).T
+#         df_gff3 = pd.concat([df_base[["seq_record", "source", "seq_type", "pos_start", "pos_end", ".1", "sense", ".2"]], df_fields], axis=1)
+#          # Contains identifier
+#         if "ID" in df_gff3.columns:
+#             df_gff3["seq_id"] = df_gff3["ID"].map(lambda x: "-".join(x.split("-")[1:]) if not pd.isnull(x) else x)
+#         if reset_index:
+#             df_gff3 = df_gff3.reset_index(drop=True)
+#     except IndexError:
+#         warnings.warn("Could not successfully parse file: {}".format(path))
+#         df_gff3 = df_base
 
-    # Path index
-    if name is not None:
-        if name == True:
-            name = path
-        df_gff3.index.name = name
+#     # Path index
+#     if name is not None:
+#         if name == True:
+#             name = path
+#         df_gff3.index.name = name
 
-    return df_gff3
+#     return df_gff3
 
-# GTF
-def read_gtf(path:str, compression="infer", record_type=None, verbose = True, reset_index=False, name=True):
-    path = format_path(path)
-    if verbose:
-        print(f"Reading gtf file:",path,sep="\t", file=sys.stderr)
-    accepted_recordtypes = {"exon", "gene", "transcript", "protein", None}
-    assert record_type in accepted_recordtypes, f"Unrecognized record_type.  Please choose from the following: {accepted_recordtypes}"
+# # GTF
+# def read_gtf(path:str, compression="infer", record_type=None, verbose = True, reset_index=False, name=True):
+#     path = format_path(path)
+#     if verbose:
+#         print(f"Reading gtf file:",path,sep="\t", file=sys.stderr)
+#     accepted_recordtypes = {"exon", "gene", "transcript", "protein", None}
+#     assert record_type in accepted_recordtypes, f"Unrecognized record_type.  Please choose from the following: {accepted_recordtypes}"
 
-    # Read the gtf file
-    df_base = _read_gtf_gff_base(path, compression, record_type, verbose)
+#     # Read the gtf file
+#     df_base = _read_gtf_gff_base(path, compression, record_type, verbose)
 
-    # Splitting fields
-    iterable_fields =  df_base.iloc[:,-1].iteritems()
+#     # Splitting fields
+#     iterable_fields =  df_base.iloc[:,-1].iteritems()
 
-    # Parse fields
-    dataframe_build = dict()
-    for i, gtf_data in iterable_fields:
-        gtf_data = gtf_data.replace("''","").replace('"',"")
-        fields = filter(bool, map(lambda field:field.strip(), gtf_data.split(";")))
-        fields = map(lambda field: field.split(" "), fields)
-        dataframe_build[i] = dict(fields)
-    df_fields = pd.DataFrame(dataframe_build).T
-    df_gtf = pd.concat([df_base.iloc[:,:7], df_fields], axis=1)
+#     # Parse fields
+#     dataframe_build = dict()
+#     for i, gtf_data in iterable_fields:
+#         gtf_data = gtf_data.replace("''","").replace('"',"")
+#         fields = filter(bool, map(lambda field:field.strip(), gtf_data.split(";")))
+#         fields = map(lambda field: field.split(" "), fields)
+#         dataframe_build[i] = dict(fields)
+#     df_fields = pd.DataFrame(dataframe_build).T
+#     df_gtf = pd.concat([df_base.iloc[:,:7], df_fields], axis=1)
 
-    # Reset index
-    if reset_index:
-        df_gtf = df_gtf.reset_index(drop=True)
+#     # Reset index
+#     if reset_index:
+#         df_gtf = df_gtf.reset_index(drop=True)
 
-    # Path index
-    if name is not None:
-        if name == True:
-            name = path
-        df_gtf.index.name = name
-    return df_gtf
+#     # Path index
+#     if name is not None:
+#         if name == True:
+#             name = path
+#         df_gtf.index.name = name
+#     return df_gtf
 
-# NCBI XML
-def read_ncbi_xml(path:str, index_name=None):
-    # Format path
-    path = format_path(path)
-    # Parse the XML tree
-    tree = ET.parse(path)
-    root = tree.getroot()
-    # Extract the attributes
-    data = defaultdict(dict)
-    for record in tqdm(root.getchildren(), "Reading NCBI XML: {}".format(path)):
-        id_record = record.attrib["accession"]
-        for attribute in record.findall("Attributes/*"):
-            data[id_record][attribute.attrib["attribute_name"]] = attribute.text
-    # Create pd.DataFrame
-    df = pd.DataFrame(data).T
-    df.index.name = index_name
-    return df
+# # NCBI XML
+# def read_ncbi_xml(path:str, index_name=None):
+#     # Format path
+#     path = format_path(path)
+#     # Parse the XML tree
+#     tree = ET.parse(path)
+#     root = tree.getroot()
+#     # Extract the attributes
+#     data = defaultdict(dict)
+#     for record in tqdm(root.getchildren(), "Reading NCBI XML: {}".format(path)):
+#         id_record = record.attrib["accession"]
+#         for attribute in record.findall("Attributes/*"):
+#             data[id_record][attribute.attrib["attribute_name"]] = attribute.text
+#     # Create pd.DataFrame
+#     df = pd.DataFrame(data).T
+#     df.index.name = index_name
+#     return df
 
 # Read EMBL-EBI sample metadata
 def read_ebi_sample_metadata(query, base_url="https://www.ebi.ac.uk/metagenomics/api/v1/samples/{}/metadata", mode="infer"):

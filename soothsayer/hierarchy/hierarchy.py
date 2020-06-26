@@ -37,7 +37,7 @@ from ..utils import *
 from ..ordination import PrincipalComponentAnalysis, eigenprofiles_from_data
 from ..symmetry import Symmetric, pairwise
 from ..transmute.conversion import linkage_to_newick, dism_to_linkage, ete_to_nx
-from ..networks import intramodular_connectivity
+from ..networks import connectivity
 from ..tree import create_tree
 
 
@@ -136,7 +136,7 @@ class Agglomerative(object):
 
         # pd.DataFrame -> Symmetric
         if isinstance(kernel, pd.DataFrame):
-            kernel = Symmetric(X=kernel, data_type=leaf_type, name=name, mode="dissimilarity", metadata=metadata)
+            kernel = Symmetric(data=kernel, node_type=leaf_type, name=name, association="dissimilarity", **metadata)
 
         # Base
         self.name = name
@@ -145,10 +145,10 @@ class Agglomerative(object):
 
         # Clustering
         self.method = method
-        self.linkage_labels = self.kernel.labels.copy()
+        self.linkage_labels = self.kernel.nodes.copy()
         self.num_leaves = len(self.linkage_labels)
         self._relabel = dict(zip(range(self.num_leaves), self.linkage_labels))
-        self.Z = linkage(self.kernel.data.values, method=method)
+        self.Z = linkage(self.kernel.weights.values, method=method, metric="precomputed") #!
         if leaf_axis == "infer":
             if data is not None:
                 axis_0_overlap = len(set(self.linkage_labels) & set(data.index))
@@ -922,12 +922,12 @@ class Agglomerative(object):
 
 
     # Intramodular connectivity
-    def intramodular_connectivity(self, kernel="auto"):
+    def connectivity(self, kernel="auto"):
         if kernel == "auto":
             kernel = 1 - self.df_dism
         if is_query_class(kernel, "Symmetric"):
             kernel = kernel.to_dense()
-        return intramodular_connectivity(kernel, clusters=self.get_clusters()[kernel.index])
+        return connectivity(kernel, groups=self.get_clusters()[kernel.index])
 
     # ============
     # Conversion

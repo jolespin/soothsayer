@@ -26,8 +26,9 @@ import soothsayer_utils as syu
 
 functions_from_soothsayer_utils = [
 'assert_acceptable_arguments', 'boolean', 'consecutive_replace', 'contains', 'dict_build', 'dict_collapse', 'dict_expand', 'dict_fill', 'dict_filter', 'dict_reverse', 'dict_tree',
-'flatten', 'format_duration', 'format_header', 'format_path', 'fragment',  'get_timestamp', 'get_unique_identifier', 'hash_kmer', 'infer_compression', 'is_all_same_type',
-'is_dict', 'is_dict_like', 'is_file_like', 'is_function', 'is_in_namespace', 'is_nonstring_iterable', 'is_number', 'is_path_like', 'is_query_class', 'iterable_depth', 'join_as_strings',
+'flatten', 'format_memory', 'format_duration', 'format_header', 'format_path', 'fragment',  'get_timestamp', 'get_unique_identifier', 'hash_kmer', 'infer_compression', 'is_all_same_type',
+'is_dict', 'is_dict_like', 'is_file_like', 'is_function', 'is_in_namespace', 'is_nonstring_iterable', 'is_symmetrical', 'is_number', 'is_path_like', 'is_query_class', "is_graph", "is_color",
+'iterable_depth', 'join_as_strings',
 'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages", "Suppress",
 ]
 
@@ -35,7 +36,7 @@ __all__ = {
     # Tree
     "infer_tree_type", "check_polytomy", "is_leaf","name_tree_nodes","prune_tree",
     # Need to organize these
-    "pd_prepend_level_to_index", 'pd_series_to_groupby_to_dataframe', 'pd_dropduplicates_index', 'generate_random_sequence', 'get_iris_data', 'is_color', 'add_cbar_from_data', 'get_coords_contour', 'get_repr', 'get_parameters_ellipse', 'DIVERGING_KWS', 'determine_mode_for_logfiles', 'create_logfile', 'is_symmetrical', 'pd_dataframe_matmul', 'dataframe_to_matrixstring', 'infer_cmap', 'pd_dataframe_extend_index', 'configure_scatter', 'CMAP_DIVERGING', 'pd_series_collapse', 'is_graph', 'format_filename', 'pd_series_filter', 'map_colors', 'rgb_to_rgba', 'LEGEND_KWS', 'force_symmetry', 'is_rgb_like', 'COLOR_POSITIVE', 'Chromatic', 'COLOR_NEGATIVE', 'infer_vmin_vmax', 'pd_dataframe_query', 'get_coords_centroid', 'filter_compositional', 'scalarmapping_from_data', 'infer_continuous_type', 
+    "pd_prepend_level_to_index", 'pd_series_to_groupby_to_dataframe', 'pd_dropduplicates_index', 'generate_random_sequence', 'is_color', 'add_cbar_from_data', 'get_coords_contour', 'get_repr', 'get_parameters_ellipse', 'DIVERGING_KWS', 'determine_mode_for_logfiles', 'create_logfile', 'is_symmetrical', 'pd_dataframe_matmul', 'dataframe_to_matrixstring', 'infer_cmap', 'pd_dataframe_extend_index', 'configure_scatter', 'CMAP_DIVERGING', 'pd_series_collapse', 'is_graph', 'format_filename', 'pd_series_filter', 'map_colors', 'rgb_to_rgba', 'LEGEND_KWS', 'force_symmetry', 'is_rgb_like', 'COLOR_POSITIVE', 'Chromatic', 'COLOR_NEGATIVE', 'infer_vmin_vmax', 'pd_dataframe_query', 'get_coords_centroid', 'filter_compositional', 'scalarmapping_from_data', 'infer_continuous_type', 
     'format_mpl_legend_handles',
     }
 
@@ -61,35 +62,32 @@ def is_rgb_like(c):
     condition_2 = len(c) in [3,4]
     return all([condition_1, condition_2])
 
-def is_color(obj):
-    # Note: This can't handle values that are RGB in (0-255) only (0,1)
-    try:
-        to_rgb(obj)
-        return True
-    except ValueError:
-        verdict = False
-        if is_nonstring_iterable(obj):
-            if all(type(x) in [float, int] for x in obj):
-                if all(0 <= x <= 255 for x in obj):
-                    verdict = True
-        return verdict
-def is_graph(obj):
-    return hasattr(obj, "has_edge")
-
-def is_number(x, num_type = np.number):
-    return np.issubdtype(type(x), num_type)
+# def is_color(obj):
+#     # Note: This can't handle values that are RGB in (0-255) only (0,1)
+#     try:
+#         to_rgb(obj)
+#         return True
+#     except ValueError:
+#         verdict = False
+#         if is_nonstring_iterable(obj):
+#             if all(type(x) in [float, int] for x in obj):
+#                 if all(0 <= x <= 255 for x in obj):
+#                     verdict = True
+#         return verdict
+# def is_graph(obj):
+#     return hasattr(obj, "has_edge")
 
 # =============
 # Checks
 # =============
-def is_symmetrical(X, tol=None):
-    if X.shape[0] == X.shape[1]:
-        if tol is None:
-            return np.all(np.tril(X) == np.triu(X).T)
-        if tol:
-            return (np.tril(X) - np.triu(X).T).ravel().min() < tol
-    else:
-        return False
+# def is_symmetrical(X, tol=None):
+#     if X.shape[0] == X.shape[1]:
+#         if tol is None:
+#             return np.all(np.tril(X) == np.triu(X).T)
+#         if tol:
+#             return (np.tril(X) - np.triu(X).T).ravel().min() < tol
+#     else:
+#         return False
 
 def force_symmetry(X):
     return (X + X.T)/2
@@ -1057,45 +1055,3 @@ def filter_compositional(
             X = functions[strategy](X=X,tol=tol, operation=operations[mode])
 
     return X
-# ===========
-# Prototyping
-# ===========
-def get_iris_data(return_data=["X", "y", "colors"], noise=None, return_target_names=True, palette="Set2", desat=1, random_state=0):
-    """
-    return_data priority is [X, y, colors]
-    """
-    if isinstance(return_data, str):
-        return_data = [return_data]
-    assert set(return_data) <= set(["X", "y", "colors"]), "`return_data` must be any combination of ['X','y','colors']"
-
-    iris = load_iris()
-    # Iris dataset
-    X = pd.DataFrame(iris.data,
-                     index = [*map(lambda x:f"iris_{x}", range(150))],
-                     columns = [*map(lambda x: x.split(" (cm)")[0].replace(" ","_"), iris.feature_names)])
-
-    y = pd.Series(iris.target,
-                           index = X.index,
-                           name = "Species")
-    colors = map_colors(y, mode=1, palette=palette, desat=desat)#y.map(lambda x:{0:"red",1:"green",2:"blue"}[x])
-
-    if noise is not None:
-        X_noise = pd.DataFrame(
-            np.random.RandomState(random_state).normal(size=(X.shape[0], noise)),
-            index=X.index,
-            columns=[*map(lambda j:f"noise_{j}", range(noise))]
-        )
-        X = pd.concat([X, X_noise], axis=1)
-    if return_target_names:
-        y = y.map(lambda k: iris.target_names[k])
-    output = list()
-    if "X" in return_data:
-        output.append(X)
-    if "y" in return_data:
-        output.append(y)
-    if "colors" in return_data:
-        output.append(colors)
-    if len(output) == 1:
-        return output[0]
-    else:
-        return tuple(output)

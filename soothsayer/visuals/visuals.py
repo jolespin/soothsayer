@@ -802,22 +802,26 @@ def plot_waterfall(data:pd.Series,
         return fig,ax
 
 # Adding annotations onto plots
-def plot_annotation(labels, x:pd.Series, y:pd.Series, ax, adjust_label_positions=True,  **kwargs):
+def plot_annotation(labels, x:pd.Series, y:pd.Series, ax, adjust_label_positions=True,  x_pad=0, y_pad=0, **kwargs):
     """
     Dependency: https://github.com/Phlya/adjustText
     * Need to get the **kwargs and *args
     """
     def _get_text_objects(labels, x, y, ax, **kwargs):
         text_objects = []
-        for label, x_i, y_i in zip(labels,x,y):
+        for ((id, label), x_i, y_i) in zip(labels.iteritems(),x,y):
+            label = label.values[0]
             text_objects.append(ax.text(x_i, y_i, label,  **kwargs))
         return text_objects
-    x = pd.Series(x)
-    y = pd.Series(y)
-    assert set(labels) <= set(x.index), "All `labels` must be in `x.index"
-    assert set(labels) <= set(y.index), "All `labels` must be in `y.index"
-    x = x[labels]
-    y = y[labels]
+    if not is_dict_like(labels):
+        labels = dict(zip(labels, labels))
+    labels = pd.Series(labels)
+    x = pd.Series(x) + x_pad
+    y = pd.Series(y) + y_pad
+    assert set(labels.index) <= set(x.index), "All `labels` must be in `x.index"
+    assert set(labels.index) <= set(y.index), "All `labels` must be in `y.index"
+    x = x[labels.index].values
+    y = y[labels.index].values
     text_objects = _get_text_objects(labels, x, y, ax, **kwargs)
     if adjust_label_positions:
         adjust_text(text_objects, x, y, ax=ax)

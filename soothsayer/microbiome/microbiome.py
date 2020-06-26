@@ -485,7 +485,7 @@ def otu_to_level(X:pd.DataFrame, taxonomy:pd.DataFrame, level):
     return X.groupby(taxonomy[level], axis=1).sum()
 
 # Alpha diversity calculations
-def alpha_diversity(X:pd.DataFrame, metric="richness", taxonomy:pd.DataFrame=None, mode="infer", idx_taxonomy=['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],  name=None, base=2, obsv_type=None, **alpha_kws):
+def alpha_diversity(X:pd.DataFrame, metric="richness", taxonomy:pd.DataFrame=None, component_type="OTU", mode="infer", idx_taxonomy=['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'],  name=None, base=2, obsv_type=None, **alpha_kws):
     """
     X => pd.DataFrame of Otu counts with columns as Otus and rows as samples
     metric => a callable or a string {entropy, richness, gini, singletons}
@@ -531,7 +531,7 @@ def alpha_diversity(X:pd.DataFrame, metric="richness", taxonomy:pd.DataFrame=Non
             else:
                 print(f"Skipping taxonomy level `{level}` because it is not in the taxonomy dataframe", file=sys.stderr)
 
-        d_level_metric["Otu"] = alpha_diversity(X, metric=metric, taxonomy=None, mode="singular", base=base, **alpha_kws)
+        d_level_metric[component_type] = alpha_diversity(X, metric=metric, taxonomy=None, mode="singular", base=base, **alpha_kws)
         df_level_metric = pd.DataFrame(d_level_metric)
         df_level_metric.index.name = f"id_{obsv_type}"
         return df_level_metric

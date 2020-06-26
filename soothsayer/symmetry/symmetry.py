@@ -18,8 +18,9 @@ import ete3
 import skbio
 
 # SciPy
-from scipy import stats
-from scipy.spatial import distance
+# from scipy import stats
+from scipy.stats import entropy
+from scipy.spatial.distance import squareform,pdist
 try:
     from fastcluster import linkage
 except ImportError:
@@ -33,241 +34,366 @@ from sklearn.metrics.pairwise import pairwise_distances
 # Compositional
 import compositional as coda
 
+# Hive NetworkX
+import hive_networkx as hx
+
 # Soothsayer
 from ..transmute.conversion import linkage_to_newick
 # from ..r_wrappers.packages.WGCNA import bicor
-from ..utils import is_symmetrical, force_symmetry, assert_acceptable_arguments, name_tree_nodes
+from ..utils import  infer_tree_type, is_symmetrical, force_symmetry, assert_acceptable_arguments, format_header, check_packages, is_dict_like, dict_build, is_number, is_nonstring_iterable, format_memory, name_tree_nodes
+
+from ..io import write_object
+import datetime, copy, warnings
+from scipy.spatial.distance import squareform
+from fastcluster import linkage
+from soothsayer.transmute import linkage_to_newick
+from skbio.util._decorator import experimental, stable
+from scipy.stats import entropy
 
 __all__ = {"Symmetric", "pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise_logfc","pairwise_biweight_midcorrelation", "dense_to_condensed", "condensed_to_dense"}
 
+# compositional
 functions_from_compositional = {"pairwise_vlr", "pairwise_rho","pairwise_phi"}
-
 
 for function_name in functions_from_compositional:
     globals()[function_name] = getattr(coda, function_name)
+    __all__.add(function_name)
+
+# hive_networkx
+functions_from_hive_networkx= {"dense_to_condensed", "condensed_to_dense","Symmetric" }
+
+for function_name in functions_from_hive_networkx:
+    globals()[function_name] = getattr(hx, function_name)
     __all__.add(function_name)
 
 __all__ = sorted(__all__)
 
 
 
-
 # =======================================================
 # Pairwise calculations
 # =======================================================
-def dense_to_condensed(X, name=None, assert_symmetry=True, tol=None):
-    if assert_symmetry:
-        assert is_symmetrical(X, tol=tol), "`X` is not symmetric with tol=`{}`".format(tol)
-    labels = X.index
-    index=pd.Index(list(map(frozenset,itertools.combinations(labels, 2))), name=name)
-    data = distance.squareform(X, checks=False)
-    return pd.Series(data, index=index, name=name)
+# def dense_to_condensed(X, name=None, assert_symmetry=True, tol=None):
+#     if assert_symmetry:
+#         assert is_symmetrical(X, tol=tol), "`X` is not symmetric with tol=`{}`".format(tol)
+#     labels = X.index
+#     index=pd.Index(list(map(frozenset,itertools.combinations(labels, 2))), name=name)
+#     data = squareform(X, checks=False)
+#     return pd.Series(data, index=index, name=name)
 
-def condensed_to_dense(y:pd.Series, fill_diagonal=np.nan, index=None):
-    # Need to optimize this
-    data = defaultdict(dict)
-    for edge, w in y.iteritems():
-        node_a, node_b = tuple(edge)
-        data[node_a][node_b] = data[node_b][node_a] = w
-    for node in data:
-        data[node][node] = fill_diagonal
-    df_dense = pd.DataFrame(data)
-    if index is None:
-        index = data.keys()
-    df_dense = df_dense.loc[index,index]
-    return df_dense
+# def condensed_to_dense(y:pd.Series, fill_diagonal=np.nan, index=None):
+#     # Need to optimize this
+#     data = defaultdict(dict)
+#     for edge, w in y.iteritems():
+#         node_a, node_b = tuple(edge)
+#         data[node_a][node_b] = data[node_b][node_a] = w
+        
+#     if is_dict_like(fill_diagonal):
+#         for node in data:
+#             data[node][node] = fill_diagonal[node]
+#     else:
+#         for node in data:
+#             data[node][node] = fill_diagonal
+            
+#     df_dense = pd.DataFrame(data)
+#     if index is not None:
+#         df_dense = df_dense.loc[index,index]
+#     return df_dense
 
-# Symmetrical dataframes represented as augment pd.Series
-class Symmetric(object):
-    """
-    An indexable symmetric matrix stored as the lower triangle for space
+# # Symmetrical dataframes represented as augment pd.Series
+# @experimental(as_of="2020.06.23")
+# class Symmetric(object):
+#     """
+#     An indexable symmetric matrix stored as the lower triangle for space
 
-    devel
-    =====
-    2018-August-16
-    * Added __add__, __sub__, etc.
-    * Removed conversion to dissimilarity for tree construction
-    * Added .iteritems method
+#     devel
+#     =====
+#     2020-June-23
+#     * Replace self._dense_to_condensed to dense_to_condensed
+#     * Dropped math operations
+#     * Added input for Symmetric or pd.Series with a frozenset index
 
-    Future:
-    Take in a Symmetric object and pd.Series with a frozenset index
-    Fix the diagonal arithmetic
-    Replace self._dense_to_condensed to dense_to_condensed
-    """
-    def __init__(self, X:pd.DataFrame, data_type=None, metric_type=None, func_metric=None, name=None, mode="infer", metadata=dict(), force_the_symmetry=True):
-        acceptable_modes = ["similarity", "dissimilarity", "statistical_test", "infer"]
-        assert mode in acceptable_modes, f"`mode` must be in {acceptable_modes}"
-        if mode == "infer":
-            mode = self._infer_mode(X)
-        assert np.any(X.isnull()) == False, "Check what is causing NaN and remove them."
-        if force_the_symmetry:
-            X = force_symmetry(X)
-        else:
-            assert is_symmetrical(X, tol=1e-10), "X is not symmetric"
+#     2018-August-16
+#     * Added __add__, __sub__, etc.
+#     * Removed conversion to dissimilarity for tree construction
+#     * Added .iteritems method
+    
 
-        self.mode = mode
-        self.data_type = data_type
-        self.func_metric = func_metric
-        if func_metric is not None:
-            assert hasattr(func_metric, "__call__"), "`func_metric` isn't a function"
-            if metric_type is None:
-                metric_type = func_metric.__name__
-        self.metric_type = metric_type
-        self.name = name
-        self.labels = X.index
-        self.diagonal = np.copy(np.diagonal(X))
+#     Future:
+#     * Use `weights` instead of `data`
+    
+#     Dropped:
+#     Fix the diagonal arithmetic
+#     """
+#     def __init__(self, data, node_type=None, edge_type=None,  func_metric=None, name=None, association="infer", assert_symmetry=True, nans_ok=True, tol=None, acceptable_associations={"similarity", "dissimilarity", "statistical_test", "network", "infer", None}, **attrs):
+        
+#         self._acceptable_associations = acceptable_associations
+#         # From Symmetric object
+#         if isinstance(data, type(self)):
+#             self.__dict__.update(data.__dict__)
+#             if (self.func_metric is None) and (func_metric is not None):
+#                 assert hasattr(func_metric, "__call__"), "`func_metric` isn't a function"
+#                 if (self.edge_type is None) and (edge_type is None):
+#                     edge_type = func_metric.__name__
+#             if (self.node_type is None) and (node_type is not None):
+#                 self.node_type = node_type
+#             if (self.edge_type is None) and (edge_type is not None):
+#                 self.edge_type = edge_type
+#             if (association  not in {"infer", None}):
+#                 assert_acceptable_arguments(association, self._acceptable_associations)
+#                 self.association = association
 
-        diagonal_elements = set(self.diagonal)
-        warnings.warn('If operations are applied to the Symmetric object they will not be represented by the diagonal when converting back to dense form. Fix this in future version.')
-        self.data = self._dense_to_condensed(X)
-        self.__synthesized__ = datetime.datetime.utcnow()
-        self.num_nodes = X.shape[0]
-        # Metadata
-        self.metadata = dict([
-            ("name",name),
-            ("data_type",data_type),
-            ("synthesized",self.__synthesized__.strftime("%Y-%m-%d %H:%M:%S")),
-            ("num_nodes",self.num_nodes),
-            ("mode", mode),
-            ("metric_type", metric_type),
-        ]
-        )
-        self.metadata.update(metadata)
+#         else:
+#             # From pd.DataFrame object
+#             if isinstance(data, pd.DataFrame):
+#                 self._from_dataframe(data=data, association=association, assert_symmetry=assert_symmetry, nans_ok=nans_ok, tol=tol)
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}({repr(self.metadata)[1:-1]})"
+#             # From pd.Series object
+#             if isinstance(data, pd.Series):
+#                 self._from_series(data=data, association=association)
+                
+#             # From pd.DataFrame or pd.Series
+#             self.metadata = dict()
+#             if not nans_ok:
+#                 assert not np.any(data.isnull()), "Cannot move forward with missing values"
+#             if func_metric is not None:
+#                 assert hasattr(func_metric, "__call__"), "`func_metric` isn't a function"
+#                 if edge_type is None:
+#                     edge_type = func_metric.__name__
+#             self.node_type = node_type
+#             self.edge_type = edge_type
+#             self.func_metric = func_metric
+#             self.values = self.weights.values
+#             self.number_of_nodes = self.nodes.size
+#             self.number_of_edges = self.edges.size
+            
+#         # Universal
+#         self.name = name
+# #         self.graph = self.to_graph(into=graph)
+#         self.memory = self.weights.memory_usage()
+#         self.metadata.update(attrs)
+#         self.__synthesized__ = datetime.datetime.utcnow()
+                                      
+ 
 
-    # ==
-    # QC
-    # ==
-    def _infer_mode(self, X):
-        diagonal = np.diagonal(X)
-        diagonal_elements = set(diagonal)
-        assert len(diagonal_elements) == 1, "Cannot infer relationships from diagonal because multiple values"
-        assert diagonal_elements <= {0,1}, "Diagonal should be either 0.0 for dissimilarity or 1.0 for similarity"
-        return {0.0:"dissimilarity", 1.0:"similarity"}[list(diagonal_elements)[0]]
+#     # =======
+#     # Utility
+#     # =======
+#     def _infer_association(self, X):
+#         diagonal = np.diagonal(X)
+#         diagonal_elements = set(diagonal)
+#         assert len(diagonal_elements) == 1, "Cannot infer relationships from diagonal because multiple values"
+#         assert diagonal_elements <= {0,1}, "Diagonal should be either 0.0 for dissimilarity or 1.0 for similarity"
+#         return {0.0:"dissimilarity", 1.0:"similarity"}[list(diagonal_elements)[0]]
 
-    # =======
-    # Built-in
-    # =======
-    def __getitem__(self, key):
-        assert type(key)  not in [int,float,str], "`key` must be a non-string iterable"
-        assert len(key) >= 2, "`key` must have at least 2 identifiers. e.g. ('A','B')"
-        key = frozenset(key)
-        if len(key) == 1:
-            return {"similarity":1.0, "dissimilarity":0.0, "statistical_test":0.0}[self.mode]
-        else:
-            if len(key) > 2:
-                key = [*map(frozenset, itertools.combinations(key, r=2))]
-            return self.data[key]
-    def __len__(self):
-        return self.num_nodes
-    def __iter__(self):
-        for v in self.data:
-            yield v
-    def iteritems(self):
-        return self.data.iteritems()
+            
+#     def _from_dataframe(self, data:pd.DataFrame, association, assert_symmetry, nans_ok, tol):
+#         if assert_symmetry:
+#             assert is_symmetrical(data, tol=tol), "`X` is not symmetric.  Consider dropping the `tol` to a value such as `1e-10` or using `(X+X.T)/2` to force symmetry"
+#         assert_acceptable_arguments(association, self._acceptable_associations)
+#         if association == "infer":
+#             association = self._infer_association(data)
+#         assert_acceptable_arguments(association, self._acceptable_associations)
+#         self.association = association
+#         self.nodes = pd.Index(sorted(data.index), name="Nodes")
+#         self.diagonal = pd.Series(np.diagonal(data), index=data.index, name="Diagonal")[self.nodes]
+#         self.weights = dense_to_condensed(data, name="Weights", assert_symmetry=assert_symmetry, tol=tol)
+#         self.edges = pd.Index(self.weights.index, name="Edges")
 
-    # Maths
-    def __add__(self, x):
-        symmetric_clone = copy.deepcopy(self)
-        symmetric_clone.data += x
-        # self.diagonal += x
-        return symmetric_clone
-    def __radd__(self, x):
-        self.diagonal += x
-        return Symmetric.__add__(self,x)
-    def __sub__(self, x):
-        symmetric_clone = copy.deepcopy(self)
-        symmetric_clone.data -= x
-        return symmetric_clone
-    def __rsub__(self, x):
-        symmetric_clone = copy.deepcopy(self)
-        symmetric_clone.data = x - symmetric_clone.data
-        return symmetric_clone
-    def __mul__(self, x):
-        symmetric_clone = copy.deepcopy(self)
-        symmetric_clone.data *= x
-        return symmetric_clone
-    def __rmul__(self, x):
-        return Symmetric.__mul__(self,x)
-    def __truediv__(self, x):
-        symmetric_clone = copy.deepcopy(self)
-        symmetric_clone.data /= x
-        return symmetric_clone
-    def __rtruediv__(self, x):
-        symmetric_clone = copy.deepcopy(self)
-        symmetric_clone.data = x / symmetric_clone.data
-        return symmetric_clone
-    def __floordiv__(self, x):
-        symmetric_clone = copy.deepcopy(self)
-        symmetric_clone.data //= x
-        return symmetric_clone
-    def __rfloordiv__(self, x):
-        symmetric_clone = copy.deepcopy(self)
-        symmetric_clone.data = x // symmetric_clone.data
-        return symmetric_clone
+                                      
+#     def _from_series(self, data:pd.Series, association):
+#         assert np.all(data.index.map(lambda edge: isinstance(edge, frozenset))), "If `data` is pd.Series then each key in the index must be a frozenset of size 2"
+#         if association == "infer":
+#             association = None
+#         assert_acceptable_arguments(association, self._acceptable_associations)
+#         self.association = association
+#         self.weights = pd.Series(data, name="Weights")
+#         self.edges = pd.Index(self.weights.index, name="Edges")
+#         self.nodes = pd.Index(sorted(frozenset.union(*self.edges)), name="Nodes")
 
-    # =======
-    # Utility
-    # =======
-    def set_diagonal(self, values):
-        self.diagonal = values
-        return self
+        
+#     def set_diagonal(self, diagonal):
+#         if diagonal is None:
+#             self.diagonal = None
+#         else:
+#             if is_number(diagonal):
+#                 diagonal = dict_build([(diagonal, self.nodes)])
+#             assert is_dict_like(diagonal), "`diagonal` must be dict-like"
+#             assert set(diagonal.keys()) >= set(self.nodes), "Not all `nodes` are in `diagonal`"
+#             self.diagonal =  pd.Series(diagonal, name="Diagonal")[self.nodes]
+            
+#     # =======
+#     # Built-in
+#     # =======
+#     def __repr__(self):
+#         pad = 4
+#         header = format_header("Symmetric(Name:{}, dtype: {})".format(self.name, self.weights.dtype),line_character="=")
+#         n = len(header.split("\n")[0])
+#         fields = [
+#             header,
+#             pad*" " + "* Number of nodes ({}): {}".format(self.node_type, self.number_of_nodes),
+#             pad*" " + "* Number of edges ({}): {}".format(self.edge_type, self.number_of_edges),
+#             pad*" " + "* Association: {}".format(self.association),
+#             pad*" " + "* Memory: {}".format(format_memory(self.memory)),
+#             *map(lambda line:pad*" " + line, format_header("| Weights", "-", n=n-pad).split("\n")),
+#             *map(lambda line: pad*" " + line, repr(self.weights).split("\n")[1:-1]),
+#             ]
 
-    # ==========
-    # Conversion
-    # ==========
-    def to_dense(self, subset=None, diagonal=None):
-        data_dense = distance.squareform(self.data.values)
-        if diagonal is None:
-            if diagonal == "infer":
-                diagonal = {"similarity":1.0, "dissimilarity":0.0, "statistical_test":0.0}[self.mode]
-            else:
-                diagonal = self.diagonal
-        np.fill_diagonal(data_dense, diagonal)
-        df_dense = pd.DataFrame(data_dense, index=self.labels, columns=self.labels)
-        if subset is None:
-            return df_dense
-        else:
-            # There should be a better way to do this
-            return df_dense.loc[subset,subset]
+#         return "\n".join(fields)
+    
+#     def __getitem__(self, key):
+#         """
+#         `key` can be a node or non-string iterable of edges
+#         """
 
-    def to_condensed(self):
-        return self.data
+#         if is_nonstring_iterable(key):
+#             assert len(key) >= 2, "`key` must have at least 2 identifiers. e.g. ('A','B')"
+#             key = frozenset(key)
+#             if len(key) == 1:
+#                 return self.diagonal[list(key)[0]]
+#             else:
+#                 if len(key) > 2:
+#                     key = list(map(frozenset, itertools.combinations(key, r=2)))
+#                 return self.weights[key]
+#         else:
+#             if key in self.nodes:
+#                 s = frozenset([key])
+#                 mask = self.edges.map(lambda x: bool(s & x))
+#                 return self.weights[mask]
+#             else:
+#                 raise KeyError("{} not in node list".format(key))
+        
+#     @experimental(as_of="2020.06.23")
+#     def __call__(self, key, func=np.sum):
+#         """
+#         This can be used for connectivity in the context of networks but can be confusing with the versatiliy of __getitem__
+#         """
+#         if hasattr(key, "__call__"):
+#             return self.weights.groupby(key).apply(func)
+#         else:
+#             return func(self[key])
+        
+#     def __len__(self):
+#         return self.number_of_nodes
+#     def __iter__(self):
+#         for v in self.weights:
+#             yield v
+#     def items(self):
+#         return self.weights.items()
+#     def iteritems(self):
+#         return self.weights.iteritems()
+#     def keys(self):
+#         return self.weights.keys()
+    
+#     def apply(self, func):
+#         return func(self.weights)
+#     def mean(self):
+#         return self.weights.mean()
+#     def median(self):
+#         return self.weights.median()
+#     def min(self):
+#         return self.weights.min()
+#     def max(self):
+#         return self.weights.max()
+#     def idxmin(self):
+#         return self.weights.idxmin()
+#     def idxmax(self):
+#         return self.weights.idxmax()
+#     def sum(self):
+#         return self.weights.sum()
+#     def sem(self):
+#         return self.weights.sem()
+#     def var(self):
+#         return self.weights.var()
+#     def std(self):
+#         return self.weights.std()
+#     def describe(self, **kwargs):
+#         return self.weights.describe(**kwargs)
+#     def map(self, func):
+#         return self.weights.map(func)
+#     def entropy(self, base=2):
+#         assert np.all(self.weights > 0), "All weights must be greater than 0"
+#         return entropy(self.weights, base=base)
 
-    def _dense_to_condensed(self, X):
-        np.fill_diagonal(X.values, 0)
-        index=pd.Index([*map(frozenset,itertools.combinations(self.labels, 2))], name=self.name)
-        data = distance.squareform(X, checks=False)
-        return pd.Series(data, index=index, name=self.name)
+# #     # Maths
+# #     def __add__(self, x):
+# #         symmetric_clone = copy.deepcopy(self)
+# #         symmetric_clone.data += x
+# #         self.diagonal += x
+# #         return symmetric_clone
+# #     def __radd__(self, x):
+# #         self.diagonal += x
+# #         return Symmetric.__add__(self,x)
+    
+# #     def __sub__(self, x):
+# #         symmetric_clone = copy.deepcopy(self)
+# #         symmetric_clone.data -= x
+# #         return symmetric_clone
+# #     def __rsub__(self, x):
+# #         symmetric_clone = copy.deepcopy(self)
+# #         symmetric_clone.data = x - symmetric_clone.data
+# #         return symmetric_clone
+# #     def __mul__(self, x):
+# #         symmetric_clone = copy.deepcopy(self)
+# #         symmetric_clone.data *= x
+# #         return symmetric_clone
+# #     def __rmul__(self, x):
+# #         return Symmetric.__mul__(self,x)
+# #     def __truediv__(self, x):
+# #         symmetric_clone = copy.deepcopy(self)
+# #         symmetric_clone.data /= x
+# #         return symmetric_clone
+# #     def __rtruediv__(self, x):
+# #         symmetric_clone = copy.deepcopy(self)
+# #         symmetric_clone.data = x / symmetric_clone.data
+# #         return symmetric_clone
+# #     def __floordiv__(self, x):
+# #         symmetric_clone = copy.deepcopy(self)
+# #         symmetric_clone.data //= x
+# #         return symmetric_clone
+# #     def __rfloordiv__(self, x):
+# #         symmetric_clone = copy.deepcopy(self)
+# #         symmetric_clone.data = x // symmetric_clone.data
+# #         return symmetric_clone
 
-    def _condensed_to_dense(self, y):
-        y.index = pd.MultiIndex.from_tuples(y.index, names=[None,None])
-        X = y.unstack().loc[self.labels,self.labels]
-        mask_null = X.isnull().values
-        X.values[mask_null] = X.T.values[mask_null]
-        return X
+#     # ==========
+#     # Conversion
+#     # ==========
+#     def to_dense(self, index=None):
+#         return condensed_to_dense(y=self.weights, fill_diagonal=self.diagonal, index=index)
 
-    def as_tree(self, method="ward", into=ete3.Tree, node_prefix="y"):
-        assert self.mode == "dissimilarity", "mode must be dissimilarity to construct tree"
-        if not hasattr(self,"Z"):
-            self.Z = linkage(self.data.values,method=method)
-        if not hasattr(self,"newick"):
-            self.newick = linkage_to_newick(self.Z, self.labels)
-        tree = into(newick=self.newick, name=self.name)
-        return name_tree_nodes(tree, node_prefix)
+#     def to_condensed(self):
+#         return self.weights
 
-    def as_graph(self, graph=None):
-        if graph is None:
-            graph = nx.Graph()
-        graph.name = self.name
-        for (node_A, node_B), weight in self.data.iteritems():
-            graph.add_edge(node_A, node_B, weight=weight)
-        return graph
+#     @check_packages(["ete3", "skbio"])
+#     def to_tree(self, method="average", into=None, node_prefix="y"):
+#         assert self.association == "dissimilarity", "`association` must be 'dissimilarity' to construct tree"
+#         if method in {"centroid", "median", "ward"}:
+#             warnings.warn("Methods ‘centroid’, ‘median’, and ‘ward’ are correctly defined only if Euclidean pairwise metric is used.\nSciPy Documentation - https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html#scipy.cluster.hierarchy.linkage") 
+#         if into is None:
+#             into = ete3.Tree
+#         if not hasattr(self,"Z"):
+#             self.Z = linkage(self.weights.values, metric="precomputed", method=method)
+#         if not hasattr(self,"newick"):
+#             self.newick = linkage_to_newick(self.Z, self.nodes)
+#         tree = into(newick=self.newick, name=self.name)
+#         return name_tree_nodes(tree, node_prefix)
 
-    def copy(self):
-        return copy.deepcopy(self)
+#     def to_networkx(self, into=None, **attrs):
+#         if into is None:
+#             into = nx.Graph
+#         metadata = {"name":self.name, "node_type":self.node_type, "edge_type":self.edge_type, "func_metric":self.func_metric}
+#         metadata.update(attrs)
+#         graph = into(**metadata)
+#         for (node_A, node_B), weight in self.weights.iteritems():
+#             graph.add_edge(node_A, node_B, weight=weight)
+#         return graph
+    
+#     def to_file(self, path, **kwargs):
+#         write_object(obj=self, path=path, **kwargs)
+
+#     def copy(self):
+#         return copy.deepcopy(self)
 
 # Pairwise interactions
 def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="infer", signed=True, n_jobs=-1, check_metrics=True, symmetric_kws=dict()):
@@ -349,7 +475,7 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="
         # Statistical test
         if metric_name in STATISTICAL_TEST_METRICS:
             metric = lambda u,v: getattr(stats, metric_name)(u,v)[1]
-            df_dense = pd.DataFrame(distance.squareform(distance.pdist(Ar_X, metric=metric)), index=labels, columns=labels)
+            df_dense = pd.DataFrame(squareform(pdist(Ar_X, metric=metric)), index=labels, columns=labels)
             fill_diagonal = 0.0
             if mode != "statistical_test":
                 print(f"Convert `mode` from `{mode}` to `statistical_test`", file=sys.stderr)
@@ -357,7 +483,7 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="
             break
         # Euclidean distance
         if metric_name == "euclidean":
-            df_dense = pd.DataFrame(distance.squareform(distance.pdist(Ar_X, metric="euclidean")), index=labels, columns=labels)
+            df_dense = pd.DataFrame(squareform(pdist(Ar_X, metric="euclidean")), index=labels, columns=labels)
             fill_diagonal = 0.0
             break
         # Biweight midcorrelation
@@ -405,7 +531,7 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="
 
     # Symmetric keywords
     _symmetric_kws={
-        "metric_type":metric_name,
+        "edge_type":metric_name,
         "func_metric":metric if hasattr(metric, "__call__") else None,
         "metadata":{
             "input_shape":X.shape,

@@ -176,11 +176,11 @@ class PrincipalCoordinatesAnalysis(CoreOrdinationMethods):
     """
     def __init__(self, kernel, metric_type=None, node_type=None, prefix="PCoA.", name=None, verbose=False, symmetric_kws=dict()):
         if is_query_class(kernel, "DataFrame"):
-            kernel = Symmetric(kernel, name=name, metric_type=metric_type, mode="dissimilarity", **symmetric_kws)
+            kernel = Symmetric(kernel, name=name, edge_type=metric_type, association="dissimilarity", **symmetric_kws)
         self.kernel = kernel
-        self.labels = kernel.labels
+        self.labels = kernel.nodes
         self.node_type = node_type
-        self.metric_type = metric_type
+        self.edge_type = edge_type
         self.name = name
         self.prefix = prefix
         self.verbose = verbose

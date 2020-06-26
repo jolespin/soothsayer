@@ -19,7 +19,7 @@ assert rpy2_version_major > 1, "Please update your rpy2 version"
 
 
 # Converters
-@check_packages(["rpy2"], language="python", import_into_backend=False)
+# @check_packages(["rpy2"], language="python", import_into_backend=False)
 def pandas_to_rpy2(df, rpy2_version_major=None):
     if rpy2_version_major is None:
         from rpy2 import __version__ as rpy2_version
@@ -28,10 +28,11 @@ def pandas_to_rpy2(df, rpy2_version_major=None):
         return pandas2ri.py2ri(df)
     if rpy2_version_major == 3: # v3.x
         from rpy2.robjects.conversion import localconverter
+
         with localconverter(ro.default_converter + pandas2ri.converter):
             return ro.conversion.py2rpy(df)
 
-@check_packages(["rpy2"], language="python", import_into_backend=False)
+# @check_packages(["rpy2"], language="python", import_into_backend=False)
 def rpy2_to_pandas(r_df, rpy2_version_major=None):
     if rpy2_version_major is None:
         from rpy2 import __version__ as rpy2_version
@@ -45,7 +46,7 @@ def rpy2_to_pandas(r_df, rpy2_version_major=None):
 
 # Load R Packages
 R_packages = dict() # Remove this in future versions
-@check_packages(["rpy2"], language="python", import_into_backend=False)
+# @check_packages(["rpy2"], language="python", import_into_backend=False)
 def R_package_retrieve(package, not_exists_ok=True):
     """
     ["dynamicTreeCut", "WGCNA", "fastcluster", "phyloseq", "philr", "ape", "metagenomeSeq", "edgeR"]
