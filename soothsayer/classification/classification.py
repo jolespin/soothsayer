@@ -157,7 +157,7 @@ class HierarchicalClassifier(BaseEstimator, ClassifierMixin):
         write_object(self, path, compression=compression)
 
     # Convert a NetworkX graph object to an ete3 Tree
-    def as_tree(self, subgraph=None, deepcopy=True, into=ete3.Tree):
+    def to_tree(self, subgraph=None, deepcopy=True, into=ete3.Tree):
         """
         Using into = 'default' to do a check to make sure ete3 is installed
         """

@@ -21,6 +21,7 @@ import skbio
 # from scipy import stats
 from scipy.stats import entropy
 from scipy.spatial.distance import squareform,pdist
+from scipy.spatial import distance
 try:
     from fastcluster import linkage
 except ImportError:
@@ -396,28 +397,28 @@ __all__ = sorted(__all__)
 #         return copy.deepcopy(self)
 
 # Pairwise interactions
-def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="infer", signed=True, n_jobs=-1, check_metrics=True, symmetric_kws=dict()):
+def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, association="infer", signed=True, n_jobs=-1, check_metrics=True, symmetric_kws=dict()):
     """
     Compute pairwise interactions
 
     01-August-2018
     """
 
-    def get_data_object(df_dense, into, mode, func_signed, metric, symmetric_kws, CORRELATION_METRICS, DISTANCE_METRICS, name, check_metrics):
+    def get_data_object(df_dense, into, association, func_signed, metric, symmetric_kws, CORRELATION_METRICS, DISTANCE_METRICS, name, check_metrics):
         if hasattr(metric, "__call__"):
             metric_name = metric.__name__
         else:
             metric_name = metric
 
-        if mode == "similarity":
+        if association == "similarity":
             if check_metrics:
                 assert metric_name not in DISTANCE_METRICS, f"Cannot compute simlilarity for {metric.__name__}"
 
-        if mode == "dissimilarity":
+        if association == "dissimilarity":
             if metric_name in CORRELATION_METRICS:
                 df_dense = 1 - func_signed(df_dense)
         if into in [Symmetric, pd.Series]:
-            kernel = Symmetric(df_dense, mode=mode, name=name, **symmetric_kws)
+            kernel = Symmetric(df_dense, association=association, name=name, **symmetric_kws)
             if into == Symmetric:
                 return kernel
             if into == pd.Series:
@@ -432,24 +433,24 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="
     DISTANCE_METRICS = distance.__dict__["__all__"]
 
     # Assertions
-    accepted_modes = ["similarity", "dissimilarity", "statistical_test", "infer"]
-    assert mode in accepted_modes, f"{mode} is not in {accepted_modes}"
+    accepted_associations = ["similarity", "dissimilarity", "statistical_test", "infer"]
+    assert association in accepted_associations, f"{association} is not in {accepted_association}"
 
     # Metric name
     if hasattr(metric,"__call__"):
         metric_name = metric.__name__
     else:
         metric_name = metric
-    # Infer mode
-    if mode == "infer":
+    # Infer association
+    if association == "infer":
         if metric_name in CORRELATION_METRICS:
-            mode = "similarity"
+            association = "similarity"
         if metric_name in STATISTICAL_TEST_METRICS:
-            mode = "statistical_test"
+            association = "statistical_test"
         if metric_name in DISTANCE_METRICS:
-            mode = "dissimilarity"
-        assert mode != "infer", f"Unable to infer mode from metric = {metric}"
-        print(f"Inferred mode as `{mode}`", file=sys.stderr)
+            association = "dissimilarity"
+        assert association != "infer", f"Unable to infer association from metric = {metric}"
+        print(f"Inferred association as `{association}`", file=sys.stderr)
 
     # Similarity transformation function
     functions = {
@@ -477,9 +478,9 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="
             metric = lambda u,v: getattr(stats, metric_name)(u,v)[1]
             df_dense = pd.DataFrame(squareform(pdist(Ar_X, metric=metric)), index=labels, columns=labels)
             fill_diagonal = 0.0
-            if mode != "statistical_test":
-                print(f"Convert `mode` from `{mode}` to `statistical_test`", file=sys.stderr)
-                mode = "statistical_test"
+            if association != "statistical_test":
+                print(f"Convert `association` from `{association}` to `statistical_test`", file=sys.stderr)
+                association = "statistical_test"
             break
         # Euclidean distance
         if metric_name == "euclidean":
@@ -516,7 +517,7 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="
         # Diagonal
         if fill_diagonal is not None:
             if fill_diagonal == "auto":
-                fill_diagonal = {"similarity":1.0, "dissimilarity":0.0}[mode]
+                fill_diagonal = {"similarity":1.0, "dissimilarity":0.0}[association]
             fill_diagonal = np.repeat(fill_diagonal, X_copy.shape[0]).tolist()
             np.fill_diagonal(df_dense.values, fill_diagonal)
 
@@ -540,7 +541,7 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, mode="
     _symmetric_kws.update(symmetric_kws)
 
     # Return object
-    return get_data_object(df_dense, into, mode, func_signed, metric, _symmetric_kws, CORRELATION_METRICS, DISTANCE_METRICS, name, check_metrics)
+    return get_data_object(df_dense, into, association, func_signed, metric, _symmetric_kws, CORRELATION_METRICS, DISTANCE_METRICS, name, check_metrics)
 
 # Pairwise distance on ete trees
 def pairwise_tree_distance(tree, topology_only=True):

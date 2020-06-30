@@ -56,12 +56,19 @@ class Agglomerative(object):
         * horizontal_lines
         * _plot_clusters_mpl
         * _plot_tracks_mpl
+    * Add arcplot
     # ==========
     # devel
     # ==========
+    2020-June-29
+    * `as_graph` -> `to_networkx`
+    * `as_tree` -> `to_tree`
+    * `kernel` -> `dism`
+
     2019-May-29
     * Added spines to tracks
     * Added bar outline
+
     2019-March-11
     * Removed `cluster_mapping`
     * Added `add_secondary_classes` like `add_tracks`
@@ -116,7 +123,7 @@ class Agglomerative(object):
     * Leaves must be strings for some reason...
     """
     def __init__(self,
-                 kernel,
+                 dism,
                  name=None,
                  data=None,
                  leaf_axis="infer",
@@ -130,25 +137,25 @@ class Agglomerative(object):
                  polar_kws=dict(),
                  rectilinear_kws=dict(),
                 ):
-        # Check the kernel object type
-        accepted_kernel_types = {pd.DataFrame, Symmetric}
-        assert type(kernel) in accepted_kernel_types, f"`kernel` type must be one of the following: {accepted_kernel_types}"
+        # Check the dism object type
+        accepted_dism_types = {pd.DataFrame, Symmetric}
+        assert type(dism) in accepted_dism_types, f"`dism` type must be one of the following: {accepted_dism_types}"
 
         # pd.DataFrame -> Symmetric
-        if isinstance(kernel, pd.DataFrame):
-            kernel = Symmetric(data=kernel, node_type=leaf_type, name=name, association="dissimilarity", **metadata)
+        if isinstance(dism, pd.DataFrame):
+            dism = Symmetric(data=dism, node_type=leaf_type, name=name, association="dissimilarity", **metadata)
 
         # Base
         self.name = name
         self.data = data
-        self.kernel = kernel
+        self.dism = dism
 
         # Clustering
         self.method = method
-        self.linkage_labels = self.kernel.nodes.copy()
+        self.linkage_labels = self.dism.nodes.copy()
         self.num_leaves = len(self.linkage_labels)
         self._relabel = dict(zip(range(self.num_leaves), self.linkage_labels))
-        self.Z = linkage(self.kernel.weights.values, method=method, metric="precomputed") #!
+        self.Z = linkage(self.dism.weights.values, method=method , metric="precomputed") #!
         if leaf_axis == "infer":
             if data is not None:
                 axis_0_overlap = len(set(self.linkage_labels) & set(data.index))
@@ -187,7 +194,6 @@ class Agglomerative(object):
         self.outlier_color = outlier_color
 
         # Polar
-
         self._polar_kws = {"pad":0.02, "n_smooth":100, "func_dcoord":_func_dcoord}
         self._polar_kws.update(polar_kws)
 
@@ -304,7 +310,7 @@ class Agglomerative(object):
         if cut_method == "hybrid":
             _algo_kws = {}
             _algo_kws.update(algo_kws)
-            cluster_mapping = cutree_dynamic(self.kernel, cut_method=cut_method, method=self.method, minClusterSize=min_c, deepSplit=deep_split, name=self.name, **_algo_kws).astype(int) #Outlier module
+            cluster_mapping = cutree_dynamic(self.dism, cut_method=cut_method, method=self.method, minClusterSize=min_c, deepSplit=deep_split, name=self.name, **_algo_kws).astype(int) #Outlier module
 
         # Index the clusters by the leaves
         self.cluster_mapping = cluster_mapping[self.leaves]
@@ -496,7 +502,7 @@ class Agglomerative(object):
         # Add horizontal lines
         if bool(horizontal_lines):
             if ax.name == "polar":
-                print("Warning: `horizontal_lines` visualization is currently not available with polar projection", file=sys.stderr)
+                warnings.warn("`horizontal_lines` visualization is currently not available with polar projection")
             else:
                 if is_nonstring_iterable(horizontal_lines) and not is_dict(horizontal_lines):
                     horizontal_lines = {pos:dict() for pos in horizontal_lines}
@@ -759,7 +765,7 @@ class Agglomerative(object):
                             ax_track = self._plot_track_mpl( **args_track)
                             self.axes.append(ax_track)
                 else:
-                    print("Warning: `show_tracks` visualization is currently not available with polar projection", file=sys.stderr)
+                    warnings.warn("`show_tracks` visualization is currently not available with polar projection")
             # Add secondary classes
             if all([bool(show_secondary_classes), bool(self.secondary_classes)]):
                 if not polar:
@@ -784,8 +790,8 @@ class Agglomerative(object):
                         ax_secondary_class = self._plot_classes_mpl( **args_secondary_class)
                         self.axes.append(ax_secondary_class)
                 else:
-                    print("Warning: `show_secondary_classes` visualization is currently not available with polar projection", file=sys.stderr)
-
+                    warnings.warn("`show_secondary_classes` visualization is currently not available with polar projection")
+    
             # Add clusters
             if all([show_clusters, self._clusters_exist]):
                 if not polar:
@@ -805,7 +811,7 @@ class Agglomerative(object):
                     ax_clusters = self._plot_classes_mpl( **args_clusters)
                     self.axes.append(ax_clusters)
                 else:
-                    print("Warning: `show_clusters` visualization is currently not available with polar projection", file=sys.stderr)
+                    warnings.warn("Warning: `show_clusters` visualization is currently not available with polar projection")
 
 
 
@@ -878,7 +884,7 @@ class Agglomerative(object):
             output = pd.Series(scores, index=labels, name=f"cluster_{cluster}")
             return into(output)
         else:
-            print("Warning: `silhouette` score can only be calculated on `ete3.ClusterTree` objects", file=sys.stderr)
+            warnings.warn("`silhouette` score can only be calculated on `ete3.ClusterTree` objects")
 
     # Eigengenes
     def eigengenes(self, X=None, mode=0):
@@ -921,13 +927,13 @@ class Agglomerative(object):
             return pd.DataFrame(d_cluster_eigengenes), pd.Series(d_cluster_eigenvalues)
 
 
-    # Intramodular connectivity
-    def connectivity(self, kernel="auto"):
-        if kernel == "auto":
-            kernel = 1 - self.df_dism
-        if is_query_class(kernel, "Symmetric"):
-            kernel = kernel.to_dense()
-        return connectivity(kernel, groups=self.get_clusters()[kernel.index])
+#     # Intramodular connectivity
+#     def connectivity(self, adjacency="auto"):
+#         if adjacency == "auto":
+#             adjacency = 1 - self.df_dism
+#         if is_query_class(adjacency, "Symmetric"):
+#             adjacency = adjacency.to_dense()
+#         return connectivity(adjacency, groups=self.get_clusters()[adjacency.index])
 
     # ============
     # Conversion
@@ -935,14 +941,14 @@ class Agglomerative(object):
     def is_cluster_node(self, node):
         return node.name in self.cluster_attributes["node"].values
 
-    def as_tree(self, format="ete3", collapse_clusters=False, prefix_cluster="cluster_"):
+    def to_tree(self, format="ete3", collapse_clusters=False, prefix_cluster="cluster_"):
         accepted_formats = {"ete3", "skbio"}
         assert format in accepted_formats, f"Available formats must be one of the following: {accepted_formats}"
         if format == "ete3":
             if not collapse_clusters:
                 return self.tree
             else:
-                print("Warning: Collapsing clusters is experimental and should be checked manually before propogating downstream", file=sys.stderr)
+                warnings.warn("Collapsing clusters is experimental and should be checked manually before propogating downstream")
                 cluster_node = self.cluster_attributes["node"]
                 node_cluster = pd.Series(cluster_node.index, index=cluster_node.values)
 
@@ -970,7 +976,7 @@ class Agglomerative(object):
             return tree_skbio
 
 
-    def as_graph(self, graph=None, weight_func=None):
+    def to_networkx(self, graph=None, weight_func=None):
         # Get graph
         if graph is None:
             graph = nx.OrderedDiGraph(name=self.name)

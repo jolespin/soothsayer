@@ -42,7 +42,7 @@ setup(name='soothsayer',
     # Extensions
     "soothsayer_utils >= 2020.6.26",
     "compositional >= 2020.5.19",
-    "hive_networkx >= 2020.6.26",
+    "hive_networkx >= 2020.6.29",
 
     # Optional
     # "teneto",
