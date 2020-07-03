@@ -1,7 +1,7 @@
 # ==============
 # Soothsayer
 # ==============
-# High-level API for (bio-)informatics
+# High-level package for (bio-)informatics
 # ------------------------------------
 # GitHub: https://github.com/jolespin/soothsayer
 # PyPI: https://pypi.org/project/soothsayer/
@@ -34,7 +34,7 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.06.29"
+__version__= "2020.07.02"
 __moniker__ = "Yerba mate"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
@@ -62,7 +62,7 @@ from .io import io
 # Microbiome
 from .microbiome import microbiome
 # Networks
-from .networks import networks, Hive, TemporalNetwork
+from .networks import networks, Hive, TemporalNetwork, EnsembleAssociationNetwork
 # Ordination
 from .ordination import ordination, PrincipalComponentAnalysis, PrincipalCoordinatesAnalysis, Manifold
 # R Wrappers

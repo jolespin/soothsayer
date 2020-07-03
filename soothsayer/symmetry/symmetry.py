@@ -32,12 +32,6 @@ except ImportError:
 # from astropy.stats import biweight_midcorrelation, median_absolute_deviation
 from sklearn.metrics.pairwise import pairwise_distances
 
-# Compositional
-import compositional as coda
-
-# Hive NetworkX
-import hive_networkx as hx
-
 # Soothsayer
 from ..transmute.conversion import linkage_to_newick
 # from ..r_wrappers.packages.WGCNA import bicor
@@ -51,9 +45,10 @@ from soothsayer.transmute import linkage_to_newick
 from skbio.util._decorator import experimental, stable
 from scipy.stats import entropy
 
-__all__ = {"Symmetric", "pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise_logfc","pairwise_biweight_midcorrelation", "dense_to_condensed", "condensed_to_dense"}
+__all__ = {"pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise_logfc"}
 
 # compositional
+import compositional as coda
 functions_from_compositional = {"pairwise_vlr", "pairwise_rho","pairwise_phi"}
 
 for function_name in functions_from_compositional:
@@ -61,10 +56,19 @@ for function_name in functions_from_compositional:
     __all__.add(function_name)
 
 # hive_networkx
-functions_from_hive_networkx= {"dense_to_condensed", "condensed_to_dense","Symmetric" }
+import hive_networkx as hx
+functions_from_hive_networkx= {"Symmetric", "dense_to_condensed", "condensed_to_dense"}
 
 for function_name in functions_from_hive_networkx:
     globals()[function_name] = getattr(hx, function_name)
+    __all__.add(function_name)
+
+# ensemble_networkx
+import ensemble_networkx as enx
+functions_from_ensemble_networkx= {"EnsembleAssociationNetwork", "pairwise_biweight_midcorrelation"}
+
+for function_name in functions_from_ensemble_networkx:
+    globals()[function_name] = getattr(enx, function_name)
     __all__.add(function_name)
 
 __all__ = sorted(__all__)
@@ -608,86 +612,86 @@ def pairwise_logfc(X:pd.DataFrame, idx_ctrl, idx_treatment, func_log=np.log2, na
     names = [name_treatment, name_ctrl]
     return pd.DataFrame(logfc_profiles, index=pd.MultiIndex.from_tuples(idx_pairwise_labels, names=names), columns=idx_attr)
 
-# Biweight midcorrelation
-def pairwise_biweight_midcorrelation(X, use_numba="infer", verbose=False):
-    """
-    X: {np.array, pd.DataFrame}
+# # Biweight midcorrelation
+# def pairwise_biweight_midcorrelation(X, use_numba=False, verbose=False):
+#     """
+#     X: {np.array, pd.DataFrame}
 
-    Code adapted from the following sources:
-        * https://stackoverflow.com/questions/61090539/how-can-i-use-broadcasting-with-numpy-to-speed-up-this-correlation-calculation/61219867#61219867
-        * https://github.com/olgabot/pandas/blob/e8caf4c09e1a505eb3c88b475bc44d9389956585/pandas/core/nanops.py
+#     Code adapted from the following sources:
+#         * https://stackoverflow.com/questions/61090539/how-can-i-use-broadcasting-with-numpy-to-speed-up-this-correlation-calculation/61219867#61219867
+#         * https://github.com/olgabot/pandas/blob/e8caf4c09e1a505eb3c88b475bc44d9389956585/pandas/core/nanops.py
 
-    Special thanks to the following people:
-        * @norok2 (https://stackoverflow.com/users/5218354/norok2) for optimization (vectorization and numba)
-        * @olgabot (https://github.com/olgabot) for NumPy implementation
+#     Special thanks to the following people:
+#         * @norok2 (https://stackoverflow.com/users/5218354/norok2) for optimization (vectorization and numba)
+#         * @olgabot (https://github.com/olgabot) for NumPy implementation
 
-    Benchmarking:
-        * iris_features (4,4)
-            * numba: 159 ms ± 2.85 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
-            * numpy: 276 µs ± 3.45 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
-        * iris_samples: (150,150)
-            * numba: 150 ms ± 7.57 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
-            * numpy: 686 µs ± 18.8 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+#     Benchmarking:
+#         * iris_features (4,4)
+#             * numba: 159 ms ± 2.85 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+#             * numpy: 276 µs ± 3.45 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+#         * iris_samples: (150,150)
+#             * numba: 150 ms ± 7.57 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+#             * numpy: 686 µs ± 18.8 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
 
-    Future:
-        * Handle missing values
+#     Future:
+#         * Handle missing values
 
-    """
-    # Data
-    result = None
-    labels = None
-    if isinstance(X, pd.DataFrame):
-        labels = X.columns
-        X = X.values
+#     """
+#     # Data
+#     result = None
+#     labels = None
+#     if isinstance(X, pd.DataFrame):
+#         labels = X.columns
+#         X = X.values
 
-    def _base_computation(A):
-        n, m = A.shape
-        A = A - np.median(A, axis=0, keepdims=True)
-        v = 1 - (A / (9 * np.median(np.abs(A), axis=0, keepdims=True))) ** 2
-        est = A * v ** 2 * (v > 0)
-        norms = np.sqrt(np.sum(est ** 2, axis=0))
-        return n, m, est, norms
+#     def _base_computation(A):
+#         n, m = A.shape
+#         A = A - np.median(A, axis=0, keepdims=True)
+#         v = 1 - (A / (9 * np.median(np.abs(A), axis=0, keepdims=True))) ** 2
+#         est = A * v ** 2 * (v > 0)
+#         norms = np.sqrt(np.sum(est ** 2, axis=0))
+#         return n, m, est, norms
 
-    # Check if numba is available
-    assert_acceptable_arguments(use_numba, {True, False, "infer"})
-    if use_numba == "infer":
-        if "numba" in sys.modules:
-            use_numba = True
-        else:
-            use_numba = False
-        if verbose:
-            print("Numba is available:", use_numba, file=sys.stderr)
+#     # Check if numba is available
+#     assert_acceptable_arguments(use_numba, {True, False, "infer"})
+#     if use_numba == "infer":
+#         if "numba" in sys.modules:
+#             use_numba = True
+#         else:
+#             use_numba = False
+#         if verbose:
+#             print("Numba is available:", use_numba, file=sys.stderr)
 
-    # Compute using numba
-    if use_numba:
-        assert "numba" in sys.modules
-        from numba import jit
+#     # Compute using numba
+#     if use_numba:
+#         assert "numba" in sys.modules
+#         from numba import jit
 
-        def _biweight_midcorrelation_numba(A):
-            @jit
-            def _condensed_to_dense(n, m, est, norms, result):
-                for i in range(m):
-                    for j in range(i + 1, m):
-                        x = 0
-                        for k in range(n):
-                            x += est[k, i] * est[k, j]
-                        result[i, j] = result[j, i] = x / norms[i] / norms[j]
-            n, m, est, norms = _base_computation(A)
-            result = np.empty((m, m))
-            np.fill_diagonal(result, 1.0)
-            _condensed_to_dense(n, m, est, norms, result)
-            return result
+#         def _biweight_midcorrelation_numba(A):
+#             @jit
+#             def _condensed_to_dense(n, m, est, norms, result):
+#                 for i in range(m):
+#                     for j in range(i + 1, m):
+#                         x = 0
+#                         for k in range(n):
+#                             x += est[k, i] * est[k, j]
+#                         result[i, j] = result[j, i] = x / norms[i] / norms[j]
+#             n, m, est, norms = _base_computation(A)
+#             result = np.empty((m, m))
+#             np.fill_diagonal(result, 1.0)
+#             _condensed_to_dense(n, m, est, norms, result)
+#             return result
 
-        result = _biweight_midcorrelation_numba(X)
-    # Compute using numpy
-    else:
-        def _biweight_midcorrelation_numpy(A):
-            n, m, est, norms = _base_computation(A)
-            return np.einsum('mi,mj->ij', est, est) / norms[:, None] / norms[None, :]
-        result = _biweight_midcorrelation_numpy(X)
+#         result = _biweight_midcorrelation_numba(X)
+#     # Compute using numpy
+#     else:
+#         def _biweight_midcorrelation_numpy(A):
+#             n, m, est, norms = _base_computation(A)
+#             return np.einsum('mi,mj->ij', est, est) / norms[:, None] / norms[None, :]
+#         result = _biweight_midcorrelation_numpy(X)
 
-    # Add labels
-    if labels is not None:
-        result = pd.DataFrame(result, index=labels, columns=labels)
+#     # Add labels
+#     if labels is not None:
+#         result = pd.DataFrame(result, index=labels, columns=labels)
 
-    return result
+#     return result

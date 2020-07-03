@@ -9,7 +9,7 @@ ___] |__| |__|  |  |  | ___] |  |   |   |___ |  \
 ## Installation instructions:
 I've tried to make installation as seemless as possible.  There are several Python & R dependencies that are difficult to install but it should be working via `conda` with the preconfigured environment `.yml` files.  
 
-Please **do not** install `soothsayer` from `-c jolespin soothsayer` via `anacond cloud` but with `pip install soothsayer` instead.  However, use `conda` to create the environment.  Once `soothsayer` is stable it will be properly added to `anaconda cloud`.
+Use `conda` to create the environment with all dependencies then `pip install --no-deps soothsayer` to install `soothsayer`.  Once `soothsayer` is stable it will be properly added to `anaconda cloud`.
 
 ### Method 1 :
 #### [OSX|Linux] Installation [Recommended]
@@ -54,8 +54,6 @@ pip install git+https://github.com/jolespin/soothsayer
 
 #### Bug with `pip install` concerning `soothsayer`
 There is a strange [issue](https://github.com/pypa/pip/issues/7170) that I'm working on with `PyPI`  where installing `soothsayer` via `pip` removes all of the packages in `site-directory`.  I've found a work around for the time being.  Please use the `remove_and_reinstall_soothsayer.sh` script to first remove an older instance of `soothsayer` and reinstall the newest version. 
-
-~~Cannot update to `Python > 3.6` until `rpy2` fixes [this error](https://github.com/rpy2/rpy2/issues/690#issuecomment-619135384).~~
 
 Let me know if you have any issues before creating an issue on GitHub:
 jespinoz[ a t ]jcvi[ d o t ]org

@@ -4,7 +4,7 @@
 _________________________________
 
 #### Current Version:
-*v2020.06.29*
+*v2020.07.02*
 
 #### Citation:
 *Espinoza, *Dupont et al. 2020 (In Review)
@@ -19,9 +19,8 @@ Documentation coming soon. .. ... ..... ........
 **Please refer to the [installation manual](install/README.md) for installation details.**  
 It will make the installation process *much easier* due to all of the dependencies. 
 
-* <s>conda: https://anaconda.org/jolespin/soothsayer</s>
-
-* pip: https://pypi.org/project/soothsayer
+* pip: [https://pypi.org/project/soothsayer](https://pypi.org/project/soothsayer)
+* conda: Not yet available
 
 
 #### Development:
@@ -30,12 +29,7 @@ It will make the installation process *much easier* due to all of the dependenci
 If you are interested in requesting features or wish to report a bug, please post a GitHub issue prefixed with the tag `[Feature Request]` and `[Bug]`, respectively.
 
 #### Known bugs:
-* `statsmodels v0.10.0` has a [bug](https://github.com/statsmodels/statsmodels/issues/5899) that fails to unpickle regression models.  If you will be using `soothsayer.regression`, then install the `v0.10.x` patch for `statsmodels` with the following:
-
-```bash
-pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
-```
-
+* Use `statsmodels > v0.10.x` as `v0.10.0` has a [bug](https://github.com/statsmodels/statsmodels/issues/5899) that fails to unpickle regression models.  
 
 #### Contact:
 * Josh L. Espinoza: [jespinoz@jcvi.org](jespinoz@jcvi.org).

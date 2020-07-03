@@ -810,47 +810,26 @@ def plot_annotation(labels, x:pd.Series, y:pd.Series, ax, adjust_label_positions
     def _get_text_objects(labels, x, y, ax, **kwargs):
         text_objects = []
         for ((id, label), x_i, y_i) in zip(labels.iteritems(),x,y):
-            label = label.values[0]
+            if is_nonstring_iterable(label):
+                label = label.values[0]
             text_objects.append(ax.text(x_i, y_i, label,  **kwargs))
         return text_objects
     if not is_dict_like(labels):
         labels = dict(zip(labels, labels))
     labels = pd.Series(labels)
+    n = labels.index.size
+    assert n >= 1, "There are no labels"
     x = pd.Series(x) + x_pad
     y = pd.Series(y) + y_pad
     assert set(labels.index) <= set(x.index), "All `labels` must be in `x.index"
     assert set(labels.index) <= set(y.index), "All `labels` must be in `y.index"
     x = x[labels.index].values
     y = y[labels.index].values
+
     text_objects = _get_text_objects(labels, x, y, ax, **kwargs)
     if adjust_label_positions:
         adjust_text(text_objects, x, y, ax=ax)
     return text_objects
-
-# def plot_annotation(labels, x:pd.Series, y:pd.Series, ax, adjust_label_positions=True,  x_pad=0, y_pad=0, **kwargs): #! Need to test this with other functions
-#     """
-#     Dependency: https://github.com/Phlya/adjustText
-#     * Need to get the **kwargs and *args
-#     """
-#     def _get_text_objects(labels, x, y, ax, **kwargs):
-#         text_objects = []
-#         for ((id, label), x_i, y_i) in zip(labels.iteritems(),x,y):
-#             label = label.values[0]
-#             text_objects.append(ax.text(x_i, y_i, label,  **kwargs))
-#         return text_objects
-#     if not is_dict_like(labels):
-#         labels = dict(zip(labels, labels))
-#     labels = pd.Series(labels)
-#     x = pd.Series(x) + x_pad
-#     y = pd.Series(y) + y_pad
-#     assert set(labels.index) <= set(x.index), "All `labels` must be in `x.index"
-#     assert set(labels.index) <= set(y.index), "All `labels` must be in `y.index"
-#     x = x[labels.index]
-#     y = y[labels.index]
-#     text_objects = _get_text_objects(labels, x, y, ax, **kwargs)
-#     if adjust_label_positions:
-#         adjust_text(text_objects, x, y, ax=ax)
-#     return text_objects
 
 # Volcano plot
 def plot_volcano(diffusion_values:pd.Series, test_values:pd.Series, tol_diffusion=0, tol_test=0.05, test_field="FDR", xlabel="log$_2$(FC)", ylabel="-log$_2$(FDR)", horizontal=None, linestyle=":", size_significant=50, size_nonsignificant=18, ax=None, figsize=(5,5), cmap=plt.cm.seismic_r, color_nonsignificant="#f8f8ff", title=None, alpha_ratio=0.618, linewidth=0.618,  edgecolor="black", style="seaborn-white", fill_nonsignificant="gray", alpha_fill=0.1618, show_annotations=False, adjust_annotation_positions=True, annot_kws=dict(),  *args):

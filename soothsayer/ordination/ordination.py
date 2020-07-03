@@ -180,7 +180,7 @@ class PrincipalCoordinatesAnalysis(CoreOrdinationMethods):
         self.kernel = kernel
         self.labels = kernel.nodes
         self.node_type = node_type
-        self.edge_type = edge_type
+        self.edge_type = metric_type
         self.name = name
         self.prefix = prefix
         self.verbose = verbose
