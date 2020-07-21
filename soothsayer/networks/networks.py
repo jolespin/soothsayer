@@ -30,23 +30,18 @@ from ..transmute.normalization import normalize_minmax
 from ..io import write_object
 
 
-__all__ = {  "determine_soft_threshold","cluster_modularity", "TemporalNetwork", "EnsembleAssociationNetwork", "Edge"}
+__all__ = {  "determine_soft_threshold","cluster_modularity", "TemporalNetwork",  "Edge"}
 
 # hive_networkx
 import hive_networkx as hx
 functions_from_hive_networkx= {"Hive", "connectivity","topological_overlap_measure", "signed" }
-
-for function_name in functions_from_hive_networkx:
-    globals()[function_name] = getattr(hx, function_name)
-    __all__.add(function_name)
+add_objects_to_globals(hx, functions_from_hive_networkx, globals(), add_version=True, __all__=__all__)
 
 # ensemble_networkx
 import ensemble_networkx as enx
-functions_from_ensemble_networkx= {"EnsembleAssociationNetwork"}
+functions_from_ensemble_networkx= {"EnsembleAssociationNetwork", "SampleSpecificPerturbationNetwork"}
+add_objects_to_globals(enx, functions_from_ensemble_networkx, globals(), add_version=True, __all__=__all__)
 
-for function_name in functions_from_ensemble_networkx:
-    globals()[function_name] = getattr(enx, function_name)
-    __all__.add(function_name)
 
 __all__ = sorted(__all__)
 

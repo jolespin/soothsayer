@@ -832,7 +832,31 @@ def plot_annotation(labels, x:pd.Series, y:pd.Series, ax, adjust_label_positions
     return text_objects
 
 # Volcano plot
-def plot_volcano(diffusion_values:pd.Series, test_values:pd.Series, tol_diffusion=0, tol_test=0.05, test_field="FDR", xlabel="log$_2$(FC)", ylabel="-log$_2$(FDR)", horizontal=None, linestyle=":", size_significant=50, size_nonsignificant=18, ax=None, figsize=(5,5), cmap=plt.cm.seismic_r, color_nonsignificant="#f8f8ff", title=None, alpha_ratio=0.618, linewidth=0.618,  edgecolor="black", style="seaborn-white", fill_nonsignificant="gray", alpha_fill=0.1618, show_annotations=False, adjust_annotation_positions=True, annot_kws=dict(),  *args):
+def plot_volcano(
+    diffusion_values:pd.Series, 
+    test_values:pd.Series, 
+    tol_diffusion=0, 
+    tol_test=0.05, 
+    test_field="FDR", 
+    xlabel="log$_2$(FC)", 
+    ylabel="-log$_2$(FDR)", 
+    horizontal=None, 
+    linestyle=":", 
+    size_significant=50, 
+    size_nonsignificant=18, 
+    ax=None, figsize=(5,5), 
+    cmap=CMAP_DIVERGING, # This is from soothsayer.utils
+    color_nonsignificant="#f8f8ff", 
+    title=None, alpha_ratio=0.618, 
+    linewidth=0.618,  
+    edgecolor="black", 
+    style="seaborn-white", 
+    fill_nonsignificant="gray", 
+    alpha_fill=0.1618, 
+    show_annotations=False, 
+    adjust_annotation_positions=True, 
+    annot_kws=dict(),  
+    *args):
     """
     # Generalized to all types of metrics (not just fold-change)
     # Added `test_field` (2018-May-11)

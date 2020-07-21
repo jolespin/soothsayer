@@ -20,7 +20,7 @@ import numpy as np
 from Bio import SeqIO
 
 # Soothsayer
-from soothsayer.utils import format_path, infer_compression, is_path_like, is_query_class, assert_acceptable_arguments
+from soothsayer.utils import format_path, infer_compression, is_path_like, is_query_class, assert_acceptable_arguments, add_objects_to_globals
 from ..text import read_textfile, get_file_object
 
 # Soothsayer Utils
@@ -35,9 +35,7 @@ functions_from_soothsayer_utils = [
 'read_ncbi_xml', 
 'write_fasta', 
 ]
-
-for function_name in functions_from_soothsayer_utils:
-    globals()[function_name] = getattr(syu, function_name)
+add_objects_to_globals(syu, functions_from_soothsayer_utils, globals(), add_version=True, __all__=None)
 
 # ======
 # Future

@@ -29,7 +29,7 @@ functions_from_soothsayer_utils = [
 'flatten', 'format_memory', 'format_duration', 'format_header', 'format_path', 'fragment',  'get_timestamp', 'get_unique_identifier', 'hash_kmer', 'infer_compression', 'is_all_same_type',
 'is_dict', 'is_dict_like', 'is_file_like', 'is_function', 'is_in_namespace', 'is_nonstring_iterable', 'is_symmetrical', 'is_number', 'is_path_like', 'is_query_class', "is_graph", "is_color",
 'iterable_depth', 'join_as_strings',
-'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages", "Suppress",
+'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages", "Suppress","get_color_midpoint",
 ]
 
 __all__ = {
@@ -37,12 +37,25 @@ __all__ = {
     "infer_tree_type", "check_polytomy", "is_leaf","name_tree_nodes","prune_tree",
     # Need to organize these
     "pd_prepend_level_to_index", 'pd_series_to_groupby_to_dataframe', 'pd_dropduplicates_index', 'generate_random_sequence', 'is_color', 'add_cbar_from_data', 'get_coords_contour', 'get_repr', 'get_parameters_ellipse', 'DIVERGING_KWS', 'determine_mode_for_logfiles', 'create_logfile', 'is_symmetrical', 'pd_dataframe_matmul', 'dataframe_to_matrixstring', 'infer_cmap', 'pd_dataframe_extend_index', 'configure_scatter', 'CMAP_DIVERGING', 'pd_series_collapse', 'is_graph', 'format_filename', 'pd_series_filter', 'map_colors', 'rgb_to_rgba', 'LEGEND_KWS', 'force_symmetry', 'is_rgb_like', 'COLOR_POSITIVE', 'Chromatic', 'COLOR_NEGATIVE', 'infer_vmin_vmax', 'pd_dataframe_query', 'get_coords_centroid', 'filter_compositional', 'scalarmapping_from_data', 'infer_continuous_type', 
-    'format_mpl_legend_handles',
+    'format_mpl_legend_handles', "add_objects_to_globals",
     }
 
-for function_name in functions_from_soothsayer_utils:
-    globals()[function_name] = getattr(syu, function_name)
-    __all__.add(function_name)
+
+
+# Add objects to globals
+def add_objects_to_globals(module, objects:set, globals, add_version:bool=True, __all__:set=None):
+    for obj_name in objects:
+        obj = getattr(module, obj_name)
+        if add_version:
+            version = "{}({})".format(module.__name__, module.__version__)
+            setattr(obj, "__version__", version)
+        globals[obj_name] = obj
+        if __all__ is not None:
+            assert isinstance(__all__, set)
+            __all__.add(obj_name)
+            
+add_objects_to_globals(syu, functions_from_soothsayer_utils, globals(), add_version=True, __all__=__all__)
+
 __all__ = sorted(__all__)
 
 
@@ -189,6 +202,8 @@ def dataframe_to_matrixstring(df):
     return df.to_csv(None, sep="\t",index_label="#Names")
 
 
+
+
 # =====
 # Formatting
 # =====
@@ -230,7 +245,7 @@ def get_repr(class_name, instance_name=None, *args):
 # Matplotlib and colors
 # ======
 # Format handles for a matplotlib legend
-def format_mpl_legend_handles(cdict_handles, label_specific_kws=None, marker="o", markeredgecolor="black", markeredgewidth=1,**args ):
+def format_mpl_legend_handles(cdict_handles, label_specific_kws=None, marker="s", markeredgecolor="black", markeredgewidth=1,**args ):
     """
     More info on parameters: https://matplotlib.org/api/_as_gen/matplotlib.lines.Line2D.html#matplotlib.lines.Line2D.set_marker
     Usage: plt.legend(*format_mpl_legend_handles(cdict_handles),

@@ -3,11 +3,9 @@
 # ==============================================================================
 # Soothsayer
 import soothsayer_utils as syu
+from soothsayer.utils import add_objects_to_globals
 
 functions_from_soothsayer_utils = [
 'get_iris_data',
 ]
-
-
-for function_name in functions_from_soothsayer_utils:
-    globals()[function_name] = getattr(syu, function_name)
+add_objects_to_globals(syu, functions_from_soothsayer_utils, globals(), add_version=True, __all__=None)

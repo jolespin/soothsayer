@@ -20,7 +20,7 @@ import skbio
 # SciPy
 # from scipy import stats
 from scipy.stats import entropy
-from scipy.spatial.distance import squareform,pdist
+from scipy.spatial.distance import squareform, pdist
 from scipy.spatial import distance
 try:
     from fastcluster import linkage
@@ -35,7 +35,7 @@ from sklearn.metrics.pairwise import pairwise_distances
 # Soothsayer
 from ..transmute.conversion import linkage_to_newick
 # from ..r_wrappers.packages.WGCNA import bicor
-from ..utils import  infer_tree_type, is_symmetrical, force_symmetry, assert_acceptable_arguments, format_header, check_packages, is_dict_like, dict_build, is_number, is_nonstring_iterable, format_memory, name_tree_nodes
+from ..utils import  infer_tree_type, is_symmetrical, force_symmetry, assert_acceptable_arguments, format_header, check_packages, is_dict_like, dict_build, is_number, is_nonstring_iterable, format_memory, name_tree_nodes, add_objects_to_globals
 
 from ..io import write_object
 import datetime, copy, warnings
@@ -50,26 +50,19 @@ __all__ = {"pairwise", "pairwise_tree_distance","pairwise_difference", "pairwise
 # compositional
 import compositional as coda
 functions_from_compositional = {"pairwise_vlr", "pairwise_rho","pairwise_phi"}
-
-for function_name in functions_from_compositional:
-    globals()[function_name] = getattr(coda, function_name)
-    __all__.add(function_name)
+add_objects_to_globals(coda, functions_from_compositional, globals(), add_version=True, __all__=__all__)
 
 # hive_networkx
 import hive_networkx as hx
 functions_from_hive_networkx= {"Symmetric", "dense_to_condensed", "condensed_to_dense"}
+add_objects_to_globals(hx, functions_from_hive_networkx, globals(), add_version=True, __all__=__all__)
 
-for function_name in functions_from_hive_networkx:
-    globals()[function_name] = getattr(hx, function_name)
-    __all__.add(function_name)
 
 # ensemble_networkx
 import ensemble_networkx as enx
-functions_from_ensemble_networkx= {"EnsembleAssociationNetwork", "pairwise_biweight_midcorrelation"}
+functions_from_ensemble_networkx= { "pairwise_biweight_midcorrelation"}
+add_objects_to_globals(enx, functions_from_ensemble_networkx, globals(), add_version=True, __all__=__all__)
 
-for function_name in functions_from_ensemble_networkx:
-    globals()[function_name] = getattr(enx, function_name)
-    __all__.add(function_name)
 
 __all__ = sorted(__all__)
 

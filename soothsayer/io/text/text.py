@@ -14,7 +14,7 @@ import pickle, gzip, bz2, zipfile
 import pandas as pd
 
 # Soothsayer
-from soothsayer.utils import format_path, infer_compression, is_file_like
+from soothsayer.utils import format_path, infer_compression, is_file_like, add_objects_to_globals
 
 # Soothsayer Utils
 import soothsayer_utils as syu
@@ -23,13 +23,7 @@ functions_from_soothsayer_utils = [
     "read_textfile",
     "read_from_clipboard",
 ]
-
-for function_name in functions_from_soothsayer_utils:
-    globals()[function_name] = getattr(syu, function_name)
-
-
-
-
+add_objects_to_globals(syu, functions_from_soothsayer_utils, globals(), add_version=True, __all__=None)
 
 
 # # Create file object

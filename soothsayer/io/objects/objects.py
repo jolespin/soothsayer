@@ -9,7 +9,7 @@ from collections import *
 import pickle, gzip, bz2, zipfile
 
 # Soothsayer
-from soothsayer.utils import format_path, infer_compression
+from soothsayer.utils import format_path, infer_compression, add_objects_to_globals
 
 # Soothsayer Utils
 import soothsayer_utils as syu
@@ -18,9 +18,7 @@ functions_from_soothsayer_utils = [
     "write_object",
     "read_script_as_module",
 ]
-
-for function_name in functions_from_soothsayer_utils:
-    globals()[function_name] = getattr(syu, function_name)
+add_objects_to_globals(syu, functions_from_soothsayer_utils, globals(), add_version=True, __all__=None)
 
 
 # ======

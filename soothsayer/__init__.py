@@ -34,8 +34,8 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.07.02"
-__moniker__ = "Yerba mate"
+__version__= "2020.07.21"
+__moniker__ = "Spruce tip mead"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
@@ -62,7 +62,7 @@ from .io import io
 # Microbiome
 from .microbiome import microbiome
 # Networks
-from .networks import networks, Hive, TemporalNetwork, EnsembleAssociationNetwork
+from .networks import networks, Hive, TemporalNetwork, EnsembleAssociationNetwork, SampleSpecificPerturbationNetwork
 # Ordination
 from .ordination import ordination, PrincipalComponentAnalysis, PrincipalCoordinatesAnalysis, Manifold
 # R Wrappers
@@ -88,7 +88,7 @@ from .visuals import visuals
 _submodules = ["core", "classification", "db", "feature_extraction", "hierarchy", "io", "microbiome",  "networks", "ordination", "r_wrappers", "regression", "statistics", "symmetry", "transmute", "tree", "utils", "visuals"]
 _core = ["Dataset"]
 _hierarchy = ["Agglomerative", "Topology"]
-_networks = ["Hive", "TemporalNetwork"]
+_networks = ["Hive", "TemporalNetwork","EnsembleAssociationNetwork", "SampleSpecificPerturbationNetwork", ]
 _ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold"]
 _symmetry = ["Symmetric"]
 _utils = ["Chromatic", "Suppress", "pv"]

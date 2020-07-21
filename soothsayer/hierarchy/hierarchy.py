@@ -20,7 +20,7 @@ import skbio
 from scipy.cluster import hierarchy as sp_hierarchy
 try:
     from fastcluster import linkage
-except ImportError:
+except (ImportError, ModuleNotFoundError) as e:
     from scipy.cluster.hierarchy import linkage
     warnings.warn("Could not import `linkage` from `fastcluster` and using `scipy.cluster.hierarchy.linkage` instead")
 

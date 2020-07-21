@@ -26,15 +26,14 @@ from ..r_wrappers.packages.metagenomeSeq import normalize_css
 # from soothsayer.r_wrappers.packages.philr import normalize_philr
 
 
-from ..utils import is_dict, assert_acceptable_arguments, is_number
+from ..utils import is_dict, assert_acceptable_arguments, is_number, add_objects_to_globals
 
 __all__ = {"normalize_minmax", "normalize_tss", "normalize_center", "normalize_zscore", "normalize_quantile", "normalize_boxcox",  "normalize", "normalize_expression"}
 
+# Add object from compositional
 functions_from_compositional = {"transform_clr","transform_xlr", "transform_iqlr", "transform_ilr"}
+add_objects_to_globals(coda, functions_from_compositional, globals(), add_version=True, __all__=__all__)
 
-for function_name in functions_from_compositional:
-    globals()[function_name] = getattr(coda, function_name)
-    __all__.add(function_name)
 
 __all__ = sorted(__all__)
    
@@ -125,7 +124,7 @@ def normalize(X, method="tss", axis=1, tree=None, feature_range=(0,1)):
         df_normalized = normalize_boxcox(X)
     if method == "minmax":
         df_normalized = normalize_minmax(X, feature_range=feature_range)
-    # Aitchison
+    # Compositional
     if method == "clr":
         df_normalized = transform_clr(X)
     if method == "ilr":
