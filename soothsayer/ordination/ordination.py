@@ -69,6 +69,8 @@ class CoreOrdinationMethods(object):
             -------
             ax
             """
+            warnings.warn("Using `show_features` to create a `biplot` is experimental and is still being implemented.  Please do not use this for anything serious.")
+            
             # Pre-processing
             if show_features is True:
                 show_features = -1
@@ -170,7 +172,6 @@ class CoreOrdinationMethods(object):
         arrow_properties=dict(),
         text_kws=dict(),
         axis_kws=dict(),
-        quiver_scale=6,
         **plot_scatter_kws,
         ):
         """
