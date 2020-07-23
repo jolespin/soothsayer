@@ -20,6 +20,7 @@ setup(name='soothsayer',
       packages=find_packages(include=("*", "./*")),
       install_requires=[
 	"matplotlib >= 3",
+    "seaborn >= 0.10.1",
 	"scipy >= 1.0",
 	"scikit-learn >= 0.20.2",
     "numpy >= 1.13", #, < 1.14.0",
@@ -40,10 +41,10 @@ setup(name='soothsayer',
     "statsmodels >= 0.10.0", #https://github.com/statsmodels/statsmodels/issues/5899 May need to use this separately: pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
     "mmh3",
     # Extensions
-    "soothsayer_utils >= 2020.7.01",
+    "soothsayer_utils >= 2020.7.7",
     "compositional >= 2020.5.19",
     "hive_networkx >= 2020.6.29",
-    "ensemble_networkx >= 2020.7.02",
+    "ensemble_networkx >= 2020.7.10",
 
     # Optional
     # "teneto",
