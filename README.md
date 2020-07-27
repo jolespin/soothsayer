@@ -1,5 +1,5 @@
 
-<img src="logo.png" width=200>
+<img src="logo/soothsayer_square.png" width=200>
 
 _________________________________
 
@@ -20,7 +20,6 @@ Documentation coming soon. .. ... ..... ........
 It will make the installation process *much easier* due to all of the dependencies. 
 
 * pip: [https://pypi.org/project/soothsayer](https://pypi.org/project/soothsayer)
-* conda: Not yet available
 
 
 #### Development:
@@ -28,11 +27,11 @@ It will make the installation process *much easier* due to all of the dependenci
 
 If you are interested in requesting features or wish to report a bug, please post a GitHub issue prefixed with the tag `[Feature Request]` and `[Bug]`, respectively.
 
-#### Known bugs:
+#### Notes:
 * Use `statsmodels > v0.10.x` as `v0.10.0` has a [bug](https://github.com/statsmodels/statsmodels/issues/5899) that fails to unpickle regression models.  
 
 #### Contact:
 * Josh L. Espinoza: [jespinoz@jcvi.org](jespinoz@jcvi.org).
 
 <img src ="https://allpistuff.com/wp-content/uploads/2018/07/twitter.c0030826.jpg" width=100>
-<img src="https://binstar-static-prod.s3.amazonaws.com/latest/img/AnacondaCloud_logo_green.png" width=300>
+
