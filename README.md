@@ -9,17 +9,33 @@ _________________________________
 #### Citation:
 *Espinoza, *Dupont et al. 2020 (In Review)
 
+#### Contact:
+Josh L. Espinoza: [jespinoz@jcvi.org](jespinoz@jcvi.org).
+
+_________________________________
+
+#### *Soothsayer* Ecosystem:
+* [soothsayer_utils](https://github.com/jolespin/soothsayer_utils) - Utility functions for *Soothsayer*
+* [hive_networkx](https://github.com/jolespin/hive_networkx) - High-level Hive plot (Martin Krzywinski et al. 2012) implementations using *Matplotlib* in Python. Built on top of *NetworkX* and *Pandas*.
+* [compositional](https://github.com/jolespin/compositional) - Compositional data analysis in Python.
+
+_________________________________
+
 #### Case studies, tutorials and usage:
 Documentation coming soon. .. ... ..... ........
 
 * [Antimicrobial resistance modeling](https://github.com/jolespin/antimicrobial_resistance_modeling/blob/master/Espinoza-Dupont_et_al_2020/Notebooks/markdown_version/Espinoza-Dupont_et_al_2020.md)
-* [Denoising Iris dataset + noise attributes with *Clairvoyance*](tutorials/Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
+* [Feature selection using *Clairvoyance* on the Iris dataset with 1000 noise attributes](tutorials/Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
+
+_________________________________
 
 #### Installation:
 **Please refer to the [installation manual](install/README.md) for installation details.**  
-It will make the installation process *much easier* due to all of the dependencies. 
+It will make the installation process *much easier* due to all of the Python and R dependencies. 
 
 * pip: [https://pypi.org/project/soothsayer](https://pypi.org/project/soothsayer)
+
+_________________________________
 
 
 #### Development:
@@ -27,17 +43,10 @@ It will make the installation process *much easier* due to all of the dependenci
 
 If you are interested in requesting features or wish to report a bug, please post a GitHub issue prefixed with the tag `[Feature Request]` and `[Bug]`, respectively.
 
-#### Soothsayer Ecosystem:
-* [soothsayer_utils](https://github.com/jolespin/soothsayer_utils) - Utility functions for Soothsayer
-* [hive_networkx](https://github.com/jolespin/hive_networkx) - High-level Hive plot (Martin Krzywinski et al. 2012) implementations using Matplotlib in Python. Built on top of NetworkX and Pandas.
-* [compositional](https://github.com/jolespin/compositional) - Compositional data analysis in Python.
+_________________________________
 
 
-#### Notes:
-* Use `statsmodels > v0.10.x` as `v0.10.0` has a [bug](https://github.com/statsmodels/statsmodels/issues/5899) that fails to unpickle regression models.  
 
-#### Contact:
-* Josh L. Espinoza: [jespinoz@jcvi.org](jespinoz@jcvi.org).
+<img src ="https://allpistuff.com/wp-content/uploads/2018/07/twitter.c0030826.jpg" width=100> <img src="logo/soothsayer_wide.png" width=200>
 
-<img src ="https://allpistuff.com/wp-content/uploads/2018/07/twitter.c0030826.jpg" width=100>
 
