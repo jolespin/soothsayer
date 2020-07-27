@@ -4,7 +4,7 @@
 _________________________________
 
 #### Current Version:
-*v2020.07.21*
+*v2020.07.23*
 
 #### Citation:
 *Espinoza, *Dupont et al. 2020 (In Review)
@@ -26,6 +26,12 @@ It will make the installation process *much easier* due to all of the dependenci
 *Soothsayer* is in a developmental stage.  If you're not sure if your installation is a developmental version, check by running: `import soothsayer as sy; print(sy.__developmental__)`.  It is *highly recommended* to [update to the current version](https://github.com/jolespin/soothsayer/tree/master/install#update-to-the-current-release-recommended). 
 
 If you are interested in requesting features or wish to report a bug, please post a GitHub issue prefixed with the tag `[Feature Request]` and `[Bug]`, respectively.
+
+#### Soothsayer Ecosystem:
+* [soothsayer_utils](https://github.com/jolespin/soothsayer_utils) - Utility functions for Soothsayer
+* [hive_networkx](https://github.com/jolespin/hive_networkx) - High-level Hive plot (Martin Krzywinski et al. 2012) implementations using Matplotlib in Python. Built on top of NetworkX and Pandas.
+* [compositional](https://github.com/jolespin/compositional) - Compositional data analysis in Python.
+
 
 #### Notes:
 * Use `statsmodels > v0.10.x` as `v0.10.0` has a [bug](https://github.com/statsmodels/statsmodels/issues/5899) that fails to unpickle regression models.  

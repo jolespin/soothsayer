@@ -1,8 +1,8 @@
 ## Create Soothsayer Environment
 now=$(date +"%T")
 os_system=$(uname)
-env_name=${1:-"soothsayer_py3.8_env"} # Default: soothsayer_env
-py_version=${2:-"3.8.2"} # Default: 3.6.x
+env_name=${1:-"soothsayer_py3.7_env"} # Default: soothsayer_env
+py_version=${2:-"3.7"} # Default: 3.6.x
 
 echo "Start Time: $now"
 echo "Creating a conda environment to run soothsayer and all dependencies: $env_name"
@@ -30,10 +30,6 @@ conda install -y -c bioconda r-dynamictreecut r-wgcna bioconductor-philr biocond
 
 ## May need to run the following line if R packages fail from stringi.dylib
 # conda install -c r r-stringi
-pip install soothsayer_utils
-pip install compositional
-pip install hive_networkx
-pip install ensemble_networkx
 pip install soothsayer --no-deps
 
 # End
