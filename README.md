@@ -2,6 +2,8 @@
 <img src="logo/soothsayer_square.png" width=200>
 
 _________________________________
+#### Description:
+*Soothsayer* is a high-level package for (bio-)informatics with various methods for network analysis, hierarchical ensembles of classifiers, feature selection, plotting, and more.
 
 #### Current Version:
 *v2020.07.28*
