@@ -1,10 +1,5 @@
-```
+<img src="../logo/soothsayer_wide.png" width=500>
 
-____ ____ ____ ___ _  _ ____ ____ _   _ ____ ____
-[__  |  | |  |  |  |__| [__  |__|  \_/  |___ |__/
-___] |__| |__|  |  |  | ___] |  |   |   |___ |  \
-
-```
 
 # Case studies, tutorials and usage
 
