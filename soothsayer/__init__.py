@@ -34,7 +34,7 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.07.23"
+__version__= "2020.07.28"
 __moniker__ = "Spruce tip mead"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"

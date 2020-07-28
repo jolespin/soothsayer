@@ -4,7 +4,7 @@
 _________________________________
 
 #### Current Version:
-*v2020.07.23*
+*v2020.07.28*
 
 #### Citation:
 *Espinoza, *Dupont et al. 2020 (In Review)
@@ -24,7 +24,7 @@ _________________________________
 #### Case studies, tutorials and usage:
 Documentation coming soon. .. ... ..... ........
 
-* [Antimicrobial resistance modeling](https://github.com/jolespin/antimicrobial_resistance_modeling/blob/master/Espinoza-Dupont_et_al_2020/Notebooks/markdown_version/Espinoza-Dupont_et_al_2020.md)
+* [Antimicrobial resistance modeling](tutorials/Notebooks/antimicrobial_resistance_modeling.md)
 * [Feature selection using *Clairvoyance* on the Iris dataset with 1000 noise attributes](tutorials/Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
 
 _________________________________

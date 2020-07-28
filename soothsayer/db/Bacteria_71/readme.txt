@@ -5,5 +5,15 @@ from the collection (as they were exceptionally redundant or rare among MAGs fro
 and added Ribosomal_S3_C, Ribosomal_L5, Ribosomal_L2 to make it more compatible with Hug et al's
 set of ribosomal proteins.
 
-Original source:
+Original package:
 https://github.com/merenlab/anvio
+
+Original source:
+https://github.com/merenlab/anvio/tree/master/anvio/data/hmm/Bacteria_71
+
+Please cite Anvi'o and the original reference if this is used:
+https://doi.org/10.7717/peerj.1319
+https://doi.org/10.1093/bioinformatics/btz188
+
+Refer to LICENSE.txt for more details.
+

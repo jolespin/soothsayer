@@ -9,6 +9,7 @@ import os, sys, time, warnings
 # PyData
 import numpy as np
 import pandas as pd
+from scipy.spatial.distance import euclidean 
 
 # Scikits
 from sklearn.preprocessing import StandardScaler
@@ -19,7 +20,7 @@ from skbio import DistanceMatrix
 from adjustText import adjust_text
 
 from ..io import write_object
-from ..utils import is_query_class, to_precision, dict_filter, is_symmetrical, is_nonstring_iterable
+from ..utils import is_query_class, to_precision, dict_filter, is_symmetrical, is_nonstring_iterable, assert_acceptable_arguments
 from ..symmetry import Symmetric
 from ..visuals import plot_scatter
 
@@ -45,6 +46,7 @@ class CoreOrdinationMethods(object):
             show_features,  
             precision, 
             use_percent, 
+            method_top_features,
             arrowstyle,
             arrow_scale,
             color_arrow, 
@@ -69,7 +71,7 @@ class CoreOrdinationMethods(object):
             -------
             ax
             """
-            warnings.warn("Using `show_features` to create a `biplot` is experimental and is still being implemented.  Please do not use this for anything serious.")
+            warnings.warn("Using `show_features` to create a `biplot` is experimental.")
             
             # Pre-processing
             if show_features is True:
@@ -79,9 +81,30 @@ class CoreOrdinationMethods(object):
                 if show_features == -1:
                     # Set -1 to total number of features
                     show_features = self.m
+                    
                 # Get top features
-                show_features = self.loadings_.iloc[:,0].abs().sort_values(ascending=False)[:show_features]
-                show_features = show_features.index
+                assert_acceptable_arguments(method_top_features, {"weighted", "partitioned", "importance"})
+                number_of_requested_features = show_features
+                if method_top_features == "weighted":
+                    weighted_features = (self.contributions_.iloc[:,:2]*self.explained_variance_ratio_.iloc[:2]).sum(axis=1).sort_values(ascending=False)
+                    show_features = weighted_features.iloc[:number_of_requested_features].index
+                if method_top_features == "partitioned":
+                    number_of_requested_features_is_even = (number_of_requested_features % 2) == 0
+                    k = number_of_requested_features//2
+                    # Even
+                    if number_of_requested_features_is_even: 
+                        pc1_features = self.contributions_.iloc[:,0].sort_values(ascending=False).iloc[:k].index.tolist()
+                    # Odd
+                    else:
+                        pc1_features = self.contributions_.iloc[:,0].sort_values(ascending=False).iloc[:k+1].index.tolist()
+                    pc2_features = self.contributions_.iloc[:,1].sort_values(ascending=False).iloc[:k].index.tolist()
+                    show_features = sorted(set(pc1_features + pc2_features))
+                if method_top_features == "importance":
+                    # https://github.com/qiime2/q2-emperor/blob/756eddba1fc590f33d4bf7a3d0268517e68e9ae5/q2_emperor/_plot.py#L78
+                    # select the top N most important features based on the vector's magnitude
+                    show_features = self.importance_.iloc[:number_of_requested_features].index
+                print("Selected {} features:".format(number_of_requested_features), list(show_features), sep="\n", file=sys.stderr)
+                
             if isinstance(show_features, str):
                 show_features = [show_features]
             if is_nonstring_iterable(show_features):
@@ -158,6 +181,7 @@ class CoreOrdinationMethods(object):
         show_features=None,  
         precision=4, 
         use_percent=False, 
+        method_top_features="partitioned",
         arrowstyle="-|>",
         arrow_scale=1,
         color_arrow="darkslategray", 
@@ -207,6 +231,7 @@ class CoreOrdinationMethods(object):
                     show_features=show_features,
                     precision=precision,
                     use_percent=use_percent,
+                    method_top_features=method_top_features,
                     arrowstyle=arrowstyle,
                     arrow_scale=arrow_scale,
                     color_arrow=color_arrow, 
@@ -349,7 +374,6 @@ class CoreOrdinationMethods(object):
         return ax
         
 
-
     # Save to file
     def to_file(self, path:str, compression="infer"):
         write_object(self, path, compression=compression)
@@ -402,6 +426,15 @@ class MatrixDecomposition(object):
             self.contributions_ = self.loadings_.abs()
             self.contributions_ = self.contributions_/self.contributions_.sum(axis=0)
 
+        # Importance
+        # https://github.com/qiime2/q2-emperor/blob/master/q2_emperor/_plot.py#L78
+        if hasattr(self, "loadings_"):
+            if self.loadings_ is not None:
+                origin = np.zeros(self.loadings_.shape[1])
+                self.importance_ = self.loadings_.apply(euclidean, axis=1, args=(origin,)).sort_values(ascending=False)
+            else:
+                self.importance_ = None
+                
         # Project data onto eigenvectors
         self.projection_ =  pd.DataFrame(
             self.model_.transform(self.data_transformed_),
@@ -441,7 +474,8 @@ class PrincipalComponentAnalysis(CoreOrdinationMethods):
             prefix=prefix,
             name=name,
         )
-        self.__dict__.update(self.core_.__dict__)
+        for attr,obj in self.core_.__dict__.items():
+            setattr(self, attr, obj)
 
 
 # Principal Coordinant Analysis
@@ -502,7 +536,16 @@ class PrincipalCoordinatesAnalysis(CoreOrdinationMethods):
                 self.contributions_ = self.contributions_/self.contributions_.sum(axis=0)
             else:
                 self.contributions_ = None
-
+                
+        # Importance
+        # https://github.com/qiime2/q2-emperor/blob/master/q2_emperor/_plot.py#L78
+        if hasattr(self, "loadings_"):
+            if self.loadings_ is not None:
+                origin = np.zeros(self.loadings_.shape[1])
+                self.importance_ = self.loadings_.apply(euclidean, axis=1, args=(origin,)).sort_values(ascending=False)
+            else:
+                self.importance_ = None
+                
         # Project data onto eigenvectors
         self.projection_ =  pd.DataFrame(
             self.model_.samples.values,
