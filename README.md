@@ -6,7 +6,7 @@ _________________________________
 *Soothsayer* is a high-level package for (bio-)informatics with various methods for network analysis, hierarchical ensembles of classifiers, feature selection, plotting, and more.
 
 #### Current Version:
-*v2020.07.28*
+*v2020.07.31*
 
 #### Citation:
 *Espinoza, *Dupont et al. 2020 (In Review)
@@ -48,6 +48,16 @@ If you are interested in requesting features or wish to report a bug, please pos
 _________________________________
 
 
+#### `Soothsayer` in the wild:
+
+
+_________________________________
+
+* Yu Imai, Kirsten J. Meyer, Akira Iinishi, Quentin Favre-Godal, Robert Green, Sylvie Manuse, Mariaelena Caboni, Miho Mori, Samantha Niles, Meghan Ghiglieri, Chandrashekhar Honrao, Xiaoyu Ma, Jason Guo, Alexandros Makriyannis, Luis Linares-Otoya, Nils Böhringer, Zerlina G. Wuisan, Hundeep Kaur, Runrun Wu, Andre Mateus, Athanasios Typas, Mikhail M. Savitski, Josh L. Espinoza, Aubrie O’Rourke, Karen E. Nelson, Sebastian Hiller, Nicholas Noinaj, Till F. Schäberle, Anthony D’Onofrio & Kim Lewis. (2019). A new antibiotic selectively kills Gram-negative pathogens. Nature. doi:10.1038/s41586-019-1791-1. 
+
+* Espinoza JL, Shah N, Singh S, Nelson KE, Dupont CL. Applications of weighted association networks applied to compositional data in biology. Environ Microbiol. 2020 May 20;. doi: 10.1111/1462-2920.15091. PubMed PMID: 32436334.
+
+* O'Rourke A, Beyhan S, Choi Y, Morales P, Chan AP, Espinoza JL, Dupont CL, Meyer KJ, Spoering A, Lewis K, Nierman WC, Nelson KE. Mechanism-of-Action Classification of Antibiotics by Global Transcriptome Profiling. Antimicrob Agents Chemother. 2020 Feb 21;64(3). doi: 10.1128/AAC.01207-19.  PubMed PMID: 31907190
 
 <img src ="https://allpistuff.com/wp-content/uploads/2018/07/twitter.c0030826.jpg" width=100> <img src="logo/soothsayer_wide.png" width=200>
 
