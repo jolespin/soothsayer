@@ -57,7 +57,6 @@ _________________________________
 
 * Espinoza JL, Shah N, Singh S, Nelson KE, Dupont CL. Applications of weighted association networks applied to compositional data in biology. Environ Microbiol. 2020 May 20;. doi: 10.1111/1462-2920.15091. PubMed PMID: 32436334.
 
-* O'Rourke A, Beyhan S, Choi Y, Morales P, Chan AP, Espinoza JL, Dupont CL, Meyer KJ, Spoering A, Lewis K, Nierman WC, Nelson KE. Mechanism-of-Action Classification of Antibiotics by Global Transcriptome Profiling. Antimicrob Agents Chemother. 2020 Feb 21;64(3). doi: 10.1128/AAC.01207-19.  PubMed PMID: 31907190
 
 <img src ="https://allpistuff.com/wp-content/uploads/2018/07/twitter.c0030826.jpg" width=100> <img src="logo/soothsayer_wide.png" width=200>
 
