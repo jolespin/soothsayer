@@ -1217,8 +1217,8 @@ def plot_compositional(
                     for id_class, idx_query in pd_series_collapse(y).iteritems():
                         try:
                             sns.kdeplot(data=depth[idx_query], data2=richness[idx_query],  color=class_colors[id_class], zorder=0, ax=ax, **_kde_2d_kws)
-                        except ValueError:
-                            warnings.warn("Could not compute the 2-dimensional KDE plot for the following class: {}".format(id_class))
+                        except Exception as e:
+                            warnings.warn("({}) Could not compute the 2-dimensional KDE plot for the following class: {}".format(id_class))
             else:
                 sns.kdeplot(data=depth, data2=richness, color=color_density, zorder=0,  ax=ax, **_kde_2d_kws)
 

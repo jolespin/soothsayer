@@ -29,7 +29,7 @@ functions_from_soothsayer_utils = [
 'flatten', 'format_memory', 'format_duration', 'format_header', 'format_path', 'fragment',  'get_timestamp', 'get_unique_identifier', 'hash_kmer', 'infer_compression', 'is_all_same_type',
 'is_dict', 'is_dict_like', 'is_file_like', 'is_function', 'is_in_namespace', 'is_nonstring_iterable', 'is_symmetrical', 'is_number', 'is_path_like', 'is_query_class', "is_graph", "is_color",
 'iterable_depth', 'join_as_strings',
-'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages", "Suppress","get_color_midpoint",
+'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages", "Suppress","get_color_midpoint","remove_pairwise_nan", "format_pairwise",
 ]
 
 __all__ = {

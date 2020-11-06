@@ -1,0 +1,765 @@
+M00001	Glycolysis (Embden-Meyerhof pathway), glucose => pyruvate	K00134	K00150	K00844	K00845	K00850	K00873	K00886	K00918	K00927	K01623	K01624	K01689	K01803	K01810	K01834	K06859	K08074	K11389	K11645	K12406	K12407	K13810	K15633	K15634	K15635	K15916	K16305	K16306	K16370																																																		
+M00002	Glycolysis, core module involving three-carbon compounds	K00134	K00150	K00873	K00927	K01689	K01803	K01834	K11389	K12406	K15633	K15634	K15635																																																																			
+M00003	Gluconeogenesis, oxaloacetate => fructose-6P	K00134	K00150	K00927	K01086	K01596	K01610	K01622	K01623	K01624	K01689	K01803	K01834	K02446	K03841	K04041	K11532	K11645	K15633	K15634	K15635																																																											
+M00004	Pentose phosphate pathway (Pentose phosphate cycle)	K00033	K00036	K00615	K00616	K01057	K01783	K01807	K01808	K01810	K06859	K07404	K13810	K13937	K15916	K19243																																																																
+M00005	PRPP biosynthesis, ribose 5P => PRPP	K00948																																																																														
+M00006	Pentose phosphate pathway, oxidative phase, glucose 6P => ribulose 5P	K00033	K00036	K01057	K07404	K13937	K19243																																																																									
+M00007	Pentose phosphate pathway, non-oxidative phase, fructose 6P => ribose 5P	K00615	K00616	K01783	K01807	K01808	K13810																																																																									
+M00008	Entner-Doudoroff pathway, glucose-6P => glyceraldehyde-3P + pyruvate	K00036	K01057	K01625	K01690	K07404																																																																										
+M00009	Citrate cycle (TCA cycle, Krebs cycle)	K00024	K00025	K00026	K00030	K00031	K00116	K00164	K00174	K00175	K00176	K00177	K00234	K00235	K00236	K00237	K00239	K00240	K00241	K00242	K00244	K00245	K00246	K00247	K00382	K00658	K01647	K01676	K01677	K01678	K01679	K01681	K01682	K01899	K01900	K01902	K01903	K18118	K18859	K18860																																								
+M00010	Citrate cycle, first carbon oxidation, oxaloacetate => 2-oxoglutarate	K00030	K00031	K01647	K01681	K01682																																																																										
+M00011	Citrate cycle, second carbon oxidation, 2-oxoglutarate => oxaloacetate	K00024	K00025	K00026	K00116	K00164	K00174	K00175	K00176	K00177	K00234	K00235	K00236	K00237	K00239	K00240	K00241	K00242	K00244	K00245	K00246	K00247	K00382	K00658	K01676	K01677	K01678	K01679	K01899	K01900	K01902	K01903	K18118	K18859	K18860																																													
+M00012	Glyoxylate cycle	K00024	K00025	K00026	K01637	K01638	K01647	K01681	K01682	K19282																																																																						
+M00013	Malonate semialdehyde pathway, propanoyl-CoA => acetyl-CoA	K00140	K00249	K05605	K07511	K07514	K07515																																																																									
+M00014	Glucuronate pathway (uronate pathway)	K00002	K00008	K00012	K00699	K00854	K01195	K03331	K05351	K12447	K13247	K14756	K16190																																																																			
+M00015	Proline biosynthesis, glutamate => proline	K00147	K00286	K00931	K12657																																																																											
+M00016	Lysine biosynthesis, succinyl-DAP pathway, aspartate => lysine	K00133	K00215	K00674	K00821	K00928	K01439	K01586	K01714	K01778	K12524	K12525	K12526	K14267																																																																		
+M00017	Methionine biosynthesis, apartate => homoserine => methionine	K00003	K00133	K00548	K00549	K00651	K00928	K01739	K01760	K12524	K12525	K12526																																																																				
+M00018	Threonine biosynthesis, aspartate => homoserine => threonine	K00003	K00133	K00872	K00928	K01733	K02203	K02204	K12524	K12525	K12526																																																																					
+M00019	Valine/isoleucine biosynthesis, pyruvate => valine / 2-oxobutanoate => isoleucine	K00053	K00826	K01652	K01653	K01687	K11258																																																																									
+M00020	Serine biosynthesis, glycerate-3P => serine	K00058	K00831	K01079																																																																												
+M00021	Cysteine biosynthesis, serine => cysteine	K00640	K01738	K12339	K13034	K17069																																																																										
+M00022	Shikimate pathway, phosphoenolpyruvate + erythrose-4P => chorismate	K00014	K00800	K00891	K01626	K01735	K01736	K03785	K03786	K03856	K13829	K13830	K13832	K13853																																																																		
+M00023	Tryptophan biosynthesis, chorismate => tryptophan	K00766	K01609	K01656	K01657	K01658	K01694	K01695	K01696	K01817	K06001	K13497	K13498	K13501	K13503																																																																	
+M00024	Phenylalanine biosynthesis, chorismate => phenylalanine	K00832	K00838	K01713	K01850	K04092	K04093	K04516	K04518	K05359	K06208	K06209	K13853	K14170	K14187																																																																	
+M00025	Tyrosine biosynthesis, chorismate => tyrosine	K00210	K00815	K00832	K00838	K01850	K04092	K04093	K04516	K04517	K06208	K06209	K13853	K14170	K14187																																																																	
+M00026	Histidine biosynthesis, PRPP => histidine	K00013	K00765	K00817	K01089	K01496	K01523	K01663	K01693	K01814	K02500	K02501	K02502	K04486	K05602	K11755	K14152	K18649																																																														
+M00027	GABA (gamma-Aminobutyrate) shunt	K00135	K00139	K00823	K01580	K07250	K13524	K16871																																																																								
+M00028	Ornithine biosynthesis, glutamate => ornithine	K00145	K00618	K00619	K00620	K00818	K00821	K00930	K01438	K11067	K12659	K14677	K14681	K14682																																																																		
+M00029	Urea cycle	K00611	K01476	K01755	K01940	K01948	K14681																																																																									
+M00030	Lysine biosynthesis, AAA pathway, 2-oxoglutarate => 2-aminoadipate => lysine	K00143	K00290	K00293	K00825	K00838	K01655	K01705	K05824	K14085	K17450																																																																					
+M00031	Lysine biosynthesis, mediated by LysW, 2-aminoadipate => lysine	K05826																																																																														
+M00032	Lysine degradation, lysine => saccharopine => acetoacetyl-CoA	K00022	K00143	K00164	K00252	K00290	K00293	K00658	K00825	K01692	K01782	K01825	K07511	K07514	K07515	K14085	K14157																																																															
+M00033	Ectoine biosynthesis, aspartate => ectoine	K00133	K00836	K00928	K06718	K06720																																																																										
+M00034	Methionine salvage pathway	K00772	K00789	K00797	K00815	K00832	K00838	K00899	K01243	K01244	K01611	K08963	K08964	K08965	K08966	K08967	K08969	K09880	K16054	K18284																																																												
+M00035	Methionine degradation	K00558	K00789	K01251	K01697	K10150	K17398	K17399																																																																								
+M00036	Leucine degradation, leucine => acetoacetate + acetyl-CoA	K00166	K00167	K00249	K00253	K00382	K00826	K01640	K01968	K01969	K05607	K09699	K11381	K13766																																																																		
+M00037	Melatonin biosynthesis, tryptophan => serotonin => melatonin	K00502	K00543	K00669	K01593																																																																											
+M00038	Tryptophan metabolism, tryptophan => kynurenine => 2-aminomuconate	K00452	K00453	K00463	K00486	K01432	K01556	K03392	K07130	K10217	K14263																																																																					
+M00039	Monolignol biosynthesis, phenylalanine/tyrosine => monolignol	K00083	K00487	K00588	K01904	K09753	K09754	K09755	K10775	K13064	K13065	K13066	K18368																																																																			
+M00040	Tyrosine biosynthesis, prephanate => pretyrosine => tyrosine	K00220	K00832	K15226	K15227	K15849																																																																										
+M00042	Catecholamine biosynthesis, tyrosine => dopamine => noradrenaline => adrenaline	K00501	K00503	K00505	K00553	K01592	K01593																																																																									
+M00043	Thyroid hormone biosynthesis, tyrosine => triiodothyronine/thyroxine	K00431																																																																														
+M00044	Tyrosine degradation, tyrosine => homogentisate	K00451	K00457	K01555	K01800	K03334	K16171																																																																									
+M00045	Histidine degradation, histidine => N-formiminoglutamate => glutamate	K01468	K01479	K01712	K01745																																																																											
+M00046	Pyrimidine degradation, uracil => beta-alanine, thymine => 3-aminoisobutanoate	K00207	K01431	K01464	K06016	K17722	K17723																																																																									
+M00047	Creatine pathway	K00542	K00613	K00933																																																																												
+M00048	Inosine monophosphate biosynthesis, PRPP + glutamine => IMP	K00601	K00602	K00764	K01492	K01587	K01588	K01589	K01756	K01923	K01933	K01945	K01952	K06863	K08289	K11175	K11176	K11787	K11788	K11808	K13713																																																											
+M00049	Adenine ribonucleotide biosynthesis, IMP => ADP,ATP	K00873	K00939	K00940	K00944	K01756	K01939	K12406	K18532	K18533																																																																						
+M00050	Guanine ribonucleotide biosynthesis IMP => GDP,GTP	K00088	K00873	K00940	K00942	K01951	K12406																																																																									
+M00051	Uridine monophosphate biosynthesis, glutamine (+ PRPP) => UMP	K00226	K00254	K00608	K00609	K00610	K00762	K01465	K01591	K01954	K01955	K01956	K11540	K11541	K13421	K17828																																																																
+M00052	Pyrimidine ribonucleotide biosynthesis, UMP => UDP/UTP,CDP/CTP	K00940	K00945	K01937	K13799	K13800	K13809	K18533																																																																								
+M00053	Pyrimidine deoxyribonuleotide biosynthesis, CDP/CTP => dCDP/dCTP,dTDP/dTTP	K00524	K00525	K00526	K00527	K00560	K00940	K00943	K01494	K01520	K10807	K10808	K13998	K18533																																																																		
+M00055	N-glycan precursor biosynthesis	K00729	K01001	K03842	K03843	K03844	K03845	K03846	K03847	K03848	K03849	K03850	K07432	K07441																																																																		
+M00056	O-glycan biosynthesis, mucin type core	K00710	K00727	K00731	K00739	K09653	K09662	K09663																																																																								
+M00057	Glycosaminoglycan biosynthesis, linkage tetrasaccharide	K00733	K00734	K00771	K10158																																																																											
+M00058	Glycosaminoglycan biosynthesis, chondroitin sulfate backbone	K00746	K00747	K03419	K13499																																																																											
+M00059	Glycosaminoglycan biosynthesis, heparan sulfate backbone	K01793	K02366	K02367	K02368	K02369	K02370	K02576	K02577	K02578	K02579																																																																					
+M00060	Lipopolysaccharide biosynthesis, KDO2-lipid A	K00677	K00748	K00912	K02517	K02527	K02535	K02536	K02560	K03269	K16363																																																																					
+M00061	D-Glucuronate degradation, D-glucuronate => pyruvate + D-glyceraldehyde 3P	K00040	K00874	K01625	K01686	K01812	K08323	K17463																																																																								
+M00063	CMP-KDO biosynthesis	K00979	K01627	K03270	K06041																																																																											
+M00064	ADP-L-glycero-D-manno-heptose biosynthesis	K03271	K03272	K03273	K03274																																																																											
+M00065	GPI-anchor biosynthesis, core oligosaccharide	K03434	K03857	K05283	K05284	K05285	K05286	K05287	K07542																																																																							
+M00066	Lactosylceramide biosynthesis	K00720	K07553																																																																													
+M00067	Sulfoglycolipids biosynthesis, ceramide/1-alkyl-2-acylglycerol => sulfatide/seminolipid	K01019	K04628																																																																													
+M00068	Glycosphingolipid biosynthesis, globo-series, LacCer => Gb4Cer	K00719	K01988																																																																													
+M00069	Glycosphingolipid biosynthesis, ganglio series, LacCer => GT3	K03369	K03370	K03371																																																																												
+M00070	Glycosphingolipid biosynthesis, lacto-series, LacCer => Lc4Cer	K03766	K03877	K07819	K07820																																																																											
+M00071	Glycosphingolipid biosynthesis, neolacto-series, LacCer => nLc4Cer	K03766	K07966	K07967	K07968	K07969																																																																										
+M00072	N-glycosylation by oligosaccharyltransferase	K00730	K07151	K12666	K12667	K12668	K12669	K12670	K12691																																																																							
+M00073	N-glycan precursor trimming	K01228	K01230	K05546																																																																												
+M00074	N-glycan biosynthesis, high-mannose type	K01230	K05528	K05529	K05530	K05531	K05532	K05533	K05534	K05535	K05546																																																																					
+M00075	N-glycan biosynthesis, complex type	K00736	K01231																																																																													
+M00076	Dermatan sulfate degradation	K01135	K01136	K01195	K01197	K01217																																																																										
+M00077	Chondroitin sulfate degradation	K01132	K01135	K01195	K01197																																																																											
+M00078	Heparan sulfate degradation	K01136	K01137	K01195	K01205	K01217	K01565	K07964	K07965	K10532																																																																						
+M00079	Keratan sulfate degradation	K01132	K01137	K12309	K12373																																																																											
+M00080	Lipopolysaccharide biosynthesis, inner core => outer core => O-antigen	K02527	K02840	K02841	K02843	K02844	K02847	K02848	K02849	K02850	K03278	K03279	K03280																																																																			
+M00081	Pectin degradation	K01051	K01184	K01213																																																																												
+M00082	Fatty acid biosynthesis, initiation	K00645	K00648	K00665	K00667	K00668	K01961	K01962	K01963	K02160	K11262	K11263	K11533	K18472	K18473																																																																	
+M00083	Fatty acid biosynthesis, elongation	K00059	K00208	K00209	K00647	K00648	K00665	K00667	K00668	K01716	K02371	K02372	K09458	K10780	K11533	K16363																																																																
+M00085	Fatty acid biosynthesis, elongation, mitochondria	K00022	K07508	K07509	K07511	K07512	K07515																																																																									
+M00086	beta-Oxidation, acyl-CoA synthesis	K01897	K15013																																																																													
+M00087	beta-Oxidation	K00022	K00232	K00249	K00255	K00632	K01692	K01782	K01825	K06445	K07508	K07509	K07511	K07513	K07514	K07515	K07516	K09479	K10527	K13767																																																												
+M00088	Ketone body biosynthesis, acetyl-CoA => acetoacetate/3-hydroxybutyrate/acetone	K00626	K01640	K01641																																																																												
+M00089	Triacylglycerol biosynthesis	K00629	K00630	K00631	K00635	K00655	K01080	K03621	K08591	K11155	K11160	K13506	K13507	K13508	K13509	K13513	K13517	K13519	K13523	K14456	K14674	K18851																																																										
+M00090	Phosphatidylcholine (PC) biosynthesis, choline => PC	K00866	K00968	K00994	K13644	K14156																																																																										
+M00091	Phosphatidylcholine (PC) biosynthesis, PE => PC	K00550	K00551	K00570	K16369																																																																											
+M00092	Phosphatidylethanolamine (PE) biosynthesis, ethanolamine => PE	K00894	K00967	K00993	K13644	K14156																																																																										
+M00093	Phosphatidylethanolamine (PE) biosynthesis, PA => PS => PE	K00981	K00998	K01613	K17103																																																																											
+M00094	Ceramide biosynthesis	K00654	K04708	K04709	K04710	K04712																																																																										
+M00095	C5 isoprenoid biosynthesis, mevalonate pathway	K00021	K00626	K00869	K00938	K01597	K01641	K01823	K13273																																																																							
+M00096	C5 isoprenoid biosynthesis, non-mevalonate pathway	K00099	K00919	K00991	K01662	K01770	K01823	K03526	K03527	K12506																																																																						
+M00097	beta-Carotene biosynthesis, GGAP => beta-carotene	K00514	K02291	K02293	K06443	K09835	K15744																																																																									
+M00098	Acylglycerol degradation	K01046	K01054	K12298	K13534	K14073	K14074	K14075	K14076	K14452	K14674	K14675	K16816	K17900																																																																		
+M00099	Sphingosine biosynthesis	K00654	K01441	K04708	K04709	K04710	K04712	K12348	K12349																																																																							
+M00100	Sphingosine degradation	K01634	K04718																																																																													
+M00101	Cholesterol biosynthesis, squalene 2,3-epoxide => cholesterol	K00213	K00222	K00227	K01824	K01852	K05917	K07748	K07750	K09827	K09828	K13373																																																																				
+M00102	Ergocalciferol biosynthesis	K00223	K00227	K00559	K09829	K09831																																																																										
+M00103	Cholecalciferol biosynthesis	K07419	K07438																																																																													
+M00104	Bile acid biosynthesis, cholesterol => cholate/chenodeoxycholate	K00037	K00251	K00488	K00489	K01796	K07431	K08748	K08764	K10214	K11992	K12405	K12408																																																																			
+M00106	Conjugated bile acid biosynthesis, cholate => taurocholate/glycocholate	K00659	K08748																																																																													
+M00107	Steroid hormone biosynthesis, cholesterol => prognenolone => progesterone	K00070	K00498	K01822																																																																												
+M00108	C21-Steroid hormone biosynthesis, progesterone => corticosterone/aldosterone	K00497	K00513	K07433																																																																												
+M00109	C21-Steroid hormone biosynthesis, progesterone => cortisol/cortisone	K00071	K00497	K00512	K00513	K07433	K15680																																																																									
+M00110	C19/C18-Steroid hormone biosynthesis, pregnenolone => androstenedione => estrone	K00070	K00512	K01822	K07434																																																																											
+M00112	Tocopherol/tocotorienol biosynthesis	K05928	K09833	K09834	K12502	K18534																																																																										
+M00113	Jasmonic acid biosynthesis	K00232	K00454	K00632	K01723	K05894	K07513	K10525	K10526	K10527																																																																						
+M00114	Ascorbate biosynthesis, plants, glucose-6P => ascorbate	K00064	K00225	K00966	K00971	K01809	K01810	K01840	K06859	K10046	K10047	K13810	K14190	K15778	K15916	K16011	K16881	K17497	K17744	K18649																																																												
+M00115	NAD biosynthesis, aspartate => NAD	K00278	K00767	K00969	K01916	K01950	K03517	K06210																																																																								
+M00116	Menaquinone biosynthesis, chorismate => menaquinone	K01661	K01851	K01911	K02361	K02548	K02549	K02551	K02552	K03183	K08680	K12073	K19222																																																																			
+M00117	Ubiquinone biosynthesis, prokaryotes, chorismate => ubiquinone	K00568	K03179	K03181	K03182	K03183	K03184	K03185	K03186	K18240	K18800																																																																					
+M00118	Glutathione biosynthesis, glutamate => glutathione	K01919	K01920	K11204	K11205																																																																											
+M00119	Pantothenate biosynthesis, valine/L-aspartate => pantothenate	K00077	K00606	K00826																																																																												
+M00120	Coenzyme A biosynthesis, pantothenate => CoA	K00859	K00867	K00954	K01598	K01922	K01947	K02201	K02318	K03525	K09680	K13038																																																																				
+M00121	Heme biosynthesis, glutamate => protoheme/siroheme	K01698	K01719	K01749	K01845	K01885	K02492	K13542	K13543	K14163																																																																						
+M00122	Cobalamin biosynthesis, cobinamide => cobalamin	K00798	K02225	K02227	K02231	K02232	K19221																																																																									
+M00123	Biotin biosynthesis, pimeloyl-ACP/CoA => biotin	K00652	K00833	K01012	K01935	K19562	K19563																																																																									
+M00124	Pyridoxal biosynthesis, erythrose-4P => pyridoxal-5P	K00097	K00275	K00831	K03472	K03473	K03474																																																																									
+M00125	Riboflavin biosynthesis, GTP => riboflavin/FMN/FAD	K00082	K01497	K01498	K11752	K14652	K20860	K20861	K20862	K21063	K21064																																																																					
+M00126	Tetrahydrofolate biosynthesis, GTP => THF	K00287	K00796	K00950	K01077	K01113	K01495	K01633	K01930	K09007	K11754	K13938	K13939	K13940	K13941	K13998	K18824	K18825	K18974	K20457																																																												
+M00127	Thiamine biosynthesis, AIR => thiamine-P/thiamine-2P	K00877	K00941	K03147	K14153																																																																											
+M00128	Ubiquinone biosynthesis, eukaryotes, 4-hydroxybenzoate => ubiquinone	K00591	K06125	K06126	K06127	K06134																																																																										
+M00129	Ascorbate biosynthesis, animals, glucose-1P => ascorbate	K00012	K00103	K00699	K00963	K01053	K01195	K14756																																																																								
+M00130	Inositol phosphate metabolism, PI=> PIP2 => Ins(1,4,5)P3 => Ins(1,3,4,5)P4	K00888	K00889	K00911	K01116	K05857	K05858	K05859	K05860	K05861	K13711	K13712	K19801																																																																			
+M00131	Inositol phosphate metabolism, Ins(1,3,4,5)P4 => Ins(1,3,4)P3 => myo-inositol	K01092	K01106	K01107	K01109	K10047	K15422	K15759	K18649																																																																							
+M00132	Inositol phosphate metabolism, Ins(1,3,4)P3 => phytate	K00913	K00915	K10572																																																																												
+M00133	Polyamine biosynthesis, arginine => agmatine => putrescine => spermidine	K01480	K01583	K01584	K01585	K02626																																																																										
+M00134	Polyamine biosynthesis, arginine => ornithine => putrescine	K01476	K01581																																																																													
+M00135	GABA biosynthesis, eukaryotes, putrescine => GABA	K00128	K00149	K00274	K00657	K14085																																																																										
+M00136	GABA biosynthesis, prokaryotes, putrescine => GABA	K09470	K09471	K09472	K09473																																																																											
+M00137	Flavanone biosynthesis, phenylalanine => naringenin	K00487	K00660	K01859	K01904	K10775																																																																										
+M00138	Flavonoid biosynthesis, naringenin => pelargonidin	K00475	K05277	K13082																																																																												
+M00140	C1-unit interconversion, prokaryotes	K00600	K01491	K01938																																																																												
+M00141	C1-unit interconversion, eukaryotes	K00288	K00600	K13402	K13403																																																																											
+M00142	NADH:ubiquinone oxidoreductase, mitochondria	K03878	K03879	K03880	K03881	K03882	K03883	K03884																																																																								
+M00143	NADH dehydrogenase (ubiquinone) Fe-S protein/flavoprotein complex, mitochondria	K03934	K03935	K03936	K03937	K03938	K03939	K03940	K03941	K03942	K03943	K03944																																																																				
+M00144	NADH:quinone oxidoreductase, prokaryotes	K00330	K00331	K00332	K00333	K00334	K00335	K00336	K00337	K00338	K00339	K00340	K00341	K00342	K00343	K13378	K13380	K15863																																																														
+M00145	NAD(P)H:quinone oxidoreductase, chloroplasts and cyanobacteria	K05572	K05573	K05574	K05575	K05576	K05577	K05578	K05579	K05580	K05581	K05582	K05583	K05584	K05585																																																																	
+M00146	NADH dehydrogenase (ubiquinone) 1 alpha subcomplex	K03945	K03946	K03947	K03948	K03949	K03950	K03951	K03952	K03953	K03954	K03955	K03956	K11352	K11353																																																																	
+M00147	NADH dehydrogenase (ubiquinone) 1 beta subcomplex	K03957	K03958	K03959	K03960	K03961	K03962	K03963	K03964	K03965	K03966	K03967	K03968	K11351																																																																		
+M00148	Succinate dehydrogenase (ubiquinone)	K00234	K00235	K00236	K00237																																																																											
+M00149	Succinate dehydrogenase, prokaryotes	K00239	K00240	K00241	K00242																																																																											
+M00150	Fumarate reductase, prokaryotes	K00244	K00245	K00246	K00247																																																																											
+M00151	Cytochrome bc1 complex respiratory unit	K00410	K00411	K00412	K00413	K03886	K03887	K03888	K03889	K03890	K03891																																																																					
+M00152	Cytochrome bc1 complex	K00410	K00411	K00412	K00413	K00414	K00415	K00416	K00417	K00418	K00419	K00420																																																																				
+M00153	Cytochrome d ubiquinol oxidase	K00425	K00426																																																																													
+M00154	Cytochrome c oxidase	K02256	K02257	K02258	K02259	K02260	K02261	K02262	K02263	K02264	K02265	K02266	K02267	K02268	K02269	K02270	K02271	K02272	K02273																																																													
+M00155	Cytochrome c oxidase, prokaryotes	K02274	K02275	K02276	K02277	K15408																																																																										
+M00156	Cytochrome c oxidase, cbb3-type	K00404	K00405	K00406	K00407	K15862																																																																										
+M00157	F-type ATPase, prokaryotes and chloroplasts	K02108	K02109	K02110	K02111	K02112	K02113	K02114	K02115																																																																							
+M00158	F-type ATPase, eukaryotes	K01549	K02125	K02126	K02127	K02128	K02129	K02130	K02131	K02132	K02133	K02134	K02135	K02136	K02137	K02138	K02139	K02140	K02141	K02142	K02143																																																											
+M00159	V/A-type ATPase, prokaryotes	K02107	K02117	K02118	K02119	K02120	K02121	K02122	K02123	K02124																																																																						
+M00160	V-type ATPase, eukaryotes	K02144	K02145	K02146	K02147	K02148	K02149	K02150	K02151	K02152	K02153	K02154	K02155	K03661	K03662																																																																	
+M00161	Photosystem II	K02703	K02704	K02705	K02706	K02707	K02708																																																																									
+M00162	Cytochrome b6f complex	K02634	K02635	K02636	K02637	K02640	K02642	K02643	K03689																																																																							
+M00163	Photosystem I	K02689	K02690	K02691	K02692	K02693	K02694																																																																									
+M00165	Reductive pentose phosphate cycle (Calvin cycle)	K00134	K00150	K00615	K00855	K00927	K01086	K01100	K01601	K01602	K01623	K01624	K01807	K01808	K02446	K03841	K04041	K05298	K11532																																																													
+M00166	Reductive pentose phosphate cycle, ribulose-5P => glyceraldehyde-3P	K00134	K00150	K00855	K00927	K01601	K01602	K05298																																																																								
+M00167	Reductive pentose phosphate cycle, glyceraldehyde-3P => ribulose-5P	K00615	K01086	K01100	K01623	K01624	K01807	K01808	K02446	K03841	K04041	K11532																																																																				
+M00168	CAM (Crassulacean acid metabolism), dark	K00024	K00025	K00026	K01595																																																																											
+M00169	CAM (Crassulacean acid metabolism), light	K00029	K01006																																																																													
+M00170	C4-dicarboxylic acid cycle, phosphoenolpyruvate carboxykinase type	K01595	K01610	K14454	K14455																																																																											
+M00171	C4-dicarboxylic acid cycle, NAD - malic enzyme type	K00025	K00026	K00028	K00814	K01006	K01595	K14272	K14454	K14455																																																																						
+M00172	C4-dicarboxylic acid cycle, NADP - malic enzyme type	K00029	K00051	K01006	K01595																																																																											
+M00173	Reductive citrate cycle (Arnon-Buchanan cycle)	K00024	K00031	K00169	K00170	K00171	K00172	K00174	K00175	K00176	K00177	K00239	K00240	K00241	K00242	K00244	K00245	K00246	K00247	K01006	K01007	K01595	K01676	K01677	K01678	K01679	K01681	K01682	K01902	K01903	K01958	K01959	K01960	K03737	K15230	K15231	K15232	K15233	K15234	K18556	K18557	K18558	K18559	K18560																																				
+M00174	Methane oxidation, methanotroph, methane => formaldehyde	K10944	K10945	K10946	K14028	K14029	K16157	K16158	K16159	K16160	K16161	K16162	K17066																																																																			
+M00175	Nitrogen fixation, nitrogen => ammonia	K00531	K02586	K02588	K02591																																																																											
+M00176	Assimilatory sulfate reduction, sulfate => H2S	K00380	K00381	K00390	K00392	K00860	K00955	K00956	K00957	K00958	K13811																																																																					
+M00177	Ribosome, eukaryotes	K02865	K02866	K02868	K02870	K02872	K02873	K02875	K02877	K02880	K02882	K02883	K02885	K02889	K02891	K02893	K02894	K02896	K02898	K02900	K02901	K02903	K02905	K02908	K02910	K02912	K02915	K02917	K02918	K02920	K02921	K02922	K02923	K02924	K02925	K02927	K02928	K02929	K02930	K02932	K02934	K02936	K02937	K02938	K02940	K02941	K02942	K02943	K02947	K02949	K02951	K02953	K02955	K02957	K02958	K02960	K02962	K02964	K02966	K02969	K02971	K02973	K02974	K02975	K02976	K02977	K02978	K02979	K02980	K02981	K02983	K02984	K02985	K02987	K02989	K02991	K02993	K02995	K02997	K02998
+M00178	Ribosome, bacteria	K02863	K02864	K02867	K02871	K02874	K02876	K02878	K02879	K02881	K02884	K02886	K02887	K02888	K02890	K02892	K02895	K02897	K02899	K02902	K02904	K02906	K02907	K02909	K02911	K02913	K02914	K02916	K02919	K02926	K02931	K02933	K02935	K02939	K02945	K02946	K02948	K02950	K02952	K02954	K02956	K02959	K02961	K02963	K02965	K02967	K02968	K02970	K02982	K02986	K02988	K02990	K02992	K02994	K02996	K07590																								
+M00179	Ribosome, archaea	K02863	K02864	K02866	K02867	K02869	K02871	K02873	K02874	K02875	K02876	K02877	K02881	K02883	K02885	K02886	K02889	K02890	K02892	K02895	K02896	K02904	K02906	K02907	K02908	K02910	K02912	K02915	K02917	K02921	K02922	K02924	K02927	K02928	K02929	K02930	K02931	K02933	K02936	K02944	K02946	K02948	K02950	K02952	K02954	K02956	K02961	K02962	K02965	K02966	K02967	K02974	K02975	K02976	K02977	K02978	K02979	K02982	K02983	K02984	K02986	K02987	K02988	K02991	K02992	K02994	K02995	K02996												
+M00180	RNA polymerase II, eukaryotes	K03006	K03007	K03008	K03009	K03010	K03011	K03012	K03013	K03014	K03015	K03016	K03017																																																																			
+M00181	RNA polymerase III, eukaryotes	K03007	K03009	K03013	K03014	K03016	K03018	K03019	K03020	K03021	K03022	K03023	K03024	K03025	K03026	K03027	K14721																																																															
+M00182	RNA polymerase I, eukaryotes	K02999	K03000	K03001	K03002	K03003	K03004	K03005	K03007	K03009	K03013	K03014	K03016	K03020	K03027																																																																	
+M00183	RNA polymerase, bacteria	K03040	K03043	K03046	K03048	K03060	K13797																																																																									
+M00184	RNA polymerase, archaea	K03041	K03042	K03044	K03045	K03047	K03049	K03050	K03051	K03052	K03053	K03054	K03055	K03056	K03058	K03059	K13798																																																															
+M00185	Sulfate transport system	K02045	K02046	K02047	K02048																																																																											
+M00186	Tungstate transport system	K05772	K05773	K06857																																																																												
+M00188	NitT/TauT family transport system	K02049	K02050	K02051																																																																												
+M00189	Molybdate transport system	K02017	K02018	K02020	K05776																																																																											
+M00190	Iron(III) transport system	K02010	K02011	K02012																																																																												
+M00191	Thiamine transport system	K02062	K02063	K02064																																																																												
+M00192	Putative thiamine transport system	K05777	K05778	K05779																																																																												
+M00193	Putative spermidine/putrescine transport system	K02052	K02053	K02054	K02055																																																																											
+M00194	Maltose/maltodextrin transport system	K10108	K10109	K10110	K10111	K10112																																																																										
+M00196	Raffinose/stachyose/melibiose transport system	K10112	K10117	K10118	K10119																																																																											
+M00197	Putative fructooligosaccharide transport system	K10112	K10120	K10121	K10122																																																																											
+M00198	Putative sn-glycerol-phosphate transport system	K05813	K05814	K05815	K05816																																																																											
+M00199	L-Arabinose/lactose transport system	K10188	K10189	K10190	K10191																																																																											
+M00200	Putative sorbitol/mannitol transport system	K10111	K10112	K10227	K10228	K10229																																																																										
+M00201	alpha-Glucoside transport system	K10112	K10232	K10233	K10234	K10235																																																																										
+M00202	Oligogalacturonide transport system	K10192	K10193	K10194	K10195																																																																											
+M00203	Glucose/arabinose transport system	K10196	K10197	K10198	K10199																																																																											
+M00204	Trehalose/maltose transport system	K10111	K10236	K10237	K10238																																																																											
+M00205	N-Acetylglucosamine transport system	K10200	K10201	K10202																																																																												
+M00206	Cellobiose transport system	K10112	K10240	K10241	K10242																																																																											
+M00207	Putative multiple sugar transport system	K02025	K02026	K02027	K10111	K10112																																																																										
+M00208	Glycine betaine/proline transport system	K02000	K02001	K02002																																																																												
+M00209	Osmoprotectant transport system	K05845	K05846	K05847																																																																												
+M00210	Phospholipid transport system	K02065	K02066	K02067	K07122	K07323																																																																										
+M00211	Putative ABC transport system	K02068	K02069																																																																													
+M00212	Ribose transport system	K10439	K10440	K10441																																																																												
+M00213	L-Arabinose transport system	K10537	K10538	K10539																																																																												
+M00214	Methyl-galactoside transport system	K10540	K10541	K10542																																																																												
+M00215	D-Xylose transport system	K10543	K10544	K10545																																																																												
+M00216	Multiple sugar transport system	K10546	K10547	K10548																																																																												
+M00217	D-Allose transport system	K10549	K10550	K10551																																																																												
+M00218	Fructose transport system	K10552	K10553	K10554																																																																												
+M00219	AI-2 transport system	K10555	K10556	K10557	K10558																																																																											
+M00220	Rhamnose transport system	K10559	K10560	K10561	K10562																																																																											
+M00221	Putative simple sugar transport system	K02056	K02057	K02058																																																																												
+M00222	Phosphate transport system	K02036	K02037	K02038	K02040																																																																											
+M00223	Phosphonate transport system	K02041	K02042	K02044																																																																												
+M00224	Fluoroquinolone transport system	K16905	K16906	K16907																																																																												
+M00225	Lysine/arginine/ornithine transport system	K10013	K10015	K10016	K10017																																																																											
+M00226	Histidine transport system	K10014	K10015	K10016	K10017																																																																											
+M00227	Glutamine transport system	K10036	K10037	K10038																																																																												
+M00228	Putative glutamine transport system	K10039	K10040	K10041																																																																												
+M00229	Arginine transport system	K09996	K09997	K09998	K09999	K10000																																																																										
+M00230	Glutamate/aspartate transport system	K10001	K10002	K10003	K10004																																																																											
+M00231	Octopine/nopaline transport system	K10018	K10019	K10020	K10021																																																																											
+M00232	General L-amino acid transport system	K09969	K09970	K09971	K09972																																																																											
+M00233	Glutamate transport system	K10005	K10006	K10007	K10008																																																																											
+M00234	Cystine transport system	K02424	K10009	K10010																																																																												
+M00235	Arginine/ornithine transport system	K10022	K10023	K10024	K10025																																																																											
+M00236	Putative polar amino acid transport system	K02028	K02029	K02030																																																																												
+M00237	Branched-chain amino acid transport system	K01995	K01996	K01997	K01998	K01999																																																																										
+M00238	D-Methionine transport system	K02071	K02072	K02073																																																																												
+M00239	Peptides/nickel transport system	K02031	K02032	K02033	K02034	K02035																																																																										
+M00240	Iron complex transport system	K02013	K02015	K02016																																																																												
+M00241	Vitamin B12 transport system	K06073	K06074	K06858																																																																												
+M00242	Zinc transport system	K09815	K09816	K09817																																																																												
+M00243	Manganese/iron transport system	K09818	K09819	K09820																																																																												
+M00244	Putative zinc/manganese transport system	K02074	K02075	K02077																																																																												
+M00245	Cobalt/nickel transport system	K02006	K02007	K02008	K02009																																																																											
+M00246	Nickel transport system	K02006	K02007	K02008	K02009	K10094	K16915																																																																									
+M00247	Putative ABC transport system	K01989	K05832	K05833																																																																												
+M00249	Capsular polysaccharide transport system	K09688	K09689	K10107																																																																												
+M00250	Lipopolysaccharide transport system	K09690	K09691																																																																													
+M00251	Teichoic acid transport system	K09692	K09693																																																																													
+M00252	Lipooligosaccharide transport system	K09694	K09695																																																																													
+M00253	Sodium transport system	K09696	K09697																																																																													
+M00254	ABC-2 type transport system	K01990	K01992																																																																													
+M00255	Lipoprotein-releasing system	K09808	K09810																																																																													
+M00256	Cell division transport system	K09811	K09812																																																																													
+M00257	Hemin transport system	K09813	K09814																																																																													
+M00258	Putative ABC transport system	K02003	K02004																																																																													
+M00259	Heme transport system	K02193	K02194	K02195																																																																												
+M00260	DNA polymerase III complex, bacteria	K02337	K02338	K02339	K02340	K02341	K02342	K02343	K02344	K02345	K03763	K14159																																																																				
+M00261	DNA polymerase alpha / primase complex	K02320	K02321	K02684	K02685																																																																											
+M00262	DNA polymerase delta complex	K02327	K02328	K03504	K03505																																																																											
+M00263	DNA polymerase epsilon complex	K02324	K02325	K02326	K03506																																																																											
+M00264	DNA polymerase II complex, archaea	K02322	K02323																																																																													
+M00265	PTS system, glucose-specific II component	K02777	K02778	K02779																																																																												
+M00266	PTS system, maltose/glucose-specific II component	K02777	K02790	K02791																																																																												
+M00267	PTS system, N-acetylglucosamine-specific II component	K02802	K02803	K02804																																																																												
+M00268	PTS system, alpha-glucoside-specific II component	K02749	K02750	K02777																																																																												
+M00269	PTS system, sucrose-specific II component	K02808	K02809	K02810																																																																												
+M00270	PTS system, trehalose-specific II component	K02777	K02817	K02818	K02819																																																																											
+M00271	PTS system, beta-glucoside-specific II component	K02755	K02756	K02757																																																																												
+M00272	PTS system, beta-glucoside (arbutin/salicin/cellobiose)-specific II component	K02752	K02753	K02777																																																																												
+M00273	PTS system, fructose-specific II component	K02768	K02769	K02770																																																																												
+M00274	PTS system, mannitol-specific II component	K02798	K02799	K02800																																																																												
+M00275	PTS system, cellobiose-specific II component	K02759	K02760	K02761																																																																												
+M00276	PTS system, mannose-specific II component	K02793	K02794	K02795	K02796																																																																											
+M00277	PTS system, N-acetylgalactosamine-specific II component	K02744	K02745	K02746	K02747																																																																											
+M00278	PTS system, sorbose-specific II component	K02812	K02813	K02814	K02815																																																																											
+M00279	PTS system, galactitol-specific II component	K02773	K02774	K02775																																																																												
+M00280	PTS system, glucitol/sorbitol-specific II component	K02781	K02782	K02783																																																																												
+M00281	PTS system, lactose-specific II component	K02786	K02787	K02788																																																																												
+M00282	PTS system, D-glucosamine-specific II component	K02763	K02764	K02765																																																																												
+M00283	PTS system, ascorbate-specific II component	K02821	K02822	K03475																																																																												
+M00284	Origin recognition complex	K02603	K02604	K02605	K02606	K02607	K02608																																																																									
+M00285	MCM complex	K02209	K02210	K02212	K02540	K02541	K02542																																																																									
+M00286	GINS complex	K10732	K10733	K10734	K10735																																																																											
+M00287	PTS system, galactosamine-specific II component	K02744	K10984	K10985	K10986																																																																											
+M00288	RPA complex	K07466	K10739	K10740	K10741																																																																											
+M00289	RF-C complex	K10754	K10755	K10756																																																																												
+M00290	Holo-TFIIH complex	K02202	K03141	K03142	K03143	K03144	K06634	K10842	K10843	K10844	K10845																																																																					
+M00291	MRN complex	K10865	K10866	K10867																																																																												
+M00292	MRX complex	K10865	K10866	K10868																																																																												
+M00293	DNA polymerase zeta complex	K02350	K03508	K13728																																																																												
+M00294	DNA polymerase gamma complex	K02332	K02333																																																																													
+M00295	BRCA1-associated genome surveillance complex (BASC)	K04728	K04802	K08734	K08735	K08737	K10605	K10754	K10755	K10756	K10858	K10865	K10866	K10867	K10901																																																																	
+M00296	BER complex	K02330	K03512	K10771	K10772	K10776	K10798	K10803	K10981																																																																							
+M00297	DNA-PK complex	K06642	K10884	K10885																																																																												
+M00298	Multidrug/hemolysin transport system	K11050	K11051																																																																													
+M00299	Spermidine/putrescine transport system	K11069	K11070	K11071	K11072																																																																											
+M00300	Putrescine transport system	K11073	K11074	K11075	K11076																																																																											
+M00301	Mannopine transport system	K11077	K11078	K11079	K11080																																																																											
+M00302	2-Aminoethylphosphonate transport system	K11081	K11082	K11083	K11084																																																																											
+M00303	PTS system, N-acetylmuramic acid-specific II component	K02777	K11191	K11192																																																																												
+M00304	PTS system, fructose-specific II component	K02771	K11194	K11195	K11196																																																																											
+M00305	PTS system, 2-O-A-mannosyl-D-glycerate-specific II component	K11198	K11199	K11200																																																																												
+M00306	PTS system, fructose-specific II-like component	K11201	K11202	K11203																																																																												
+M00307	Pyruvate oxidation, pyruvate => acetyl-CoA	K00161	K00162	K00163	K00169	K00170	K00171	K00172	K00382	K00627	K03737																																																																					
+M00308	Semi-phosphorylative Entner-Doudoroff pathway, gluconate => glycerate-3P	K00131	K00134	K00874	K00927	K01625	K05308	K18978																																																																								
+M00309	Non-phosphorylative Entner-Doudoroff pathway, gluconate/galactonate => glycerate	K03738	K05308	K11395	K18020	K18021	K18022	K18127	K18128																																																																							
+M00314	Bacitracin transport system	K11631	K11632																																																																													
+M00315	Uncharacterized ABC transport system	K11635	K11636																																																																													
+M00316	Manganese transport system	K11601	K11602	K11603																																																																												
+M00317	Manganese/iron transport system	K11604	K11605	K11606	K11607																																																																											
+M00318	Iron/zinc/manganese/copper transport system	K11704	K11705	K11706																																																																												
+M00319	Manganese/zinc/iron transport system	K11707	K11708	K11709	K11710																																																																											
+M00320	Lipopolysaccharide export system	K06861	K07091	K11720																																																																												
+M00321	Bicarbonate transport system	K11950	K11951	K11952	K11953																																																																											
+M00322	Neutral amino acid transport system	K11954	K11955	K11956	K11957	K11958																																																																										
+M00323	Urea transport system	K11959	K11960	K11961	K11962	K11963																																																																										
+M00324	Dipeptide transport system	K12368	K12369	K12370	K12371	K12372																																																																										
+M00325	alpha-Hemolysin/cyclolysin transport system	K11003	K11004	K12340																																																																												
+M00326	RTX toxin transport system	K12340	K12530	K12531	K12532																																																																											
+M00327	S-Layer protein transport system	K12533	K12534	K12535																																																																												
+M00328	Hemophore/metalloprotease transport system	K12536	K12537	K12538																																																																												
+M00329	Multiple protein transport system	K12539	K12540																																																																													
+M00330	Adhesin protein transport system	K12541	K12542	K12543																																																																												
+M00331	Type II general secretion pathway	K02450	K02451	K02452	K02453	K02454	K02455	K02456	K02457	K02458	K02459	K02460	K02461	K02462	K02463	K02464	K02465	K02654																																																														
+M00332	Type III secretion system	K03219	K03220	K03221	K03222	K03223	K03224	K03225	K03226	K03227	K03228	K03229	K03230	K04053	K04054	K04056	K04057	K04058	K04059																																																													
+M00333	Type IV secretion system	K03194	K03195	K03196	K03197	K03198	K03199	K03200	K03201	K03202	K03203	K03204	K03205																																																																			
+M00334	Type VI secretion system	K11891	K11892	K11893	K11895	K11896	K11897	K11900	K11901	K11902	K11903	K11904	K11905	K11906	K11907	K11910	K11911	K11919																																																														
+M00335	Sec (secretion) system	K03070	K03071	K03072	K03073	K03074	K03075	K03076	K03106	K03110	K03210	K03217	K12257	K13301																																																																		
+M00336	Twin-arginine translocation (Tat) system	K03116	K03117	K03118	K03425																																																																											
+M00337	Immunoproteasome	K02725	K02726	K02727	K02728	K02729	K02730	K02731	K02732	K02733	K02734	K02735	K02736	K02740	K02741	K06696	K06697																																																															
+M00338	Cysteine biosynthesis, homocysteine + serine => cysteine	K01697	K01758	K10150																																																																												
+M00339	RaxAB-RaxC type I secretion system	K12340	K13408	K13409																																																																												
+M00340	Proteasome, 20S core particle	K02725	K02726	K02727	K02728	K02729	K02730	K02731	K02732	K02734	K02735	K02736	K02737	K02738	K02739																																																																	
+M00341	Proteasome, 19S regulatory particle (PA700)	K03028	K03029	K03030	K03031	K03032	K03033	K03035	K03036	K03037	K03038	K03039	K03061	K03062	K03063	K03064	K03065	K03066	K06691	K10881																																																												
+M00342	Bacterial proteasome	K03432	K03433	K13527	K13571																																																																											
+M00343	Archaeal proteasome	K03420	K03432	K03433																																																																												
+M00344	Formaldehyde assimilation, xylulose monophosphate pathway	K00863	K01624	K03841	K17100																																																																											
+M00345	Formaldehyde assimilation, ribulose monophosphate pathway	K00850	K01624	K08093	K08094	K13812	K13831	K16370																																																																								
+M00346	Formaldehyde assimilation, serine pathway	K00018	K00024	K00600	K00830	K01595	K01689	K08691	K08692	K11529	K14067																																																																					
+M00348	Glutathione transport system	K13889	K13890	K13891	K13892																																																																											
+M00349	Microcin C transport system	K13893	K13894	K13895	K13896																																																																											
+M00350	Capsaicin biosynthesis, L-Phenylalanine => Capsaicin	K00487	K00588	K01904	K10775	K13064																																																																										
+M00351	Spliceosome, U1-snRNP	K11086	K11087	K11088	K11091	K11093	K11095	K11096	K11097	K11098	K11099																																																																					
+M00352	Spliceosome, U2-snRNP	K11086	K11087	K11088	K11092	K11094	K11096	K11097	K11098	K11099	K12825	K12826	K12827	K12828	K12829	K12830	K12831	K12832	K12833	K12834	K12835																																																											
+M00353	Spliceosome, Prp19/CDC5L complex	K03283	K10599	K12860	K12861	K12862	K12863	K12864	K12865	K12866																																																																						
+M00354	Spliceosome, U4/U6.U5 tri-snRNP	K09567	K11086	K11087	K11088	K11096	K11097	K11098	K11099	K11984	K12621	K12622	K12623	K12624	K12625	K12626	K12627	K12662	K12843	K12844	K12845	K12846	K12847	K12852	K12853	K12854	K12855	K12856	K12857	K12858	K12859	K13099																																																
+M00355	Spliceosome, 35S U5-snRNP	K03283	K06063	K09564	K10599	K11086	K11087	K11088	K11096	K11097	K11098	K11099	K12733	K12816	K12852	K12854	K12856	K12857	K12860	K12861	K12862	K12863	K12867	K12868	K12869	K12870	K12871	K12872	K12873	K12874	K13117	K13123																																																
+M00356	Methanogenesis, methanol => methane	K00399	K00401	K00402	K03388	K03389	K03390	K04480	K14080	K14081																																																																						
+M00357	Methanogenesis, acetate => methane	K00193	K00194	K00197	K00399	K00401	K00402	K00577	K00578	K00579	K00580	K00581	K00582	K00583	K00584	K00625	K00925	K01895	K03388	K03389	K03390	K13788																																																										
+M00358	Coenzyme M biosynthesis	K05884	K05979	K06034	K08097	K13039																																																																										
+M00359	Aminoacyl-tRNA biosynthesis, eukaryotes	K01866	K01867	K01868	K01869	K01870	K01872	K01873	K01874	K01875	K01876	K01880	K01881	K01883	K01885	K01886	K01887	K01889	K01890	K01892	K01893	K04567	K14163																																																									
+M00360	Aminoacyl-tRNA biosynthesis, prokaryotes	K01866	K01867	K01868	K01869	K01870	K01872	K01873	K01874	K01875	K01876	K01878	K01879	K01880	K01881	K01883	K01884	K01885	K01886	K01887	K01889	K01890	K01892	K01893	K04566	K04567	K07587	K09698	K09759	K11627	K14164																																																	
+M00361	Nucleotide sugar biosynthesis, eukaryotes	K00012	K00963	K00966	K00971	K00972	K01784	K08678																																																																								
+M00362	Nucleotide sugar biosynthesis, prokaryotes	K00012	K00963	K00965	K00966	K00971	K00972	K01784	K01791	K04042	K11528	K16011	K16881	K17716																																																																		
+M00363	EHEC pathogenicity signature, Shiga toxin	K11006	K11007																																																																													
+M00364	C10-C20 isoprenoid biosynthesis, bacteria	K00795	K01823	K13787	K13789																																																																											
+M00365	C10-C20 isoprenoid biosynthesis, archaea	K01823	K13787																																																																													
+M00366	C10-C20 isoprenoid biosynthesis, plants	K00787	K01823	K13789	K14066																																																																											
+M00367	C10-C20 isoprenoid biosynthesis, non-plant eukaryotes	K00787	K00804	K01823																																																																												
+M00368	Ethylene biosynthesis, methionine => ethylene	K00789	K01762	K05933	K20772																																																																											
+M00369	Cyanogenic glycoside biosynthesis, tyrosine => dhurrin	K13027	K13029	K13030																																																																												
+M00370	Glucosinolate biosynthesis, tryptophan => glucobrassicin	K11812	K11813	K11818	K11819	K11820	K11821																																																																									
+M00371	Castasterone biosynthesis, campesterol => castasterone	K09587	K09588	K09590	K09591	K12637	K12638	K12639	K12640																																																																							
+M00372	Abscisic acid biosynthesis, beta-carotene => abscisic acid	K09838	K09840	K09841	K09842	K14594	K15746	K15747																																																																								
+M00373	Ethylmalonyl pathway	K00023	K00626	K08691	K14446	K14447	K14448	K14449	K14451	K17865																																																																						
+M00374	Dicarboxylate-hydroxybutyrate cycle	K00024	K00169	K00170	K00171	K00172	K00239	K00240	K00241	K00626	K01007	K01595	K01676	K01677	K01678	K01902	K01903	K14465	K14467	K14534	K15016	K15017	K15038	K18860	K18861																																																							
+M00375	Hydroxypropionate-hydroxybutylate cycle	K00626	K01848	K01849	K01964	K05606	K14465	K14466	K14534	K15016	K15017	K15018	K15019	K15020	K15036	K15037	K15038	K15039	K18861																																																													
+M00376	3-Hydroxypropionate bi-cycle	K00239	K00240	K00241	K01679	K01847	K01848	K01849	K01961	K01962	K01963	K02160	K05606	K14468	K14469	K14471	K14472	K15052																																																														
+M00377	Reductive acetyl-CoA pathway (Wood-Ljungdahl pathway)	K00194	K00197	K00198	K00297	K01491	K01938	K05299	K14138	K15022	K15023																																																																					
+M00378	F420 biosynthesis	K11779	K11780	K11781																																																																												
+M00379	SCF-MET30 complex	K03094	K03347	K03868	K10259																																																																											
+M00380	SCF-BTRC complex	K03094	K03347	K03362	K03868																																																																											
+M00381	SCF-SKP2 complex	K03094	K03347	K03868	K03875																																																																											
+M00382	SCF-FBS complex	K03094	K03347	K03868	K10099	K10100																																																																										
+M00383	ECV complex	K03868	K03870	K03871	K03872	K03873																																																																										
+M00384	Cul3-SPOP complex	K03868	K03869	K10523																																																																												
+M00385	Cul4-DDB1-DDB2 complex	K03868	K10140	K10609	K10610																																																																											
+M00386	Cul4-DDB1-CSA complex	K03868	K10570	K10609	K10610																																																																											
+M00387	SCF-FBW7 complex	K03094	K03347	K03868	K10260																																																																											
+M00388	ECS complex	K03872	K03873	K04694	K04695	K04696	K04697	K04698	K04699	K04701	K10611	K10612																																																																				
+M00389	APC/C complex	K03348	K03349	K03350	K03351	K03352	K03353	K03354	K03355	K03356	K03357	K03358	K03359	K03363	K03364	K12456																																																																
+M00390	Exosome, archaea	K03679	K07573	K11600	K12589																																																																											
+M00391	Exosome, eukaryotes	K03678	K03679	K03681	K07573	K11600	K12585	K12586	K12587	K12589	K12590																																																																					
+M00392	Ski complex	K12599	K12600	K12601	K12602																																																																											
+M00393	TRAMP complex	K03514	K12596	K12597	K12598																																																																											
+M00394	RNA degradosome	K00962	K01689	K03732	K08300																																																																											
+M00395	Decapping complex	K12610	K12611	K12612	K12613	K12614	K12615	K12617																																																																								
+M00396	Lsm 2-8 complex	K12621	K12622	K12623	K12624	K12625	K12626	K12627																																																																								
+M00397	Lsm 1-7 complex	K12620	K12621	K12622	K12623	K12624	K12625	K12626																																																																								
+M00398	Sm core complex	K11086	K11087	K11088	K11096	K11097	K11098	K11099																																																																								
+M00399	Cap binding complex	K12882	K12883																																																																													
+M00400	p97-Ufd1-Npl4 complex	K13525	K14015	K14016																																																																												
+M00401	Sec61 complex	K07342	K09481	K10956																																																																												
+M00402	Translocon-associated protein (TRAP) complex	K04571	K13249	K13250	K13251																																																																											
+M00403	HRD1/SEL1 ERAD complex	K10088	K10601	K11519	K13525	K13989	K14008	K14015	K14016	K14025	K14026	K14027																																																																				
+M00404	COPII complex	K07953	K14004	K14005	K14006	K14007																																																																										
+M00405	THC complex	K12878	K12879	K13174	K13175	K13176																																																																										
+M00406	TREX complex	K12812	K12878	K12879	K12880	K12881	K13174	K13175	K13176																																																																							
+M00407	SCF-CDC4 complex	K03094	K03347	K03361	K03868																																																																											
+M00408	ESCRT-0 complex	K04705	K12182																																																																													
+M00409	ESCRT-I complex	K12183	K12184	K12185	K12186																																																																											
+M00410	ESCRT-II complex	K12188	K12189	K12190																																																																												
+M00411	SCF-GRR1 complex	K03094	K03347	K03360	K03868																																																																											
+M00412	ESCRT-III complex	K12191	K12192	K12193	K12194	K12195	K12196	K12197	K12198	K15053																																																																						
+M00413	FA core complex	K10606	K10888	K10889	K10890	K10892	K10893	K10894	K10896	K10898	K10993																																																																					
+M00414	Bloom's syndrome complex	K03165	K10901	K10990	K15365																																																																											
+M00415	Fatty acid biosynthesis, elongation, endoplasmic reticulum	K10203	K10205	K10244	K10245	K10246	K10247	K10248	K10249	K10250	K10251	K10258	K10703	K15397																																																																		
+M00416	Cytochrome aa3-600 menaquinol oxidase	K02826	K02827	K02828	K02829																																																																											
+M00417	Cytochrome o ubiquinol oxidase	K02297	K02298	K02299	K02300																																																																											
+M00418	Toluene degradation, anaerobic, toluene => benzoyl-CoA	K07540	K07543	K07544	K07545	K07546	K07547	K07548	K07549	K07550																																																																						
+M00419	Cymene degradation, p-cymene => p-cumate	K10616	K10617	K10618	K18293																																																																											
+M00422	Acetyl-CoA pathway, CO2 => acetyl-CoA	K00192	K00193	K00194	K00195	K00197																																																																										
+M00423	Molybdate/tungstate transport system	K15495	K15496	K15497																																																																												
+M00424	Shelterin complex	K11109	K11110	K11111	K11112	K11113	K11114																																																																									
+M00425	H/ACA ribonucleoprotein complex	K11128	K11129	K11130	K11131																																																																											
+M00426	Survival motor neuron (SMN) complex	K13129	K13130	K13131	K13132	K13133	K13134	K13135	K13136	K13137																																																																						
+M00427	Nuclear pore complex	K03345	K09291	K10577	K12160	K12172	K14004	K14295	K14296	K14297	K14298	K14299	K14300	K14301	K14302	K14303	K14304	K14305	K14306	K14307	K14308	K14309	K14310	K14311	K14312	K14313	K14314	K14315	K14316	K14317	K14318	K14319	K14320	K14321																																														
+M00428	eIF4F complex	K03257	K03259	K03260																																																																												
+M00429	Competence-related DNA transformation transporter	K01493	K02236	K02237	K02238	K02239	K02240	K02241	K02242	K02243	K02244	K02245	K02246	K02247	K02248	K02249																																																																
+M00430	Exon junction complex (EJC)	K12812	K12875	K12876	K12877	K12881	K13025	K13114	K13171	K14285	K14323	K14324	K14325	K14326	K14327	K14328																																																																
+M00432	Leucine biosynthesis, 2-oxoisovalerate => 2-oxoisocaproate	K00052	K01649	K01702	K01703	K01704																																																																										
+M00433	Lysine biosynthesis, 2-oxoglutarate => 2-oxoadipate	K01655	K01705	K05824	K16792	K16793	K17450																																																																									
+M00434	PhoR-PhoB (phosphate starvation response) two-component regulatory system	K07636	K07657	K07658																																																																												
+M00435	Taurine transport system	K10831	K15551	K15552																																																																												
+M00436	Sulfonate transport system	K15553	K15554	K15555																																																																												
+M00437	Phthalate transport system	K15556	K15557	K15558																																																																												
+M00438	Nitrate/nitrite transport system	K15576	K15577	K15578	K15579																																																																											
+M00439	Oligopeptide transport system	K10823	K15580	K15581	K15582	K15583																																																																										
+M00440	Nickel transport system	K10824	K15584	K15585	K15586	K15587																																																																										
+M00442	Putative hydroxymethylpyrimidine transport system	K15598	K15599	K15600																																																																												
+M00443	SenX3-RegX3 (phosphate starvation response) two-component regulatory system	K07768	K07776																																																																													
+M00444	PhoQ-PhoP (magnesium transport) two-component regulatory system	K07637	K07660																																																																													
+M00445	EnvZ-OmpR (osmotic stress response) two-component regulatory system	K07638	K07659																																																																													
+M00446	RstB-RstA two-component regulatory system	K07639	K07661																																																																													
+M00447	CpxA-CpxR (envelope stress response) two-component regulatory system	K07640	K07662																																																																													
+M00448	CssS-CssR (secretion stress response) two-component regulatory system	K07650	K07770																																																																													
+M00449	CreC-CreB (phosphate regulation) two-component regulatory system	K07641	K07663																																																																													
+M00450	BaeS-BaeR (envelope stress response) two-component regulatory system	K07642	K07664																																																																													
+M00451	BasS-BasR (antimicrobial peptide resistance) two-component regulatory system	K07643	K07771																																																																													
+M00452	CusS-CusR (copper tolerance) two-component regulatory system	K07644	K07665																																																																													
+M00453	QseC-QseB (quorum sensing) two-component regulatory system	K07645	K07666																																																																													
+M00454	KdpD-KdpE (potassium transport) two-component regulatory system	K07646	K07667																																																																													
+M00455	TorS-TorR (TMAO respiration) two-component regulatory system	K07647	K07772																																																																													
+M00456	ArcB-ArcA (anoxic redox control) two-component regulatory system	K07648	K07773																																																																													
+M00457	TctE-TctD (tricarboxylic acid transport) two-component regulatory system	K07649	K07774																																																																													
+M00458	ResE-ResD (aerobic and anaerobic respiration) two-component regulatory system	K07651	K07775																																																																													
+M00459	VicK-VicR (cell wall metabolism) two-component regulatory system	K07652	K07668																																																																													
+M00460	MprB-MprA (maintenance of persistent infection) two-component regulatory system	K07653	K07669																																																																													
+M00461	MtrB-MtrA (osmotic stress response) two-component regulatory system	K07654	K07670																																																																													
+M00462	PrrB-PrrA (intracellular multiplication) two-component regulatory system	K07655	K07671																																																																													
+M00463	TrcS-TrcR two-component regulatory system	K07656	K07672																																																																													
+M00464	NrsS-NrsR (nickel tolerance) two-component regulatory system	K11328	K11330																																																																													
+M00465	ManS-ManR (manganese homeostasis) two-component regulatory system	K11520	K11521																																																																													
+M00466	NblS-NblR (photosynthesis) two-component regulatory system	K07769	K11332																																																																													
+M00467	SasA-RpaAB (circadian timing mediating) two-component regulatory system	K08479	K10697	K11329																																																																												
+M00468	SaeS-SaeR (staphylococcal virulence regulation) two-component regulatory system	K10681	K10682																																																																													
+M00469	BceS-BceR (bacitracin transport) two-component regulatory system	K11629	K11630																																																																													
+M00470	YxdK-YxdJ (antimicrobial peptide response) two-component regulatory system	K11633	K11634																																																																													
+M00471	NarX-NarL (nitrate respiration) two-component regulatory system	K07673	K07684																																																																													
+M00472	NarQ-NarP (nitrate respiration) two-component regulatory system	K07674	K07685																																																																													
+M00473	UhpB-UhpA (hexose phosphates uptake) two-component regulatory system	K07675	K07686																																																																													
+M00474	RcsC-RcsD-RcsB (capsule synthesis) two-component regulatory system	K07676	K07677	K07687																																																																												
+M00475	BarA-UvrY (central carbon metabolism) two-component regulatory system	K07678	K07689																																																																													
+M00476	ComP-ComA (competence) two-component regulatory system	K07680	K07691																																																																													
+M00477	EvgS-EvgA (acid and drug tolerance) two-component regulatory system	K07679	K07690																																																																													
+M00478	DegS-DegU (multicellular behavior control) two-component regulatory system	K07692	K07777																																																																													
+M00479	DesK-DesR (membrane lipid fluidity regulation) two-component regulatory system	K07693	K07778																																																																													
+M00480	VraS-VraR (cell-wall peptidoglycan synthesis) two-component regulatory system	K07681	K07694																																																																													
+M00481	LiaS-LiaR (cell wall stress response) two-component regulatory system	K11617	K11618																																																																													
+M00482	DevS-DevR (redox response) two-component regulatory system	K07682	K07695																																																																													
+M00483	NreB-NreC (dissimilatory nitrate/nitrite reduction) two-component regulatory system	K07683	K07696																																																																													
+M00484	YdfH-YdfI two-component regulatory system	K11623	K11624																																																																													
+M00485	KinABCDE-Spo0FA (sporulation control) two-component regulatory system	K02490	K02491	K07697	K07698	K07699	K13532	K13533																																																																								
+M00486	CitA-CitB (citrate fermentation) two-component regulatory system	K07700	K07702																																																																													
+M00487	CitS-CitT (magnesium-citrate transport) two-component regulatory system	K11637	K11638																																																																													
+M00488	DcuS-DcuR (C4-dicarboxylate metabolism) two-component regulatory system	K07701	K07703																																																																													
+M00489	DctS-DctR (C4-dicarboxylate transport) two-component regulatory system	K11691	K11692																																																																													
+M00490	MalK-MalR (malate transport) two-component regulatory system	K11614	K11615																																																																													
+M00491	arabinogalactan oligomer/maltooligosaccharide transport system	K10111	K10112	K15770	K15771	K15772																																																																										
+M00492	LytS-LytR two-component regulatory system	K07704	K07705																																																																													
+M00493	AlgZ-AlgR (alginate production) two-component regulatory system	K08082	K08083																																																																													
+M00494	NatK-NatR (sodium extrusion) two-component regulatory system	K11640	K11641																																																																													
+M00495	AgrC-AgrA (exoprotein synthesis) two-component regulatory system	K07706	K07707																																																																													
+M00496	ComD-ComE (competence) two-component regulatory system	K12294	K12295																																																																													
+M00497	GlnL-GlnG (nitrogen regulation) two-component regulatory system	K07708	K07712																																																																													
+M00498	NtrY-NtrX (nitrogen regulation) two-component regulatory system	K13598	K13599																																																																													
+M00499	HydH-HydG (metal tolerance) two-component regulatory system	K07709	K07713																																																																													
+M00500	AtoS-AtoC (cPHB biosynthesis) two-component regulatory system	K07710	K07714																																																																													
+M00501	PilS-PilR (type 4 fimbriae synthesis) two-component regulatory system	K02667	K02668																																																																													
+M00502	GlrK-GlrR (amino sugar metabolism) two-component regulatory system	K07711	K07715																																																																													
+M00503	PgtB-PgtA (phosphoglycerate transport) two-component regulatory system	K08475	K08476																																																																													
+M00504	DctB-DctD (C4-dicarboxylate transport) two-component regulatory system	K10125	K10126																																																																													
+M00505	KinB-AlgB (alginate production) two-component regulatory system	K11383	K11384																																																																													
+M00506	CheA-CheYBV (chemotaxis) two-component regulatory system	K03407	K03412	K03413	K03415	K13924																																																																										
+M00507	ChpA-ChpB/PilGH (chemosensory) two-component regulatory system	K02487	K02657	K02658	K06596	K06597																																																																										
+M00508	PixL-PixGH (positive phototaxis) two-component regulatory system	K11522	K11523	K11526																																																																												
+M00509	WspE-WspRF (chemosensory) two-component regulatory system	K11444	K13490	K13491																																																																												
+M00510	Cph1-Rcp1 (light response) two-component regulatory system	K11354	K11355																																																																													
+M00511	PleC-PleD (cell fate control) two-component regulatory system	K02488	K07716	K11357	K11443	K13591																																																																										
+M00512	CckA-CtrA/CpdR (cell cycle control) two-component regulatory system	K13584	K13587	K13589																																																																												
+M00513	LuxQN/CqsS-LuxU-LuxO (quorum sensing) two-component regulatory system	K10909	K10911	K10912	K10916																																																																											
+M00514	TtrS-TtrR (tetrathionate respiration) two-component regulatory system	K13040	K13041																																																																													
+M00515	FlrB-FlrC (polar flagellar synthesis) two-component regulatory system	K10942	K10943																																																																													
+M00516	SLN1-YPD1-SSK1/SKN7 (osmosensing) two-component regulatory system	K11231	K11232	K11233	K15859	K19690	K19691	K19692																																																																								
+M00517	RpfC-RpfG (cell-to-cell signaling) two-component regulatory system	K10715	K13815																																																																													
+M00518	GlnK-GlnL (glutamine utilization) two-component regulatory system	K07717	K07719																																																																													
+M00519	YesM-YesN two-component regulatory system	K07718	K07720																																																																													
+M00520	ChvG-ChvI (acidity sensing) two-component regulatory system	K14980	K14981																																																																													
+M00521	CiaH-CiaR two-component regulatory system	K14982	K14983																																																																													
+M00522	SalK-SalR two-component regulatory system	K14988	K14989																																																																													
+M00523	RegB-RegA (redox response) two-component regulatory system	K15011	K15012																																																																													
+M00524	FixL-FixJ (nitrogen fixation) two-component regulatory system	K14986	K14987																																																																													
+M00525	Lysine biosynthesis, acetyl-DAP pathway, aspartate => lysine	K00133	K00215	K00841	K00928	K01586	K01714	K01778	K05822	K05823																																																																						
+M00526	Lysine biosynthesis, DAP dehydrogenase pathway, aspartate => lysine	K00133	K00215	K00928	K01586	K01714	K03340	K12524	K12525	K12526																																																																						
+M00527	Lysine biosynthesis, DAP aminotransferase pathway, aspartate => lysine	K00133	K00215	K00928	K01586	K01714	K01778	K10206	K12524	K12525	K12526																																																																					
+M00528	Nitrification, ammonia => nitrite	K10535	K10944	K10945	K10946																																																																											
+M00529	Denitrification, nitrate => nitrogen	K00368	K00370	K00371	K00374	K00376	K02305	K02567	K02568	K04561	K15864	K15877																																																																				
+M00530	Dissimilatory nitrate reduction, nitrate => ammonia	K00362	K00363	K00370	K00371	K00374	K02567	K02568	K03385	K15876																																																																						
+M00531	Assimilatory nitrate reduction, nitrate => ammonia	K00360	K00366	K00367	K00372	K10534	K17877																																																																									
+M00532	Photorespiration	K00600	K00830	K01601	K01602	K03781	K11517	K14272	K15893	K15918	K15919	K19269																																																																				
+M00533	Homoprotocatechuate degradation, homoprotocatechuate => 2-oxohept-3-enedioate	K00151	K00455	K01826	K05921	K10219																																																																										
+M00534	Naphthalene degradation, naphthalene => salicylate	K00152	K14578	K14579	K14580	K14581	K14582	K14583	K14584	K14585																																																																						
+M00535	Isoleucine biosynthesis, pyruvate => 2-oxobutanoate	K00052	K01703	K01704	K09011																																																																											
+M00537	Xylene degradation, xylene => methylbenzoate	K00055	K00141	K15757	K15758																																																																											
+M00538	Toluene degradation, toluene => benzoate	K00055	K00141	K15760	K15761	K15762	K15763	K15764	K15765																																																																							
+M00539	Cumate degradation, p-cumate => 2-oxopent-4-enoate + 2-methylpropanoate	K10619	K10620	K10621	K10622	K10623	K16303	K16304	K18227																																																																							
+M00540	Benzoate degradation, cyclohexanecarboxylic acid =>pimeloyl-CoA	K04116	K04117	K07534	K07535	K07536																																																																										
+M00541	Benzoyl-CoA degradation, benzoyl-CoA => 3-hydroxypimeloyl-CoA	K04112	K04113	K04114	K04115	K07537	K07538	K07539	K19515	K19516																																																																						
+M00542	EHEC/EPEC pathogenicity signature, T3SS and effectors	K03219	K03221	K03222	K03224	K03225	K03226	K03227	K03228	K03229	K03230	K12784	K12785	K12786	K12787	K12788	K16041	K16042																																																														
+M00543	Biphenyl degradation, biphenyl => 2-oxopent-4-enoate + benzoate	K00462	K08689	K08690	K10222	K15750	K18087	K18088																																																																								
+M00544	Carbazole degradation, carbazole => 2-oxopent-4-enoate + anthranilate	K15751	K15752	K15753	K15754	K15755	K15756																																																																									
+M00545	Trans-cinnamate degradation, trans-cinnamate => acetyl-CoA	K00529	K01666	K02554	K04073	K05708	K05709	K05710	K05711	K05712	K05713	K05714																																																																				
+M00546	Purine degradation, xanthine => urea	K00087	K00106	K00365	K01466	K01477	K07127	K11177	K11178	K13479	K13480	K13481	K13482	K13483	K13484	K13485	K16838	K16839	K16840	K16842																																																												
+M00547	Benzene/toluene degradation, benzene => catechol / toluene => 3-methylcatechol	K03268	K16268	K16269	K18089	K18090																																																																										
+M00548	Benzene degradation, benzene => catechol	K16242	K16243	K16244	K16245	K16246	K16249																																																																									
+M00549	Nucleotide sugar biosynthesis, glucose => UDP-glucose	K00844	K00845	K00886	K00963	K01835	K12407																																																																									
+M00550	Ascorbate degradation, ascorbate => D-xylulose-5P	K02821	K02822	K03077	K03078	K03079	K03475	K03476																																																																								
+M00551	Benzoate degradation, benzoate => catechol / methylbenzoate => methylcatechol	K05549	K05550	K05783	K05784																																																																											
+M00552	D-galactonate degradation, De Ley-Doudoroff pathway, D-galactonate => glycerate-3P	K00134	K00883	K00927	K01631	K01684																																																																										
+M00554	Nucleotide sugar biosynthesis, galactose => UDP-galactose	K00849	K00965																																																																													
+M00555	Betaine biosynthesis, choline => betaine	K00108	K00130	K11440	K17755																																																																											
+M00563	Methanogenesis, methylamine/dimethylamine/trimethylamine => methane	K00399	K00401	K00402	K03388	K03389	K03390	K14082	K14083	K14084	K16176	K16177	K16178	K16179																																																																		
+M00564	Helicobacter pylori pathogenicity signature, cagA pathogenicity island	K03196	K12086	K12087	K12088	K12089	K12090	K12091	K12092	K12093	K12094	K12095	K12096	K12097	K12098	K12099	K12100	K12101	K12102	K12103	K12104	K12105	K12106	K12107	K12108	K12109	K12110	K15842																																																				
+M00565	Trehalose biosynthesis, D-glucose 1P => trehalose	K00700	K00703	K00975	K01214	K01236	K06044	K16148	K16149																																																																							
+M00566	Dipeptide transport system, Firmicutes	K16199	K16200	K16201	K16202																																																																											
+M00567	Methanogenesis, CO2 => methane	K00200	K00201	K00202	K00203	K00204	K00205	K00319	K00320	K00399	K00401	K00402	K00577	K00578	K00579	K00580	K00581	K00582	K00583	K00584	K00672	K01499	K03388	K03389	K03390	K11260	K11261	K13942																																																				
+M00568	Catechol ortho-cleavage, catechol => 3-oxoadipate	K01055	K01856	K03381	K03464	K14727																																																																										
+M00569	Catechol meta-cleavage, catechol => acetyl-CoA / 4-methylcatechol => propanoyl-CoA	K00446	K01617	K01666	K01821	K02554	K04073	K07104	K10216	K10217	K18364	K18365	K18366																																																																			
+M00570	Isoleucine biosynthesis, threonine => 2-oxobutanoate => isoleucine	K00053	K00826	K01652	K01653	K01687	K01754	K11258	K17989																																																																							
+M00571	AlgE-type Mannuronan C-5-Epimerase transport system	K12340	K16299	K16300																																																																												
+M00572	Pimeloyl-ACP biosynthesis, BioC-BioH pathway, malonyl-ACP => pimeloyl-ACP	K00059	K00208	K00647	K02169	K02170	K02372	K09458	K09789	K19560	K19561																																																																					
+M00573	Biotin biosynthesis, BioI pathway, long-chain-acyl-ACP => pimeloyl-ACP => biotin	K00652	K00833	K01012	K01935	K16593	K19563																																																																									
+M00574	Pertussis pathogenicity signature 1, pertussis toxin	K11023	K11024	K11025	K11026	K11027																																																																										
+M00575	Pertussis pathogenicity signature 2, T1SS	K07389	K11003	K11004	K11029	K12340																																																																										
+M00577	Biotin biosynthesis, BioW pathway, pimelate => pimeloyl-CoA => biotin	K00652	K00833	K01012	K01906	K01935	K19563																																																																									
+M00579	Phosphate acetyltransferase-acetate kinase pathway, acetyl-CoA => acetate	K00625	K00925	K13788	K15024																																																																											
+M00580	Pentose phosphate pathway, archaea, fructose 6P => ribose 5P	K01807	K08093	K08094	K13812	K13831																																																																										
+M00581	Biotin transport system	K03523	K16783	K16784																																																																												
+M00582	Energy-coupling factor transport system	K03523	K16785	K16786	K16787	K16923	K16924	K16925	K16926	K16927	K16928	K16929																																																																				
+M00583	Putative peptide transport system	K16916	K16917																																																																													
+M00584	Acetoin utilization transport system	K16918	K16919	K16920	K16921																																																																											
+M00585	L-Cystine transport system	K16956	K16957	K16958	K16959	K16960																																																																										
+M00586	Putative amino-acid transport system	K16961	K16962	K16963																																																																												
+M00587	Arginine/lysine/histidine/glutamine transport system	K17062	K17063																																																																													
+M00589	Putative lysine transport system	K17073	K17074	K17076																																																																												
+M00590	Erythritol transport system	K17202	K17203	K17204																																																																												
+M00591	Putative xylitol transport system	K17205	K17206	K17207																																																																												
+M00592	Inositol transport system	K17208	K17209	K17210																																																																												
+M00593	Inositol transport system	K17213	K17214	K17215																																																																												
+M00595	Thiosulfate oxidation by SOX complex, thiosulfate => sulfate	K08738	K17222	K17223	K17224	K17225	K17226	K17227																																																																								
+M00596	Dissimilatory sulfate reduction, sulfate => H2S	K00394	K00395	K00956	K00957	K00958	K11180	K11181																																																																								
+M00597	Anoxygenic photosystem II	K08928	K08929																																																																													
+M00598	Anoxygenic photosystem I	K08940	K08941	K08942	K08943																																																																											
+M00599	Inositol-phosphate transport system	K17237	K17238	K17239	K17240																																																																											
+M00600	alpha-1,4-Digalacturonate transport system	K17241	K17242	K17243																																																																												
+M00601	Putative chitobiose transport system	K17244	K17245	K17246																																																																												
+M00602	Arabinosaccharide transport system	K10112	K17234	K17235	K17236																																																																											
+M00603	Putative aldouronate transport system	K17318	K17319	K17320																																																																												
+M00604	Trehalose transport system	K17311	K17312	K17313	K17314																																																																											
+M00605	Glucose/mannose transport system	K10112	K17315	K17316	K17317																																																																											
+M00606	N,N'-Diacetylchitobiose transport system	K10112	K17329	K17330	K17331																																																																											
+M00607	Glycerol transport system	K17321	K17322	K17323	K17324	K17325																																																																										
+M00608	2-Oxocarboxylic acid chain extension, 2-oxoglutarate => 2-oxoadipate => 2-oxopimelate => 2-oxosuberate	K10977	K10978	K16792	K16793																																																																											
+M00609	Cysteine biosynthesis, methionine => cysteine	K00789	K01243	K07173	K17216	K17217	K17462	K18284																																																																								
+M00610	PTS system, D-glucosaminate-specific II component	K17464	K17465	K17466	K17467																																																																											
+M00611	Oxygenic photosynthesis in plants and cyanobacteria	M00161	M00163	M00165																																																																												
+M00612	Anoxygenic photosynthesis in purple bacteria	M00165	M00597																																																																													
+M00613	Anoxygenic photosynthesis in green nonsulfur bacteria	M00376	M00597																																																																													
+M00614	Anoxygenic photosynthesis in green sulfur bacteria	M00173	M00598																																																																													
+M00615	Nitrate assimilation	K02575	M00438	M00531																																																																												
+M00616	Sulfate-sulfur assimilation	M00176	M00185																																																																													
+M00617	Methanogen	M00356	M00357	M00563	M00567																																																																											
+M00618	Acetogen	M00377	M00579																																																																													
+M00619	Xylobiose transport system	K17326	K17327	K17328																																																																												
+M00620	Incomplete reductive citrate cycle, acetyl-CoA => oxoglutarate	K00024	K00169	K00170	K00171	K00172	K00174	K00175	K00176	K00177	K01677	K01678	K01902	K01903	K01959	K01960	K18209	K18210																																																														
+M00622	Nicotinate degradation, nicotinate => fumarate	K01799	K13995	K14974	K15357	K18028	K18029	K18030																																																																								
+M00623	Phthalate degradation, phthalate => protocatechuate	K04102	K18067	K18068	K18069																																																																											
+M00624	Terephthalate degradation, terephthalate => 3,4-dihydroxybenzoate	K18074	K18075	K18076	K18077																																																																											
+M00625	Methicillin resistance	K02545	K02546	K02547																																																																												
+M00627	beta-Lactam resistance, Bla system	K02171	K02172	K17836	K18766																																																																											
+M00628	beta-Lactam resistance, AmpC system	K01207	K01467	K08218	K17836	K17850																																																																										
+M00630	D-Galacturonate degradation (fungi), D-galacturonate => glycerol	K18102	K18103	K18106	K18107	K19634																																																																										
+M00631	D-Galacturonate degradation (bacteria), D-galacturonate => pyruvate + D-glyceraldehyde 3P	K00041	K00874	K01625	K01685	K01812	K16849	K16850	K17463																																																																							
+M00632	Galactose degradation, Leloir pathway, galactose => alpha-D-glucose-1P	K00849	K00965	K01784	K01785																																																																											
+M00633	Semi-phosphorylative Entner-Doudoroff pathway, gluconate/galactonate => glycerate-3P	K00131	K05308	K11395	K18126	K18978																																																																										
+M00634	Oleandomycin transport system	K18232	K18233																																																																													
+M00635	Tetracycline resistance, TetAB(46) transporter	K18216	K18217																																																																													
+M00636	Phthalate degradation, phthalate => protocatechuate	K18251	K18252	K18253	K18254	K18255	K18256																																																																									
+M00637	Anthranilate degradation, anthranilate => catechol	K05599	K05600	K11311	K16319	K16320	K18248	K18249																																																																								
+M00638	Salicylate degradation, salicylate => gentisate	K14578	K14581	K18242	K18243																																																																											
+M00639	Multidrug resistance, efflux pump MexCD-OprJ	K08721	K18294	K18295	K18296																																																																											
+M00641	Multidrug resistance, efflux pump MexEF-OprN	K18297	K18298	K18299	K18300																																																																											
+M00642	Multidrug resistance, efflux pump MexJK-OprM	K18139	K18301	K18302	K18303																																																																											
+M00643	Multidrug resistance, efflux pump MexXY-OprM	K18094	K18095	K18129	K18139																																																																											
+M00644	Vanadium resistance, efflux pump MexGHI-OpmD	K18099	K18304	K18305	K18306	K18307	K18308																																																																									
+M00645	Multidrug resistance, efflux pump SmeABC	K07642	K07664	K18321	K18322	K18323																																																																										
+M00646	Multidrug resistance, efflux pump AcrAD-TolC	K03585	K07642	K07664	K12340	K18324																																																																										
+M00647	Multidrug resistance, efflux pump AcrAB-TolC/SmeDEF	K03577	K03585	K05804	K12340	K13631	K13632	K18138	K18139	K18325	K18991	K18992																																																																				
+M00648	Multidrug resistance, efflux pump MdtABC	K07642	K07664	K07788	K07789	K07799																																																																										
+M00649	Multidrug resistance, efflux pump AdeABC	K18143	K18144	K18145	K18146	K18147																																																																										
+M00651	Vancomycin resistance, D-Ala-D-Lac type	K07260	K08641	K15739	K18344	K18345	K18346	K18347	K18351	K18352	K18353	K18354																																																																				
+M00652	Vancomycin resistance, D-Ala-D-Ser type	K18348	K18349	K18350	K18856	K18866																																																																										
+M00653	AauS-AauR (acidic amino acids utilization) two-component regulatory system	K17060	K17061																																																																													
+M00654	ParS-ParR (polymyxin-adaptive resistance) two-component regulatory system	K18072	K18073																																																																													
+M00655	AdeS-AdeR two-component regulatory system	K18143	K18144																																																																													
+M00656	VanS-VanR (VanB type vancomycin resistance) two-component regulatory system	K18344	K18345																																																																													
+M00657	VanS-VanR (VanE type vancomycin resistance) two-component regulatory system	K18349	K18350																																																																													
+M00658	VanS-VanR (actinomycete type vancomycin resistance) two-component regulatory system	K18351	K18352																																																																													
+M00660	Xanthomonas spp. pathogenicity signature, T3SS and effectors	K03222	K03223	K03224	K03225	K03226	K03227	K03228	K03229	K03230	K18373	K18374	K18375	K18376	K18377	K18378	K18379	K18380	K18381																																																													
+M00661	Paspaline biosynthesis, geranylgeranyl-PP + indoleglycerol phosphate => paspaline	K18385	K18386	K18387																																																																												
+M00662	Hk1-Rrp1 (glycerol uptake and utilization) two-component regulatory system	K02489	K18444																																																																													
+M00663	SsrA-SsrB two-component regulatory system	K14978	K14979																																																																													
+M00664	Nodulation	K14657	K14658	K14659	K14666																																																																											
+M00667	Tetracycline resistance, efflux pump	K18218	K18219																																																																													
+M00668	Tetracycline resistance, TetA transporter	K08151	K18476																																																																													
+M00669	gamma-Hexachlorocyclohexane transport system	K02065	K02066	K02067	K18480																																																																											
+M00670	Mce transport system	K02065	K02066	K02067	K18481																																																																											
+M00672	Penicillin biosynthesis, aminoadipate + cycteine + valine => penicillin	K04126	K10852	K12743																																																																												
+M00673	Cephamycin C biosynthesis, aminoadipate + cycteine + valine => cephamycin C	K04126	K04127	K04128	K12743	K12744	K12745	K18062	K18063																																																																							
+M00674	Clavaminate biosynthesis, arginine + glyceraldehyde-3P => clavaminate	K12673	K12674	K12675	K12676																																																																											
+M00675	Carbapenem-3-carboxylate biosynthesis, pyrroline-5-carboxylate + malonyl-CoA => carbapenem-3-carboxylate	K18315	K18316	K18317																																																																												
+M00676	PI3K-Akt signaling	K00922	K02649	K04456	K04527	K07201	K09408	K16172																																																																								
+M00677	Wnt signaling	K00182	K00312	K00408	K00444	K00445	K00572	K00714	K01064	K01357	K01384	K01558	K02105	K02235	K02329	K02353	K02354	K02375	K02376	K02432	K02620	K02842	K03083	K03209	K04490	K04491	K04492	K04690																																																				
+M00678	Hedgehog signaling	K06224	K06225	K06226	K06227	K06228	K06229	K06230	K11988	K11989	K11990	K16797	K16798	K16799	K18806																																																																	
+M00679	BMP signaling	K04501	K04662	K04663	K04664	K04665	K04670	K04671	K04672	K04673	K04675	K04676	K13578	K13596	K13597	K16620	K16621	K16622	K16790	K16791																																																												
+M00680	TGF-beta signaling	K04388	K04500	K04501	K04674	K13375	K13376	K13377																																																																								
+M00681	Activin signaling	K04500	K04501	K04667	K04670	K13567	K13596																																																																									
+M00682	Notch signaling	K02599	K04505	K04522	K06051	K06053	K06059	K06060	K06170	K06171	K06172	K20994	K20995	K20996																																																																		
+M00683	Hippo signaling	K04412	K06685	K08791	K09448	K16683	K16684	K16685	K16686	K16687	K16820	K16821	K16822																																																																			
+M00684	JAK-STAT signaling	K04447	K04692	K04694	K04695	K04696	K04697	K04698	K04699	K04701	K11217	K11218	K11219	K11220	K11221	K11222	K11223	K11224	K11225																																																													
+M00685	Apoptotic machinery	K02084	K02187	K04397	K04399	K04489																																																																										
+M00686	Toll-like receptor signaling	K02580	K03175	K04403	K04404	K04427	K04467	K04729	K04730	K04733	K04734	K04735	K07209	K07210	K10159	K10160	K18809																																																															
+M00687	MAPK (ERK1/2) signaling	K04365	K04366	K04367	K04368	K04369	K04371	K08845																																																																								
+M00688	MAPK (JNK) signaling	K04415	K04416	K04417	K04418	K04419	K04420	K04421	K04423	K04425	K04426	K04427	K04428	K04429	K04430	K04431	K04440	K17534																																																														
+M00689	MAPK (p38) signaling	K04415	K04416	K04417	K04418	K04419	K04420	K04421	K04423	K04425	K04426	K04427	K04428	K04429	K04432	K04433	K04441	K17534																																																														
+M00690	MAPK (ERK5) signaling	K04420	K04421	K04463	K04464																																																																											
+M00691	DNA damage-induced cell cycle checkpoints	K02216	K02555	K02831	K04728	K05866	K05867	K06640	K06641	K06645																																																																						
+M00692	Cell cycle - G1/S transition	K02089	K02091	K02206	K04503	K04563	K04681	K06618	K06620	K06626	K06646	K06650	K09249	K09389	K10151	K10152	K12413	K12760	K14505	K17454	K18810	K18811	K18812	K18813																																																								
+M00693	Cell cycle - G2/M transition	K02087	K02206	K02220	K02555	K03114	K04563	K05867	K05868	K06627	K06632	K07760	K18065																																																																			
+M00694	cGMP signaling	K04948	K04952	K07376	K12318	K12319	K12323	K12324	K18283																																																																							
+M00695	cAMP signaling	K01768	K04345	K04630	K04632	K08041	K08042	K08043	K08044	K08045	K08046	K08047	K08048	K08049																																																																		
+M00696	Multidrug resistance, efflux pump AcrEF-TolC	K12340	K18140	K18141	K18142																																																																											
+M00697	Multidrug resistance, efflux pump MdtEF-TolC	K07690	K12340	K18898	K18899																																																																											
+M00698	Multidrug resistance, efflux pump BpeEF-OprC	K18900	K18901	K18902	K18903																																																																											
+M00699	Multidrug resistance, efflux pump AmeABC	K03585	K18138	K18904	K18905																																																																											
+M00700	Multidrug resistance, efflux pump AbcA	K18104	K18906	K18907																																																																												
+M00701	Multidrug resistance, efflux pump EmrAB	K03446	K03543	K15974																																																																												
+M00702	Multidrug resistance, efflux pump NorB	K08170	K18906	K18907																																																																												
+M00704	Tetracycline resistance, efflux pump Tet38	K08168	K18906																																																																													
+M00705	Multidrug resistance, efflux pump MepA	K18908	K18909																																																																													
+M00706	Multidrug resistance, EfrAB transporter	K18887	K18888																																																																													
+M00707	Multidrug resistance, MdlAB/SmdAB transporter	K18889	K18890																																																																													
+M00708	Multidrug resistance, PatAB transporter	K18891	K18892																																																																													
+M00709	Macrolide resistance, MacAB-TolC transporter	K05685	K07637	K07660	K12340	K13888																																																																										
+M00710	Multidrug resistance, efflux pump EbrAB	K11814	K11815																																																																													
+M00711	Multidrug resistance, efflux pump MdtIJ	K11742	K11743																																																																													
+M00712	Multidrug resistance, efflux pump YkkCD	K18924	K18925																																																																													
+M00713	Fluoroquinolone resistance, efflux pump LfrA	K08167	K18937																																																																													
+M00714	Multidrug resistance, efflux pump QacA	K08167	K18938																																																																													
+M00715	Lincosamide resistance, efflux pump LmrB	K18926	K18939																																																																													
+M00716	ArlS-ArlR (virulence regulation) two-component regulatory system	K18940	K18941																																																																													
+M00717	Multidrug resistance, efflux pump NorA	K08153	K18906	K18940	K18941																																																																											
+M00718	Multidrug resistance, efflux pump MexAB-OprM	K03585	K18131	K18138	K18139																																																																											
+M00719	Ihk-Irr (virulence regulation) two-component regulatory system	K18986	K18987																																																																													
+M00720	Multidrug resistance, efflux pump VexEF-TolC	K12340	K18989	K18990																																																																												
+M00721	Cationic antimicrobial peptide (CAMP) resistance, arnBCADTEF operon	K07264	K07637	K07643	K07660	K07771	K07806	K10011	K10012	K12962	K12963	K13014	K18072	K18073																																																																		
+M00722	Cationic antimicrobial peptide (CAMP) resistance, phosphoethanolamine transferase PmrC	K03760	K07643	K07771																																																																												
+M00723	Cationic antimicrobial peptide (CAMP) resistance, phosphoethanolamine transferase EptB	K07637	K07660	K12975	K18514																																																																											
+M00724	Cationic antimicrobial peptide (CAMP) resistance, palmitoyl transferase PagP	K07637	K07660	K12973																																																																												
+M00725	Cationic antimicrobial peptide (CAMP) resistance, dltABCD operon	K03367	K03739	K03740	K14188	K19077	K19078																																																																									
+M00726	Cationic antimicrobial peptide (CAMP) resistance, lysyl-phosphatidylglycerol (L-PG) synthase MprF	K14205	K19077	K19078																																																																												
+M00727	Cationic antimicrobial peptide (CAMP) resistance, N-acetylmuramoyl-L-alanine amidase AmiA and AmiC	K01448	K07640	K07662																																																																												
+M00728	Cationic antimicrobial peptide (CAMP) resistance, envelope protein folding and degrading factors DegP and DsbA	K03673	K04771	K07640	K07662																																																																											
+M00729	Fluoroquinolone resistance, gyrase-protecting protein Qnr	K01356	K03553	K18555																																																																												
+M00730	Cationic antimicrobial peptide (CAMP) resistance, VraFG transporter	K19077	K19078	K19079	K19080																																																																											
+M00731	Bacitracin transport system	K19083	K19084																																																																													
+M00732	Cationic antimicrobial peptide transport system	K19079	K19080																																																																													
+M00733	GraS-GraR (cationic antimicrobial peptide transport) two-component regulatory system	K19077	K19078																																																																													
+M00734	BraS-BraR (bacitracin transport) two-component regulatory system	K19081	K19082																																																																													
+M00736	Nocardicin A biosynthesis, L-pHPG + arginine + serine => nocardicin A	K05375	K19102	K19103	K19104	K19105	K19106																																																																									
+M00737	Bacitracin resistance, VraDE transporter	K11631	K11632	K19081	K19082	K19083	K19084																																																																									
+M00738	Bacitracin resistance, BceAB transporter	K11629	K11630	K11631	K11632																																																																											
+M00739	Cationic peptide transport system	K19226	K19227	K19228	K19229	K19230																																																																										
+M00740	Methylaspartate cycle	K00024	K00031	K00261	K01647	K01681	K01846	K04835	K14449	K19268	K19280	K19281	K19282																																																																			
+M00741	Propanoyl-CoA metabolism, propanoyl-CoA => succinyl-CoA	K01847	K01848	K01849	K01964	K01965	K01966	K05606	K11263	K11942	K15036	K15037	K18472	K19312																																																																		
+M00742	Aminoglycoside resistance, protease FtsH	K03798	K04087	K04088	K07638	K07659	K19416																																																																									
+M00743	Aminoglycoside resistance, protease HtpX	K03799	K07638	K07659																																																																												
+M00744	Cationic antimicrobial peptide (CAMP) resistance, protease PgtE	K07637	K07660	K08477																																																																												
+M00745	Imipenem resistance, repression of porin OprD	K07644	K07665	K18072	K18073	K18093	K18297																																																																									
+M00746	Multidrug resistance, repression of porin OmpF	K09476	K13632	K18513																																																																												
+M00747	Bacitracin transport system	K19309	K19310																																																																													
+M00754	Nisin resistance, phage shock protein homolog LiaH	K11617	K11618	K11619	K11620																																																																											
+M00760	Erythromycin resistance, macrolide 2'-phosphotransferase I MphA	K06979	K19060																																																																													
+M00761	Undecaprenylphosphate alpha-L-Ara4N biosynthesis, UDP-GlcA => undecaprenyl phosphate alpha-L-Ara4N	K07806	K10011	K10012	K13014																																																																											
+M00762	Copper-processing system	K19340	K19341																																																																													
+M00763	Ornithine biosynthesis, mediated by LysW, glutamate => ornithine	K05826																																																																														
+M00764	PTS system, fructoselysine/glucoselysine-specific II component	K19506	K19507	K19508	K19509																																																																											
+M00765	Multidrug resistance, efflux pump Bmr	K19575	K19578																																																																													
+M00766	Streptomycin resistance, deactivating enzyme StrAB	K04343	K10673																																																																													
+M00767	Multidrug resistance, efflux pump OqxAB	K05804	K19585	K19586	K19587																																																																											
+M00768	Multidrug resistance, efflux pump GesABC	K18139	K19592	K19594	K19595																																																																											
+M00769	Multidrug resistance, efflux pump MexPQ-OpmE	K18304	K19591	K19593	K19594	K19595																																																																										
+M00770	PfeS-PfeR (enterobactin-dependent iron acquisition) two-component regulatory system	K19609	K19610																																																																													
+M00771	FitF-FitH (insecticidal toxin regulation) two-component regulatory system	K19616	K19617																																																																													
+M00772	HupT-HupR (hydrogenase synthesis regulation) two-component regulatory system	K19641	K19661																																																																													
+M00773	Tylosin biosynthesis, methylmalonyl-CoA + malonyl-CoA => tylactone => tylosin	K15988	K15989	K15990	K15991	K15992	K15993	K15994	K15995	K15996																																																																						
+M00774	Erythromycin biosynthesis, propanoyl-CoA + methylmalonyl-CoA => deoxyerythronolide B => erythromycin A/B	K10817	K14366	K14367	K14368	K14369	K14370	K15997																																																																								
+M00775	Oleandomycin biosynthesis, malonyl-CoA + methylmalonyl-CoA => 8,8a-deoxyoleandolide => oleandomycin	K13320	K16007	K16008	K16009	K16010																																																																										
+M00776	Pikromycin/methymycin/neomethymycin biosynthesis, methylmalonyl-CoA + malonyl-CoA => narbonolide/10-deoxymethynolide => pikromycin/methymycin/neomethymycin	K16000	K16001	K16002	K16003	K16004	K16005	K16006																																																																								
+M00777	Avermectin biosynthesis, 2-methylbutanoyl-CoA/isobutyryl-CoA => 6,8a-Seco-6,8a-deoxy-5-oxoavermectin 1a/1b aglycone => avermectin A1a/B1a/A1b/B1b	K14371	K14372	K14373	K14374	K14375																																																																										
+M00778	Type II polyketide backbone biosynthesis, acyl-CoA + malonyl-CoA => polyketide	K05551	K05552	K05553	K05554	K05555	K12420	K14249	K14250	K15884	K15885	K15886																																																																				
+M00779	Dihydrokalafungin biosynthesis, octaketide => dihydrokalafungin	K05556	K14626	K14627	K14628	K14629	K14630	K14631	K14632																																																																							
+M00780	Tetracycline/oxytetracycline biosynthesis, pretetramide => tetracycline/oxytetracycline	K14251	K14252	K14253	K14254	K14255	K14256																																																																									
+M00781	Nogalavinone/aklavinone biosynthesis, deoxynogalonate/deoxyaklanonate => nogalavinone/aklavinone	K15941	K15942	K15943	K15944																																																																											
+M00782	Mithramycin biosynthesis, 4-demethylpremithramycinone => mithramycin	K15959	K15960	K15961	K15963	K15964	K15965	K15966	K15967																																																																							
+M00783	Tetracenomycin C/8-demethyltetracenomycin C biosynthesis, tetracenomycin F2 => tetracenomycin C/8-demethyltetracenomycin C	K15886	K15968	K15969	K15970	K15971	K15972																																																																									
+M00784	Elloramycin biosynthesis, 8-demethyltetracenomycin C => elloramycin A	K19566	K19567	K19568	K19569	K19570																																																																										
+M00785	Cycloserine biosynthesis, arginine/serine => cycloserine	K19723	K19741																																																																													
+M00786	Fumitremorgin alkaloid biosynthesis, tryptophan + proline => fumitremorgin C/A	K14132	K14134	K17475	K17825	K17826	K17827	K18279	K18280	K18281																																																																						
+M00787	Bacilysin biosynthesis, prephenate => bacilysin	K13037	K19546	K19547	K19548	K19549	K19550																																																																									
+M00788	Terpentecin biosynthesis, GGAP => terpentecin	K19834	K19835																																																																													
+M00789	Rebeccamycin biosynthesis, tryptophan => rebeccamycin	K14266	K19884	K19885	K19886	K19887	K19888	K19889																																																																								
+M00790	Pyrrolnitrin biosynthesis, tryptophan => pyrrolnitrin	K14257	K14266	K19981	K19982																																																																											
+M00791	Manganese/zinc transport system	K10830	K19971	K19972																																																																												
+M00792	Manganese/zinc transport system	K19973	K19975	K19976																																																																												
+M00793	dTDP-L-rhamnose biosynthesis	K00067	K00973	K01710	K01790																																																																											
+M00794	dTDP-6-deoxy-D-allose biosynthesis	K13312	K13313																																																																													
+M00795	dTDP-beta-L-noviose biosynthesis	K12710	K17625	K19855																																																																												
+M00796	dTDP-D-mycaminose biosynthesis	K13307	K19853	K19854																																																																												
+M00797	dTDP-D-desosamine biosynthesis	K13308	K13309	K13310	K13311	K13326	K16436																																																																									
+M00798	dTDP-L-mycarose biosynthesis	K13315	K13316	K13317	K13318	K16435	K16438																																																																									
+M00799	dTDP-L-oleandrose biosynthesis	K13315	K16435	K16438	K19856	K19857																																																																										
+M00800	dTDP-L-megosamine biosynthesis	K13322	K13326	K16435	K16436	K16438																																																																										
+M00801	dTDP-L-olivose biosynthesis	K13319	K13327	K16435	K19858																																																																											
+M00802	dTDP-D-forosamine biosynthesis	K13327	K13328	K13329	K13330	K16435																																																																										
+M00803	dTDP-D-angolosamine biosynthesis	K13332	K16435	K16436	K19859																																																																											
+M00804	Complete nitrification, comammox, ammonia => nitrite => nitrate	K00370	K00371	K10535	K10944	K10945	K10946																																																																									
+M00805	Staurosporine biosynthesis, tryptophan => staurosporine	K20075	K20076	K20077	K20078	K20079	K20080	K20081	K20082																																																																							
+M00806	PTS system, maltose-specific II component	K02777	K20107	K20108																																																																												
+M00807	PTS system, galactose-specific II component	K20112	K20113	K20114																																																																												
+M00808	Violacein biosynthesis, tryptophan => violacein	K20086	K20087	K20088	K20089	K20090																																																																										
+M00809	PTS system, glucose-specific II component	K20116	K20117	K20118																																																																												
+M00810	Nicotine degradation, pyridine pathway, nicotine => 2,6-dihydroxypyridine/succinate semialdehyde	K19185	K19186	K19187	K19188	K19818	K19819	K19820	K19826	K19890	K20155																																																																					
+M00811	Nicotine degradation, pyrrolidine pathway, nicotine => succinate semialdehyde	K15359	K18276	K19700	K20158	K20169	K20170	K20171	K20172																																																																							
+M00812	AgrC2-AgrA2 (virulence regulation) two-component regulatory system	K20339	K20340																																																																													
+M00813	Lantibiotic transport system	K20459	K20460	K20461																																																																												
+M00814	Acarbose biosynthesis, sedoheptulopyranose-7P => acarbose	K19969	K19974	K19979	K20424	K20425	K20426	K20427	K20430																																																																							
+M00815	Validamycin A biosynthesis, sedoheptulopyranose-7P => validamycin A	K19969	K20431	K20432	K20433	K20434	K20435	K20436	K20437	K20438																																																																						
+M00816	NisK-NisR (lantibiotic biosynthesis) two-component regulatory system	K20487	K20488																																																																													
+M00817	Lantibiotic transport system	K20490	K20491	K20492	K20494																																																																											
+M00818	FusK-FusR (virulence regulation) two-component regulatory system	K20263	K20264																																																																													
+M00819	Pentalenolactone biosynthesis, farnesyl-PP => pentalenolactone	K12250	K15907	K17476	K17747	K18056	K18057	K18091																																																																								
+M00820	SagS-HptB-HsbR (swarming activity and biofilm formation) two-component regulatory system	K20973	K20974	K20975	K20976	K20977																																																																										

@@ -28,6 +28,7 @@ import soothsayer_utils as syu
 functions_from_soothsayer_utils = [
 'read_fasta',
 "read_star_log",
+'read_blast',
 'read_hmmer',
 'read_gtf_gff_base',
 'read_gff3', 
@@ -292,70 +293,71 @@ def read_checkm_qa(path:str, format=8, verbose=True, rename_columns=True, func_o
 # #         with get_file_object(path, mode="write", compression=compression, safe_mode=False, verbose=False) as f:
 # #             f.writelines(f">{id}\n{seq}\n" for id, seq in sequences.items())
 
-# Read blast output
-def read_blast(path:str, length_query=None, length_subject=None, sort_by="bitscore"):
-    """
-    if 12: ['qseqid', 'sseqid', 'pident', 'length', 'mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore']
-    if 15 assumes: -outfmt '6 std qlen slen stitle': ["std", "qlen", "slen", "stitle"]
-    ####################################################
-    Column    NCBI name    Description
-    1    qseqid    Query Seq-id (ID of your sequence)
-    2    sseqid    Subject Seq-id (ID of the database hit)
-    3    pident    Percentage of identical matches
-    4    length    Alignment length
-    5    mismatch    Number of mismatches
-    6    gapopen    Number of gap openings
-    7    qstart    Start of alignment in query
-    8    qend    End of alignment in query
-    9    sstart    Start of alignment in subject (database hit)
-    10    send    End of alignment in subject (database hit)
-    11    evalue    Expectation value (E-value)
-    12    bitscore    Bit score
-    13    sallseqid    All subject Seq-id(s), separated by a ';'
-    14    score    Raw score
-    15    nident    Number of identical matches
-    16    positive    Number of positive-scoring matches
-    17    gaps    Total number of gaps
-    18    ppos    Percentage of positive-scoring matches
-    19    qframe    Query frame
-    20    sframe    Subject frame
-    21    qseq    Aligned part of query sequence
-    22    sseq    Aligned part of subject sequence
-    23    qlen    Query sequence length
-    24    slen    Subject sequence length
-    25    salltitles    All subject title(s), separated by a '<>'
+# # Read blast output
+# def read_blast(path:str, length_query=None, length_subject=None, sort_by="bitscore"):
+#     """
+#     if 12: ['qseqid', 'sseqid', 'pident', 'length', 'mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore']
+#     if 15 assumes: -outfmt '6 std qlen slen stitle': ["std", "qlen", "slen", "stitle"]
+#     ####################################################
+#     Column    NCBI name    Description
+#     1    qseqid    Query Seq-id (ID of your sequence)
+#     2    sseqid    Subject Seq-id (ID of the database hit)
+#     3    pident    Percentage of identical matches
+#     4    length    Alignment length
+#     5    mismatch    Number of mismatches
+#     6    gapopen    Number of gap openings
+#     7    qstart    Start of alignment in query
+#     8    qend    End of alignment in query
+#     9    sstart    Start of alignment in subject (database hit)
+#     10    send    End of alignment in subject (database hit)
+#     11    evalue    Expectation value (E-value)
+#     12    bitscore    Bit score
+#     13    sallseqid    All subject Seq-id(s), separated by a ';'
+#     14    score    Raw score
+#     15    nident    Number of identical matches
+#     16    positive    Number of positive-scoring matches
+#     17    gaps    Total number of gaps
+#     18    ppos    Percentage of positive-scoring matches
+#     19    qframe    Query frame
+#     20    sframe    Subject frame
+#     21    qseq    Aligned part of query sequence
+#     22    sseq    Aligned part of subject sequence
+#     23    qlen    Query sequence length
+#     24    slen    Subject sequence length
+#     25    salltitles    All subject title(s), separated by a '<>'
 
-    Example inputs:
-        * blat -prot Yeast/Saccharomyces_cerevisiae.R64-1-1.pep.all.processed.fa  Phaeodactylum_tricornutum.ASM15095v2.pep.all.processed.fa -out=blast8 yeast-pt.blast8
-        * diamond blastp -d ../../../../reference_data/references/gracilibacteria/reference_proteins.nmnd -q ./prodigal_output/orfs.faa -f 6 -o ./diamond_output/output.blast6
+#     Example inputs:
+#         * blat -prot Yeast/Saccharomyces_cerevisiae.R64-1-1.pep.all.processed.fa  Phaeodactylum_tricornutum.ASM15095v2.pep.all.processed.fa -out=blast8 yeast-pt.blast8
+#         * diamond blastp -d ../../../../reference_data/references/gracilibacteria/reference_proteins.nmnd -q ./prodigal_output/orfs.faa -f 6 -o ./diamond_output/output.blast6
 
-    """
-    path = format_path(path)
-    idx_default_fields = ['qseqid', 'sseqid', 'pident', 'length', 'mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore']
-    # ["query_id", "subject_id", "identity", "alignment_length", "mismatches", "gap_openings", "query_start", "query_end", "subject_start", "subject_end", "e-value", "bit_score"]
-    df_blast = pd.read_csv(path, header=None, sep="\t")
-    if df_blast.shape[1] == 12:
-        df_blast.columns = idx_default_fields
-    if df_blast.shape[1] == 15:
-        df_blast.columns = idx_default_fields + ["qlen", "slen", "stitle"]
-    # Length of query
-    if length_query is not None:
-        if is_path_like(length_query):
-            length_query = read_fasta(length_query, description=False, verbose=False)
-        if isinstance(length_query[0], str):
-            length_query = length_query.map(len)
-        df_blast["qlength"] = df_blast["qseqid"].map(lambda id: length_query[id])
-        df_blast["qratio"] = (df_blast["qend"] - df_blast["qstart"])/df_blast["qlength"]
-    # Length of subject
-    if length_subject is not None:
-        if is_path_like(length_subject):
-            length_subject = read_fasta(length_subject, description=False, verbose=False)
-        if isinstance(length_subject[0], str):
-            length_subject = length_subject.map(len)
-        df_blast["slength"] = df_blast["sseqid"].map(lambda id: length_subject[id])
-        df_blast["sratio"] = (df_blast["send"] - df_blast["sstart"])/df_blast["slength"]
-    if sort_by is not None:
-        df_blast = df_blast.sort_values(by=sort_by, ascending=False).reset_index(drop=True)
+#     """
+#     path = format_path(path)
+#     idx_default_fields = ['qseqid', 'sseqid', 'pident', 'length', 'mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore']
+#     # ["query_id", "subject_id", "identity", "alignment_length", "mismatches", "gap_openings", "query_start", "query_end", "subject_start", "subject_end", "e-value", "bit_score"]
+#     df_blast = pd.read_csv(path, header=None, sep="\t")
+#     if df_blast.shape[1] == 12:
+#         df_blast.columns = idx_default_fields
+#     if df_blast.shape[1] == 15:
+#         df_blast.columns = idx_default_fields + ["qlen", "slen", "stitle"]
+#     # Length of query
+#     if length_query is not None:
+#         if is_path_like(length_query):
+#             length_query = read_fasta(length_query, description=False, verbose=False)
+#         if isinstance(length_query[0], str):
+#             length_query = length_query.map(len)
+#         df_blast["qlength"] = df_blast["qseqid"].map(lambda id: length_query[id])
+#         df_blast["qratio"] = (df_blast["qend"] - df_blast["qstart"])/df_blast["qlength"]
+#     # Length of subject
+#     if length_subject is not None:
+#         if is_path_like(length_subject):
+#             length_subject = read_fasta(length_subject, description=False, verbose=False)
+#         if isinstance(length_subject[0], str):
+#             length_subject = length_subject.map(len)
+#         df_blast["slength"] = df_blast["sseqid"].map(lambda id: length_subject[id])
+#         df_blast["sratio"] = (df_blast["send"] - df_blast["sstart"])/df_blast["slength"]
+#     if sort_by is not None:
+#         df_blast = df_blast.sort_values(by=sort_by, ascending=False).reset_index(drop=True)
+#     return df_blast
 
 #     return df_blast
 # # Helper function for reading gtf and gff3

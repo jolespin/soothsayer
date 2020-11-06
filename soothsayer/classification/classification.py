@@ -2,7 +2,7 @@
 # Modules
 # ==============================================================================
 # Built-ins
-import os, sys, time, datetime, copy
+import os, sys, time, datetime, copy, warnings
 from collections import OrderedDict, defaultdict
 from tqdm import tqdm
 
@@ -154,6 +154,11 @@ class HierarchicalClassifier(BaseEstimator, ClassifierMixin):
 
     # Save object to file
     def save_model(self, path, compression="infer"):
+        warnings.warn("`save_model` is deprecated and will be removed in future versions.  Please use `to_file` instead.", DeprecationWarning)
+        write_object(self, path, compression=compression)
+
+    # Save object to file
+    def to_file(self, path, compression="infer"):
         write_object(self, path, compression=compression)
 
     # Convert a NetworkX graph object to an ete3 Tree
@@ -216,7 +221,7 @@ class HierarchicalClassifier(BaseEstimator, ClassifierMixin):
         `custom_node_data` can override 'sub_target', 'hyperparameters', and 'cv'
         """
         # Attributes must be ordered in the way the model was originally fit
-        assert all([name,clf,attributes]), "Must provide `name`, `clf`, and `attributes`"
+        assert all([name is not None, clf is not None, attributes is not None]), "Must provide `name`, `clf`, and `attributes`"
         if hyperparameters is None:
             hyperparameters = clf.get_params()
         # Check to make sure that if the cross-validation is predefined, that index is not None, and all indicies are in index

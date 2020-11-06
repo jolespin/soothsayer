@@ -1205,8 +1205,8 @@ class Topology(object):
             if directory is not None:
                 directory_submodel = os.path.join(directory,submodel)
                 os.makedirs(directory_submodel, exist_ok=True)
-                self.X.loc[y_next.index,:].to_pickle(os.path.join(directory_submodel, "X.pbz2"), compression="bz2")
-                self.y.to_frame(self.class_type).loc[y_next.index,:].to_pickle(os.path.join(directory_submodel, "y.pbz2"), compression="bz2")
+                self.X.loc[y_next.index,:].to_pickle(os.path.join(directory_submodel, "X.pkl"), compression="bz2")
+                self.y.to_frame(self.class_type).loc[y_next.index,:].to_pickle(os.path.join(directory_submodel, "y.pkl"), compression="bz2")
         Y = pd.DataFrame(Y).loc[self.X.index,:]
         return Y
 

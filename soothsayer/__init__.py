@@ -34,8 +34,8 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.07.28"
-__moniker__ = "Spruce tip mead"
+__version__= "2020.11.05"
+__moniker__ = "Beskar"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
@@ -62,7 +62,7 @@ from .io import io
 # Microbiome
 from .microbiome import microbiome
 # Networks
-from .networks import networks, Hive, TemporalNetwork, EnsembleAssociationNetwork, SampleSpecificPerturbationNetwork
+from .networks import networks, Hive, TemporalNetwork, EnsembleAssociationNetwork, SampleSpecificPerturbationNetwork, DifferentialEnsembleAssociationNetwork
 # Ordination
 from .ordination import ordination, PrincipalComponentAnalysis, PrincipalCoordinatesAnalysis, Manifold
 # R Wrappers
@@ -78,7 +78,7 @@ from .transmute import transmute
 # Tree
 from .tree import tree
 # Utilities
-from .utils import utils, Chromatic, pv
+from .utils import utils, Chromatic, pv, Suppress
 # Visualizations
 from .visuals import visuals
 
@@ -88,7 +88,7 @@ from .visuals import visuals
 _submodules = ["core", "classification", "db", "feature_extraction", "hierarchy", "io", "microbiome",  "networks", "ordination", "r_wrappers", "regression", "statistics", "symmetry", "transmute", "tree", "utils", "visuals"]
 _core = ["Dataset"]
 _hierarchy = ["Agglomerative", "Topology"]
-_networks = ["Hive", "TemporalNetwork","EnsembleAssociationNetwork", "SampleSpecificPerturbationNetwork", ]
+_networks = ["Hive", "TemporalNetwork","EnsembleAssociationNetwork", "SampleSpecificPerturbationNetwork", "DifferentialEnsembleAssociationNetwork"]
 _ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold"]
 _symmetry = ["Symmetric"]
 _utils = ["Chromatic", "Suppress", "pv"]
@@ -96,4 +96,13 @@ _utils = ["Chromatic", "Suppress", "pv"]
 __all__ = _submodules + _core + _hierarchy + _networks + _ordination + _symmetry + _utils
 __all__ = sorted(__all__)
 
-print("Soothsayer_v{} | {}".format(__version__, utils.format_duration(t0)), file=sys.stderr)
+print(utils.format_header("Soothsayer Ecosystem"), file=sys.stderr)
+print(" * Soothsayer v{}".format(__version__), file=sys.stderr)
+import soothsayer_utils as syu
+print(" * Soothsayer Utilities v{}".format(syu.__version__), file=sys.stderr)
+import compositional as coda
+print(" * Compositional v{}".format(coda.__version__), file=sys.stderr)
+import hive_networkx as hx
+print(" * Hive NetworkX v{}".format(hx.__version__), file=sys.stderr)
+import ensemble_networkx as enx
+print(" * Ensemble NetworkX v{}".format(enx.__version__), file=sys.stderr)
