@@ -34,7 +34,7 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.11.05"
+__version__= "2020.12.16"
 __moniker__ = "Beskar"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"

@@ -2,6 +2,8 @@
 
 # Changes:
 # ========
+* 2020.12.16 Fixed a ddof=0 and ddof=1 incompatibility.  Now all ddof=1 in compositional package.
+* 2020.09.17 Fixed LinAlgError in plot_compositional from seaborn update to v0.11
 * 2020.07.21 Reimplemented PrincipalCoordinatesAnalysis and PrincipalComponentsAnalysis classes (and base classes).  They now have the ability to plot biplots, get loadings, and get contribution of feature classes to each PC.
 * 2020.07.21 Added `add_objects_to_globals` function to add objects from accessory packages like hive_networkx, ensemble_networkx, soothsayer_utils, and compositional
 * 2020.07.01 Created EnsembleAssociationNetwork class
