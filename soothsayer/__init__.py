@@ -34,8 +34,8 @@
 # Version
 # =======
 import sys, time
-__version__= "2020.12.16"
-__moniker__ = "Beskar"
+__version__= "2021.01.06"
+__moniker__ = "Brettanomyces claussenii"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
@@ -93,6 +93,8 @@ _ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Ma
 _symmetry = ["Symmetric"]
 _utils = ["Chromatic", "Suppress", "pv"]
 
+__ecosystem__ = dict()
+
 __all__ = _submodules + _core + _hierarchy + _networks + _ordination + _symmetry + _utils
 __all__ = sorted(__all__)
 
@@ -100,9 +102,13 @@ print(utils.format_header("Soothsayer Ecosystem"), file=sys.stderr)
 print(" * Soothsayer v{}".format(__version__), file=sys.stderr)
 import soothsayer_utils as syu
 print(" * Soothsayer Utilities v{}".format(syu.__version__), file=sys.stderr)
+__ecosystem__["soothsayer_utils"] = syu.__version__
 import compositional as coda
 print(" * Compositional v{}".format(coda.__version__), file=sys.stderr)
+__ecosystem__["compositional"] = coda.__version__
 import hive_networkx as hx
 print(" * Hive NetworkX v{}".format(hx.__version__), file=sys.stderr)
+__ecosystem__["hive_networkx"] = hx.__version__
 import ensemble_networkx as enx
 print(" * Ensemble NetworkX v{}".format(enx.__version__), file=sys.stderr)
+__ecosystem__["ensemble_networkx"] = enx.__version__

@@ -19,7 +19,9 @@ from .packages import philr
 from .packages import edgeR
 from .packages import metagenomeSeq
 from .packages import propr
+from .packages import ALDEx2
 
-__all__ += ["dynamicTreeCut", "WGCNA", "philr", "edgeR", "metagenomeSeq" ,"propr"]
+
+__all__ += ["dynamicTreeCut", "WGCNA", "philr", "edgeR", "metagenomeSeq" ,"propr", "ALDEx2"]
 
 __all__ = sorted(__all__)

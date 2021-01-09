@@ -10,7 +10,7 @@ from statsmodels.sandbox.stats.multicomp import multipletests
 # Soothsayer
 from ..utils import is_dict, assert_acceptable_arguments
 
-__all__ = ["p_adjust", "statistically_significant_symbols", "biweight_midcorrelation"]
+__all__ = ["p_adjust", "statistically_significant_symbols", "biweight_midcorrelation", "differential_abundance"]
 
 # Adjust p-values
 def p_adjust(p_values:pd.Series, method="fdr", name=None, **kwargs):
@@ -178,3 +178,25 @@ def biweight_midcorrelation(a,b, check_index_order=True, use_numba=False, verbos
         result = pd.Series(result, index=labels)
 
     return result
+
+# Differential abundance
+def differential_abundance(X:pd.DataFrame, y:pd.Series, reference_class=None, method="ALDEx2", into=pd.DataFrame, algo_kws=dict(), random_state=0):
+    # Assertions (This is duplicate but would rather be safe)
+    assert np.all(X.shape[0] == y.size), "X.shape[0] != y.size"
+    assert np.all(X.index == y.index), "X.index != y.index"
+
+    #Methods
+    assert_acceptable_arguments(method, {"ALDEx2"})
+
+    # ALDEx2
+    if method.lower().strip() == "aldex2":
+        from soothsayer.r_wrappers import ALDEx2
+        args = {
+            "X":X,
+            "y":y,
+            "reference_class":reference_class,
+            "into":into,
+            "aldex2_kws":algo_kws,
+            "random_state":random_state,
+        }
+        return ALDEx2.run_aldex2(**args)
