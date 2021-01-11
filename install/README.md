@@ -45,7 +45,7 @@ pip install git+https://github.com/jolespin/soothsayer
 # pip install git+https://github.com/jolespin/soothsayer --force-reinstall --no-deps
 ```
 
-#### Bug with `pip install` concerning `soothsayer`
+#### Critical bug with `pip install soothsayer`
 There is a strange [issue](https://github.com/pypa/pip/issues/7170) that I'm working on with `PyPI`  where installing `soothsayer` via `pip` *sometimes* removes all of the packages in `site-directory`.  I've found a work around for the time being.  Please use the `remove_and_reinstall_soothsayer.sh` script to first remove an older instance of `soothsayer` and reinstall the newest version. To be as safe as possible, you can manually delete `soothsayer` from `site-packages` and then reinstall with `pip` using `--no-deps`.
 
 Let me know if you have any issues before creating an issue on GitHub:
