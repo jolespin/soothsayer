@@ -21,10 +21,10 @@ from scipy.cluster import hierarchy as sp_hierarchy
 from scipy.spatial.distance import squareform
 try:
     from fastcluster import linkage
-except ImportError:
+except (ImportError, ModuleNotFoundError) as e:
     from scipy.cluster.hierarchy import linkage
-    print("Could not import `linkage` from `fastcluster` and using `scipy.cluster.hierarchy.linkage` instead", file=sys.stderr)
-
+    warnings.warn("Could not import `linkage` from `fastcluster` and using `scipy.cluster.hierarchy.linkage` instead")
+    
 # Soothsayer
 from ..utils import dict_reverse, infer_tree_type, check_polytomy, is_leaf, name_tree_nodes 
 

@@ -1,7 +1,12 @@
-# Note, once I have more time and create soothsayer v1.0 then I will make all of this formatted consistently
+# ===========
+# DEVELOPMENT
+# ===========
+Once I have more time and create soothsayer v1.0 then I will make all of this formatted consistently
 
+# ========
 # Changes:
 # ========
+* 2021.01.13 Finally removed `WGCNA` dependence.  I have recoded all of the necessary functions in Python.  This will make installation much easier.  New functions include: density, heterogeneity, centralization, scalefree_topology_estimation, and an updated determine_soft_threshold.
 * 2021.01.06 Added `differential_abundance` to `statistics` using `ALDEx2` in `r_wrappers`
 * 2020.12.16 Fixed a ddof=0 and ddof=1 incompatibility.  Now all ddof=1 in compositional package.
 * 2020.09.17 Fixed LinAlgError in plot_compositional from seaborn update to v0.11
@@ -23,6 +28,7 @@
 * Remove name in output files
 * Add weights in the synopsis file
 * Remove feature type from synopsis names
+* Change `attributes` to `features`
 
 # Bugs:
 # =====
@@ -31,11 +37,7 @@
 # __future__:
 * Make HierarchicalClassifier its own package
 # Make soothsayer_visuals its own package
-# Make soothsayer_networks its own package?
 * Make PGFCs generalizable 
-* Made depndencies of many utilities on soothsayer_utils instead.  Need to do this with other submodules as well
-* Hive plot, fix the labels and make option for being more circule instead of super long
-* Add all of the checkm markers in the database. 
 * Change `create_pca_model` to something else...
 * Collapse topology so it uses Agglomerative instead
 * Clean up the coloring (map_colors, scalarmapping_from_data, etc.)

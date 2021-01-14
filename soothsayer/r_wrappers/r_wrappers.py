@@ -49,7 +49,7 @@ R_packages = dict() # Remove this in future versions
 # @check_packages(["rpy2"], language="python", import_into_backend=False)
 def R_package_retrieve(package, not_exists_ok=True):
     """
-    ["dynamicTreeCut", "WGCNA", "fastcluster", "phyloseq", "philr", "ape", "metagenomeSeq", "edgeR"]
+    ["dynamicTreeCut", "fastcluster", "phyloseq", "philr", "ape", "metagenomeSeq", "edgeR"]
     """
     from rpy2.robjects.packages import importr
     if rpy2_version_major == 2:

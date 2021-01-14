@@ -18,8 +18,10 @@ from scipy import stats
 from scipy.special import comb
 from scipy.spatial.distance import squareform
 # from teneto import TemporalNetwork as TenetoTemporalNetwork
-from tqdm import tqdm
+# from tqdm import tqdm
 from skbio.util._decorator import experimental, stable
+
+from statsmodels.api import OLS
 
 # Soothsayer
 from ..symmetry import *
@@ -30,7 +32,7 @@ from ..transmute.normalization import normalize_minmax
 from ..io import write_object
 
 
-__all__ = {  "determine_soft_threshold","cluster_modularity", "TemporalNetwork",  "Edge"}
+__all__ = {  "determine_soft_threshold", "TemporalNetwork",  "Edge", "cluster_modularity","density","centralization","heterogeneity","scalefree_topology_estimate"}
 
 # hive_networkx
 import hive_networkx as hx
@@ -44,8 +46,6 @@ add_objects_to_globals(enx, functions_from_ensemble_networkx, globals(), add_ver
 
 
 __all__ = sorted(__all__)
-
-
 
 
 # Network Edge
@@ -1001,58 +1001,6 @@ class Edge(tuple):
 #     else:
 #         return pd.DataFrame(A_tom, index=node_labels, columns=node_labels)
 
-# Soft threshold curves
-@check_packages(["WGCNA"], language="r", import_into_backend=False)
-def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True, query_powers = np.append(np.arange(1,10), np.arange(10,30,2)), style="seaborn-white", scalefree_threshold=0.85, pad=1.0, markeredgecolor="black"):
-        """
-        WGCNA: intramodularConnectivity
-            function (similarity, RsquaredCut = 0.85, powerVector = c(seq(1,
-                       10, by = 1), seq(12, 20, by <...> reNetworkConcepts, verbose = verbose,
-                       indent = indent)
-        returns fig, ax, df_sft
-        """
-        # Imports
-        from ..r_wrappers.packages.WGCNA import pickSoftThreshold_fromSimilarity
-
-        # Check
-        if is_query_class(similarity, "Symmetric"):
-            df_adj = similarity.to_dense()
-        else:
-            df_adj = similarity
-        assert df_adj.index.value_counts().max() == 1, "Remove duplicate labels in row"
-        assert df_adj.columns.value_counts().max() == 1, "Remove duplicate labels in columns"
-
-        # Run pickSoftThreshold.fromSimilarity
-        with Suppress(show_stdout=False, show_stderr=True):
-            df_sft = pickSoftThreshold_fromSimilarity(df_adj, query_powers)
-        df_sft["Scale-Free Topology Model Fit"] = -1*np.sign(df_sft.iloc[:,2])*df_sft.iloc[:,1]
-        df_sft = df_sft.set_index("Power", drop=True)
-        fig, ax = None, None
-        if show_plot:
-            with plt.style.context(style=style):
-                fig, ax = plt.subplots(ncols=3, figsize=(20,5))
-                df_plot = pd.DataFrame([pd.Series(df_sft.index, index=df_sft.index).astype(int), df_sft["Scale-Free Topology Model Fit"]], index=["x","y"]).T
-                annot = list({(str(p), (p,r + 1e-2)) for p,r in df_sft["Scale-Free Topology Model Fit"].iteritems()})
-                fig, ax[0], im = plot_scatter(ax=ax[0], data=df_plot, x="x", y = "y", c="teal", xlabel="power", edgecolor=markeredgecolor, linewidth=1, ylabel="Scale-Free Topology : $R^2$", title="Scale-Free Topology Model Fit", annot=annot, annot_kws={"fontsize":12})
-                if scalefree_threshold:
-                    ax[0].axhline(scalefree_threshold, color="red", linestyle=":", label=to_precision(scalefree_threshold, 3))
-                    ax[0].legend(fontsize=12, title="Scale-Free Threshold")
-                # Connectivity
-                df_sft.loc[:,["mean.k.","median.k.", "max.k."]].plot(kind="line", marker="o", alpha=0.85, markeredgecolor=markeredgecolor, markeredgewidth=1, ax=ax[1])
-                ax[1].set_title("Connectivity", fontsize=15, fontweight="bold")
-                ax[1].set_ylabel("$k$", fontsize=15)
-                ax[1].grid(False)
-
-                # Density & Centralization & Heterogeneity
-                np.log(df_sft.loc[:,["Density","Centralization", "Heterogeneity"]]).plot(kind="line", markeredgecolor=markeredgecolor, markeredgewidth=1, marker="o", alpha=0.85, ax=ax[2])
-                ax[2].set_title("Network Stats", fontsize=15, fontweight="bold")
-                ax[2].set_ylabel("log-scale", fontsize=15)
-                ax[2].grid(False)
-
-                if title:
-                    fig.suptitle(title, fontsize=18, fontweight="bold", y=pad)
-        return fig, ax, df_sft
-
 # Cluster modularity matrix
 def cluster_modularity(df:pd.DataFrame, node_type="node", iteration_type="iteration"):
     """
@@ -1115,6 +1063,234 @@ def cluster_modularity(df:pd.DataFrame, node_type="node", iteration_type="iterat
 
 
     return df_pairs[~df_pairs.index.duplicated(keep="first")]
+
+# Network Metrics
+def density(k:pd.Series):
+    """
+    Density = sum(khelp)/(nGenes * (nGenes - 1))
+    https://github.com/cran/WGCNA/blob/15de0a1fe2b214f7047b887e6f8ccbb1c681e39e/R/Functions.R#L1963
+    """
+    k_total = k.sum()
+    number_of_nodes = k.size
+    return k_total/(number_of_nodes * (number_of_nodes - 1))
+
+def centralization(k:pd.Series):
+    """
+    Centralization = nGenes*(max(khelp)-mean(khelp))/((nGenes-1)*(nGenes-2))
+    https://github.com/cran/WGCNA/blob/15de0a1fe2b214f7047b887e6f8ccbb1c681e39e/R/Functions.R#L1965
+    """
+    k_max = k.max()
+    k_mean = k.mean()
+    number_of_nodes = k.size
+    return number_of_nodes * (k_max - k_mean)/((number_of_nodes - 1) * (number_of_nodes - 2))
+
+def heterogeneity(k:pd.Series):
+    """
+    Heterogeneity = sqrt(nGenes * sum(khelp^2)/sum(khelp)^2 - 1)
+    https://github.com/cran/WGCNA/blob/15de0a1fe2b214f7047b887e6f8ccbb1c681e39e/R/Functions.R#L1967
+    """
+    number_of_nodes = k.size
+    return np.sqrt(number_of_nodes * np.sum(k**2)/np.sum(k)**2 - 1)
+
+
+# Scale-Free Topology Estimation
+def scalefree_topology_estimate(k:pd.Series, number_of_partitions=10, pseudocount=1e-09, include_metrics=True, into=pd.Series):
+    """
+    lm1 = log(p(k)) ~ log(k) 
+    lm2 = log_p_dk ~ log_dk + I(10**log_dk)
+    
+    Adapted from the following source:
+    * https://github.com/cran/WGCNA/blob/15de0a1fe2b214f7047b887e6f8ccbb1c681e39e/R/Functions.R#L6540
+    * https://github.com/cran/WGCNA/blob/15de0a1fe2b214f7047b887e6f8ccbb1c681e39e/R/Functions.R#L1810
+    """
+    # discretized.k = cut(k, nBreaks)
+    k_discretized = pd.cut(k, bins=number_of_partitions)
+    # dk = tapply(k, discretized.k, mean)
+    dk = k.groupby(k_discretized).mean()
+    # p.dk = as.vector(tapply(k, discretized.k, length)/length(k))
+    p_dk = k.groupby(k_discretized).size()/len(k)
+    # breaks1 = seq(from = min(k), to = max(k),  length = nBreaks + 1)
+    bins = np.linspace(min(k),max(k),number_of_partitions+1)
+    # hist1 = hist(k, breaks = breaks1, plot = FALSE, right = TRUE)
+    hist, bin_edges = np.histogram(k, bins=bins) # This isn't being used
+    # dk2 = hist1$mids
+#     dk2 = ro.r["hist"](k, breaks=bins)[3]
+    dk2 = list()
+    for i in range(0, len(bin_edges)-1):
+        dk2.append(np.mean(bin_edges[i:i+2]))
+    dk2 = np.asarray(dk2)
+    # dk = ifelse(is.na(dk), dk2, dk)
+    index_nan = np.isnan(dk)
+    dk[index_nan] = dk2[index_nan]
+    # dk = ifelse(dk == 0, dk2, dk)
+    index_zeros = dk == 0
+    dk[index_zeros] = dk2[index_zeros]
+    # log.dk = as.vector(log10(dk))
+    log_dk = np.log10(dk)
+    # p.dk = ifelse(is.na(p.dk), 0, p.dk)
+    index_nan = np.isnan(p_dk)
+    p_dk[index_nan] = 0
+    # log.p.dk= as.numeric(log10(p.dk + 1e-09))
+    log_p_dk = np.log10(p_dk + pseudocount)
+    finite = np.isfinite(log_dk) & np.isfinite(log_p_dk)
+    log_dk = log_dk[finite]
+    log_p_dk = log_p_dk[finite]
+
+    
+    data = pd.DataFrame([log_dk, log_p_dk], index=["log_dk", "log_p_dk"]).T
+    models = dict()
+    # lm1 = try(lm(log.p.dk ~ log.dk));
+    try:
+        models["lm1"] = OLS.from_formula("log_p_dk ~ log_dk", data=data).fit()
+    except Exception as e:
+#         print("Could not fit `lm1`: {}".format(e), file=sys.stderr)
+        warnings.warn("Could not fit `lm1`: {}".format(e))
+    # lm2 = lm(log.p.dk ~ log.dk + I(10^log.dk))
+    try:
+        models["lm2"] = OLS.from_formula("log_p_dk ~ log_dk + I(10**log_dk)", data=data).fit()
+    except Exception as e:
+#         print("Could not fit `lm2`: {}".format(e), file=sys.stderr)
+
+        warnings.warn("Could not fit `lm2`: {}".format(e))
+    
+    output = OrderedDict()
+    for name, model in models.items():
+        output[(name, "$R^2$")] = model.rsquared
+        output[(name, "$R^2$ Adjusted")] = model.rsquared_adj 
+        if name == "lm1":
+            output[(name, "Slope")] = model.params[1]
+            output[(name, "Scale-Free Topology Model Fit")] = -np.sign(output[(name, "Slope")]) * output[(name, "$R^2$")]
+
+#         output[(name, "F-Test|stat")] = model.fvalue
+#         output[(name, "F-Test|pvalue")] = model.f_pvalue
+        output[(name, "AIC")] = model.aic
+        output[(name, "BIC")] = model.bic
+        output[(name, "Log-Likelihood")] = model.llf
+        # -sign(sft$fitIndices[,3]) * sft$fitIndices[,2],
+#         datout[i, 2] = SFT1$Rsquared.SFT  
+#         datout[i, 3] = SFT1$slope.SFT 
+
+    if include_metrics:
+        number_of_nodes = k.size
+        # Connectivity
+        k_mean = k.mean()
+        output[("Metrics", "k|mean")] = k_mean
+        k_median = k.median()
+        output[("Metrics", "k|median")] = k_median
+        k_max = k.max()
+        output[("Metrics", "k|max")] = k_max
+        k_total = k.sum()
+        output[("Metrics", "k|total")] = k_total
+        
+        # "More Network Concepts"
+        output[("Metrics", "Density")] = density(k)
+        
+        output[("Metrics", "Centralization")] = centralization(k)
+
+        output[("Metrics", "Heterogeneity")] = heterogeneity(k)
+    return into(output)
+
+
+# pickSoftThreshold from WGCNA
+def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True, show_annotation=True, powers = np.append(np.arange(1,10), np.arange(10,30,2)), include_self_loops=False, style="seaborn-white", scalefree_threshold=0.85,  cmap="Set1", scalefree_kws=dict(), scatter_kws=dict(), legend_kws=dict(), annot_kws=dict(), title_kws=dict(), line_kws=dict()):
+        """
+        WGCNA: intramodularConnectivity
+            function (similarity, RsquaredCut = 0.85, powerVector = c(seq(1,
+                       10, by = 1), seq(12, 20, by <...> reNetworkConcepts, verbose = verbose,
+                       indent = indent)
+        returns fig, ax, df_sft
+        """
+        # Imports
+
+        # Check
+        if is_query_class(similarity, "Symmetric"):
+            df_sim = similarity.to_dense()
+        else:
+            df_sim = similarity
+        assert df_sim.index.value_counts().max() == 1, "Remove duplicate labels in row"
+        assert df_sim.columns.value_counts().max() == 1, "Remove duplicate labels in columns"
+        assert df_sim.values.ravel().min() >= 0, "Please transform `similarity` for `unsigned` network.  No current support for `signed` networks."
+
+        # Run pickSoftThreshold.fromSimilarity
+        _scalefree_kws = dict(number_of_partitions=10,pseudocount=1e-9)
+        _scalefree_kws.update(scalefree_kws)
+        
+        data = dict()
+        for beta in pv(powers):
+            df_adj = df_sim ** beta
+            if not include_self_loops:
+                np.fill_diagonal(df_adj.values, 0)
+            # Get connectivity
+            k = df_adj.sum(axis=1)
+            # Store
+            data[beta] = scalefree_topology_estimate(k,  include_metrics=True, into=pd.Series, **_scalefree_kws)
+
+        df_sft = pd.DataFrame(data).T
+        df_sft.index.name = "Soft Threshold"
+        
+        fig, ax = None, None
+        
+        _scatter_kws = {"s":100, "c":"darkgray", "edgecolor":"black","linewidth":1}
+        _scatter_kws.update(scatter_kws)
+        _annot_kws = {"fontsize":12}
+        _annot_kws.update(annot_kws)
+        _title_kws = dict(fontsize=18, fontweight="bold", y=1)
+        _title_kws.update(title_kws)
+        _line_kws = dict(marker="o", alpha=0.85, markeredgecolor="black", markeredgewidth=1, colormap=cmap)
+        _line_kws.update(line_kws)
+        _legend_kws = {"fontsize":12, 'frameon': True, 'facecolor': 'white', 'edgecolor': 'black',}
+        _legend_kws.update(legend_kws)
+        
+        if show_plot:
+            with plt.style.context(style=style):
+                fig, ax = plt.subplots(ncols=3, figsize=(20,5))
+                df_plot = df_sft["lm1"]
+                if show_annotation is False:
+                    show_annotation = None
+                if show_annotation is True:
+                    annot = list({(str(p), (p,r + 1e-2)) for p,r in df_plot["Scale-Free Topology Model Fit"].iteritems()})
+                else:
+                    annot = show_annotation
+                    
+                df_plot["Scale-Free Topology Model Fit"].plot(kind="line",  label='_nolegend_', color=_scatter_kws["c"], ax=ax[0], marker=None, **{k:_line_kws[k] for k in ["alpha"]})
+                fig, ax[0], im = plot_scatter(
+                    ax=ax[0], 
+                    data=df_plot.reset_index(), 
+                    x="Soft Threshold", 
+                    y = "Scale-Free Topology Model Fit", 
+                    xlabel="Soft Threshold [β]", 
+                    ylabel="Scale-Free Topology : $R^2$", 
+                    title="Scale-Free Topology Model Fit", 
+                    annot=annot, 
+                    annot_kws=_annot_kws,
+                    **_scatter_kws,
+                )
+                
+                if scalefree_threshold:
+                    ax[0].axhline(scalefree_threshold, color="red", linestyle="--", label="Threshold: {}".format(scalefree_threshold), linewidth=1)
+                    ax[0].legend(**_legend_kws)
+                    
+                # Connectivity
+                df_sft["Metrics"].loc[:,["k|mean","k|median", "k|max"]].plot(kind="line",  ax=ax[1], **_line_kws)
+                ax[1].set_title("Connectivity", fontsize=15, fontweight="bold")
+                ax[1].set_xlabel("Soft Threshold [β]", fontsize=15)
+                ax[1].set_ylabel("$k$", fontsize=15)
+                ax[1].legend(**_legend_kws)
+
+                ax[1].grid(False)
+
+                # Density & Centralization & Heterogeneity
+                np.log(df_sft["Metrics"].loc[:,["Density","Centralization", "Heterogeneity"]]).plot(kind="line", ax=ax[2], **_line_kws)
+                ax[2].legend(**_legend_kws)
+                ax[2].set_title("Network Metrics", fontsize=15, fontweight="bold")
+                ax[2].set_xlabel("Soft Threshold [β]", fontsize=15)
+                ax[2].set_ylabel("log-scale", fontsize=15)
+
+                ax[2].grid(False)
+
+                if title:
+                    fig.suptitle(title, **_title_kws)
+        return fig, ax, df_sft
 
 # Temporal Networks
 class TemporalNetwork(object):
@@ -1307,7 +1483,7 @@ class TemporalNetwork(object):
         decoded_edges = list()
         for t, graph in self.graphs.items():
             if verbose:
-                iterable = tqdm(graph.edges(data=True), "t={}".format(t))
+                iterable = pv(graph.edges(data=True), "t={}".format(t))
             else:
                 iterable = graph.edges(data=True)
             for node_i,node_j, attrs in iterable:
@@ -1328,7 +1504,7 @@ class TemporalNetwork(object):
         if intertemporal_connections is not None:
             # Verbose but quicker
             if check_intermodal:
-                for edge, connection in tqdm(intertemporal_connections.items(), "Adding intertemporal edges"):
+                for edge, connection in pv(intertemporal_connections.items(), "Adding intertemporal edges"):
                     node_i_t_n, node_i_t_n1 = edge
                     t_n = node_i_t_n[-1]
                     t_n_1 = node_i_t_n1[-1]
@@ -1341,7 +1517,7 @@ class TemporalNetwork(object):
                     edge_data = [node_i_t_n, node_i_t_n1, edge_attrs]
                     decoded_edges.append(edge_data)
             else:
-                for edge, connection in tqdm(intertemporal_connections.items(), "Adding intertemporal edges"):
+                for edge, connection in pv(intertemporal_connections.items(), "Adding intertemporal edges"):
                     edge_attrs = {"weight":abs(connection), "sign":np.sign(connection)}
                     for (field, data) in additional_edge_attributes.items():
                         edge_attrs[field] = data[edge]

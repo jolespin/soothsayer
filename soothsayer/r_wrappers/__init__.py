@@ -14,7 +14,7 @@ __all__ = list()
 __all__ += ["R_package_retrieve", "R_packages", "pandas_to_rpy2", "rpy2_to_pandas"]
 from .r_wrappers import *
 from .packages import dynamicTreeCut
-from .packages import WGCNA
+# from .packages import WGCNA
 from .packages import philr
 from .packages import edgeR
 from .packages import metagenomeSeq
@@ -22,6 +22,6 @@ from .packages import propr
 from .packages import ALDEx2
 
 
-__all__ += ["dynamicTreeCut", "WGCNA", "philr", "edgeR", "metagenomeSeq" ,"propr", "ALDEx2"]
+__all__ += ["dynamicTreeCut", "philr", "edgeR", "metagenomeSeq" ,"propr", "ALDEx2"]
 
 __all__ = sorted(__all__)

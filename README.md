@@ -6,7 +6,7 @@ _________________________________
 *Soothsayer* is a high-level package for (bio-)informatics with various methods for network analysis, hierarchical ensembles of classifiers, feature selection, plotting, and more.
 
 #### Current Version:
-*v2021.01.06*
+*v2021.01.13*
 
 #### Citation:
 *Espinoza, *Dupont et al. 2021 (In Review)

@@ -11,15 +11,15 @@ Inspired by [qiime2](https://docs.qiime2.org/2019.4/install/native/) installatio
 
 ```bash
 # Download the conda environment instructions
-wget https://raw.githubusercontent.com/jolespin/soothsayer/master/install/soothsayer_py38_v2020.07.23.osx.yml
+wget https://raw.githubusercontent.com/jolespin/soothsayer/master/install/soothsayer_py39_v2021.01.13.osx.yml
 # Create a new environment (you should probably do this from the base environment [conda activate base])
-conda env create -y --name soothsayer_env --file soothsayer_py38_v2020.07.23.osx.yml
+conda env create -y --name soothsayer_env --file soothsayer_py39_v2021.01.13.osx.yml
 # [Optional] Remove the environment file
-rm soothsayer_py38_v2020.07.23.osx.yml
+rm soothsayer_py39_v2021.01.13.osx.yml
 # Activate environment
 conda activate soothsayer_env
 
-# For Linux, replace the `osx` with `linux`
+# For Linux, replace the `osx` with `linux`.  Though, not all versions have been precompiled. 
 
 ```
 
@@ -32,21 +32,24 @@ bash base_installation.sh
 # or
 bash base_installation.sh soothsayer_env
 # or
-bash base_installation.sh soothsayer_env 3.8.2
-# Duration: This will take a while and may require manually installing a few packages if certain ones fail.  
+bash base_installation.sh soothsayer_env 3.9
+# Duration: This will take a while and may require manually installing a few packages if certain ones fail.  This is mostly a base to see what needs to be installed and it will likely fail. As mentioned, I'm working endlessly to reduce the dependencies.
 ```
 
 #### Update to the current release [Recommended]
-Since `soothsayer` is still in a developmental stage, I'm constantly adding methods, fixing bugs, and moving code around.  You should run the following command to use the current version:
+Since `soothsayer` is still in a developmental stage, I'm constantly adding methods, fixing bugs, and moving code around.  Note please read critical bug in subsequent section.  
 
 ```bash
-pip install git+https://github.com/jolespin/soothsayer
+# First time installing
+pip install --no-deps git+https://github.com/jolespin/soothsayer
 
-# pip install git+https://github.com/jolespin/soothsayer --force-reinstall --no-deps
+# Updating
+bash remove_and_reinstall_soothsayer.sh
+
 ```
 
 #### Critical bug with `pip install soothsayer`
-There is a strange [issue](https://github.com/pypa/pip/issues/7170) that I'm working on with `PyPI`  where installing `soothsayer` via `pip` *sometimes* removes all of the packages in `site-directory`.  I've found a work around for the time being.  Please use the `remove_and_reinstall_soothsayer.sh` script to first remove an older instance of `soothsayer` and reinstall the newest version. To be as safe as possible, you can manually delete `soothsayer` from `site-packages` and then reinstall with `pip` using `--no-deps`.
+There is a strange [issue](https://github.com/pypa/pip/issues/7170) that I'm working on with `PyPI`  where installing `soothsayer` via `pip` *sometimes* removes all of the packages in `site-directory`.  I've found a work around for the time being.  Please use the `remove_and_reinstall_soothsayer.sh` script to first remove an older instance of `soothsayer` and reinstall the newest version. To be as safe as possible, you can manually delete `soothsayer` from `site-packages` and then reinstall with `pip` using `--no-deps`.  Basically, this won't be an issue if this is your first time installing but if you are updating, I highly recommend manually removing from site-packages and then installing with `--no-deps` flag. 
 
 Let me know if you have any issues before creating an issue on GitHub:
 jespinoz[ a t ]jcvi[ d o t ]org
