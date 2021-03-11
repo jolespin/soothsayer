@@ -6,6 +6,8 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 # ========
 # Changes:
 # ========
+* 2021.03.05 Added edgeR's exactTest, edgeR's glmLRT, and fixed np.all incompatibilities (https://github.com/pandas-dev/pandas/issues/40259)
+* 2021.01.21 Added `markerscale=2` to LEGEND_KWS
 * 2021.01.13 Finally removed `WGCNA` dependence.  I have recoded all of the necessary functions in Python.  This will make installation much easier.  New functions include: density, heterogeneity, centralization, scalefree_topology_estimation, and an updated determine_soft_threshold.
 * 2021.01.06 Added `differential_abundance` to `statistics` using `ALDEx2` in `r_wrappers`
 * 2020.12.16 Fixed a ddof=0 and ddof=1 incompatibility.  Now all ddof=1 in compositional package.
@@ -41,4 +43,5 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 * Change `create_pca_model` to something else...
 * Collapse topology so it uses Agglomerative instead
 * Clean up the coloring (map_colors, scalarmapping_from_data, etc.)
+* Move TemporalNetwork to Ensemble NetworkX
 

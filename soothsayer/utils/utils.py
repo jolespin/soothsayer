@@ -62,7 +62,7 @@ __all__ = sorted(__all__)
 # =============
 # Defaults
 # =============
-LEGEND_KWS = {'fontsize': 15, 'frameon': True, 'facecolor': 'white', 'edgecolor': 'black', 'loc': 'center left', 'bbox_to_anchor': (1, 0.5)}
+LEGEND_KWS = {'fontsize': 15, 'frameon': True, 'facecolor': 'white', 'edgecolor': 'black', 'loc': 'center left', 'bbox_to_anchor': (1, 0.5), 'markerscale':2}
 DIVERGING_KWS = dict(h_neg=220, h_pos=15, sep=20, s=90, l=50)
 CMAP_DIVERGING = sns.diverging_palette(**DIVERGING_KWS, as_cmap=True)
 COLOR_NEGATIVE, COLOR_POSITIVE = sns.diverging_palette(**DIVERGING_KWS, n=2).as_hex()
@@ -376,7 +376,7 @@ def map_colors(y:pd.Series,
 
 # Determine continuous data type
 def infer_continuous_type(data:pd.Series):
-    assert np.all(data.map(is_number)), "All values in `data` must be numerical"
+    assert all(data.map(is_number)), "All values in `data` must be numerical"
 
     _vmin = data.min()
     _vmax = data.max()
@@ -726,7 +726,7 @@ class Chromatic(object):
     def from_continuous(cls, y:pd.Series, name=None, cmap="infer", vmin="infer", vmax="infer", format="hex", **attrs):
         if is_dict(y):
             y = pd.Series(y)
-        assert np.all(y.map(is_number)), "All values in `y` must be numerical"
+        assert all(y.map(is_number)), "All values in `y` must be numerical"
 
         conditions = defaultdict(list)
 

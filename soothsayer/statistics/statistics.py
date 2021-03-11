@@ -2,15 +2,17 @@
 # Imports
 # ==============================================================================
 # Built-ins
-import os, sys
-from collections import defaultdict, OrderedDict
+import os, sys, warnings
+from collections import defaultdict, OrderedDict, Mapping
 import pandas as pd
 import numpy as np
+from scipy import stats
 from statsmodels.sandbox.stats.multicomp import multipletests
 # Soothsayer
-from ..utils import is_dict, assert_acceptable_arguments
+from ..utils import is_dict, assert_acceptable_arguments, flatten
 
-__all__ = ["p_adjust", "statistically_significant_symbols", "biweight_midcorrelation", "differential_abundance"]
+
+__all__ = ["p_adjust", "statistically_significant_symbols", "biweight_midcorrelation", "differential_abundance", "feature_set_enrichment"]
 
 # Adjust p-values
 def p_adjust(p_values:pd.Series, method="fdr", name=None, **kwargs):
@@ -180,23 +182,136 @@ def biweight_midcorrelation(a,b, check_index_order=True, use_numba=False, verbos
     return result
 
 # Differential abundance
-def differential_abundance(X:pd.DataFrame, y:pd.Series, reference_class=None, method="ALDEx2", into=pd.DataFrame, algo_kws=dict(), random_state=0):
+def differential_abundance(X:pd.DataFrame, y:pd.Series, reference_class=None, design_matrix=None, method="ALDEx2", into=pd.DataFrame, algo_kws=dict(), random_state=0, show_console=False, **kwargs):
     # Assertions (This is duplicate but would rather be safe)
     assert np.all(X.shape[0] == y.size), "X.shape[0] != y.size"
     assert np.all(X.index == y.index), "X.index != y.index"
 
     #Methods
-    assert_acceptable_arguments(method, {"ALDEx2"})
+    assert_acceptable_arguments(method, {"ALDEx2", "edgeR::exactTest", "edgeR::glmLRT"})
 
     # ALDEx2
-    if method.lower().strip() == "aldex2":
+    if method == "ALDEx2":
         from soothsayer.r_wrappers import ALDEx2
-        args = {
+        if design_matrix is not None:
+            warnings.warn("`design_matrix` not used for method='ALDEx2'")
+        kwargs = {
             "X":X,
             "y":y,
             "reference_class":reference_class,
             "into":into,
             "aldex2_kws":algo_kws,
             "random_state":random_state,
+            "show_console":show_console,
+            **kwargs,
         }
-        return ALDEx2.run_aldex2(**args)
+        return ALDEx2.run_aldex2(**kwargs)
+    
+    # EdgeR's ExactTest
+    if method == "edgeR::exactTest":
+        if design_matrix is not None:
+            warnings.warn("`design_matrix` not used for method='edgeR::exactTest'")
+        from soothsayer.r_wrappers import edgeR
+        kwargs = {
+            "X":X,
+            "y":y,
+            "reference_class":reference_class,
+            "into":into,
+            "edger_kws":algo_kws,
+            "random_state":random_state,
+            "show_console":show_console,
+            **kwargs,
+        }
+        return edgeR.run_edger_exact_test(**kwargs)
+    
+    # EdgeR's GLM
+    if method == "edgeR::glmLRT":
+        from soothsayer.r_wrappers import edgeR
+        kwargs = {
+            "X":X,
+            "y":y,
+            "design_matrix":design_matrix,
+            "reference_class":reference_class,
+            "into":into,
+            "edger_kws":algo_kws,
+            "random_state":random_state,
+            "show_console":show_console,
+            **kwargs,
+        }
+        return edgeR.run_edger_glm(**kwargs)
+
+
+# Feature Set Enrichment
+def feature_set_enrichment(features:set, feature_sets:Mapping,  tol_test:float=0.05, test_method:str="hypergeometric", fdr_method:str="fdr_bh"): # How to incorporate weights?
+    """
+    Future: 
+     * Incorporate `feature_weights:pd.Series` using Wallenius' noncentral hypergeometric distribution
+
+    Theory: 
+    http://pedagogix-tagc.univ-mrs.fr/courses/ASG1/practicals/go_statistics_td/go_statistics_td_2015.html
+    """
+    assert_acceptable_arguments(test_method, {"hypergeometric"})
+    
+    # Force set type for features in case other iterables are used
+    features = set(features)
+
+    # Union of all features in feature sets
+    feature_set_union = flatten(feature_sets, into=set)
+    number_of_features_in_db = len(feature_set_union)
+    
+    data = defaultdict(OrderedDict)
+    
+    for name, feature_set in feature_sets.items():
+        # Force feature_set as set type
+        feature_set = set(feature_set)
+        # Get number of features in set
+        number_of_features_in_set = len(feature_set)
+        # Get number of features in query
+        number_of_features_in_query = len(features)
+        # Get number of overlapping features between query and set
+        number_of_features_overlapping = len(features & feature_set)
+        
+        # Rum hypergeometric test
+        if test_method == "hypergeometric":
+            model = stats.hypergeom(
+                M = number_of_features_in_db,
+                n = number_of_features_in_set,
+                N = number_of_features_in_query,
+            )
+            # "We want the *inclusive* upper tail : P-value = P(X≥x). 
+            # For this, we can compute the exclusive upper tail of the value just below x. 
+            # Indeed, since the distribution is discrete, P(X >x-1) = P(X ≥x)."
+            # Source - http://pedagogix-tagc.univ-mrs.fr/courses/ASG1/practicals/go_statistics_td/go_statistics_td_2015.html
+            p_value = model.sf(number_of_features_overlapping - 1)
+            data["p_value"][name] = p_value
+
+#         if test_method == "fisher":
+#             number_of_query_not_in_set = len(features - feature_set)
+#             number_of_features_not_in_set = number_of_features_in_db - number_of_features_in_set
+#             contingency_table = [
+#                 [number_of_features_overlapping, number_of_features_in_query - number_of_features_overlapping],
+#                 [number_of_features_in_set - number_of_features_overlapping, number_of_features_not_in_set - (number_of_features_in_query - number_of_features_overlapping)],
+#             ]
+#             stat, p_value = stats.fisher_exact(contingency_table, alternative="greater")
+#             data["contingency_table"][name] = contingency_table
+#             data["stat"][name] = stat
+#             data["p_value"][name] = p_value
+
+        # Store values
+        data["number_of_features_in_db (M)"][name] = number_of_features_in_db
+        data["number_of_features_in_set (n)"][name] = number_of_features_in_set
+        data["number_of_features_in_query (N)"][name] = number_of_features_in_query
+        data["number_of_features_overlapping (k)"][name] = number_of_features_overlapping
+
+    # Create dataframe
+    df = pd.DataFrame(data)
+    df.insert(0, "test_method", test_method)
+
+    # Calculate adjusted p-value
+    df.insert(df.shape[1], "fdr_method", fdr_method)
+    df.insert(df.shape[1], "fdr_value", p_adjust(df["p_value"], method=fdr_method))
+    
+    # Determine statistical significance
+    if tol_test is not None:
+        df.insert(df.shape[1], "fdr<{}".format(tol_test), df["fdr_value"] < tol_test)
+    return df

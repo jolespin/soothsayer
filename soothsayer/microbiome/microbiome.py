@@ -1,4 +1,4 @@
-import os, sys, datetime, site, pathlib, operator
+import os, sys, datetime, site, pathlib, operator, warnings
 from collections import OrderedDict, defaultdict, namedtuple
 import pandas as pd
 import numpy as np
@@ -172,6 +172,7 @@ class PhylogenomicFunctionalComponents(object):
                  # Misc
                  delimiter = "|",
                 ):
+        warnings.warn("`PhylogenomicFunctionalComponent` is deprecated.  Please use `CategoricalEngineeredFeature` from `ensemble_networkx`", DeprecationWarning)
         # Input data
         self.lengths = lengths
         self.components_taxonomy = components_taxonomy
