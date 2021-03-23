@@ -34,8 +34,8 @@
 # Version
 # =======
 import sys, time
-__version__= "2021.03.10"
-__moniker__ = "Brettanomyces claussenii"
+__version__= "2021.03.22"
+__moniker__ = "Wild yeast from pine"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"

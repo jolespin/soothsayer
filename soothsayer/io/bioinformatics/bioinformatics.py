@@ -2,7 +2,7 @@
 # Modules
 # ==============================================================================
 # Built-ins
-import os, sys, time, pathlib, warnings, requests
+import os, sys, time, pathlib, warnings, requests, site
 from collections import *
 from io import StringIO, BytesIO
 from ast import literal_eval
@@ -10,7 +10,7 @@ from tqdm import tqdm
 import xml.etree.ElementTree as ET
 
 # Compression & Serialization
-import pickle, gzip, bz2, zipfile
+import pickle, gzip, bz2, zipfile, site
 
 # PyData
 import pandas as pd
@@ -44,11 +44,64 @@ add_objects_to_globals(syu, functions_from_soothsayer_utils, globals(), add_vers
 # (1) Add ability for `path` arguments to be `pathlib.Path`
 # (2) Add ability to process ~ in path
 
-
-
 # ==============
 # Bioinformatics
 # ==============
+
+# KEGG Brite Hierarchy
+def read_kegg_json(path:str, parse_names_and_identifiers:bool=True, index_by_identifiers:bool=True):
+    """
+    KEGG Brite Hierarchy:
+    ko00001: Orthologs: https://www.genome.jp/kegg-bin/show_brite?ko00001.keg
+    ko00002: Modules: https://www.genome.jp/kegg-bin/show_brite?ko00002.keg
+    ko00003: Reaction Modules: https://www.genome.jp/kegg-bin/show_brite?ko00003.keg
+    br08907: Networks: https://www.genome.jp/kegg-bin/show_brite?br08907.keg
+
+    Read JSON file and outputs pandas DataFrame
+    
+    Built-in: 
+    kegg-ortholog_ko00001_v2021-03-21.json
+    kegg-module_ko00002_v2020-11-24.json
+    """
+    def _get_name(x):
+        name = None
+        if x.startswith(("M", "RM", "N")):
+            name = " ".join(x.split(" ")[1:])
+        if x.startswith("K"):
+            name = ";".join(x.split(";")[1:])
+
+        assert name is not None, f"Could not parse name from string: {x}"
+        return name
+
+    # Built-in
+    if path in {"kegg-ortholog_ko00001_v2021-03-21.json", "kegg-module_ko00002_v2020-11-24.json"}:
+        path = os.path.join(site.getsitepackages()[0], "soothsayer", "db", path)
+        
+    # Parse JSON file
+    results = list()
+    for i, row in pd.read_json(path).iterrows():
+        data = row["children"]
+        level_1 = data["name"]
+        for child_1 in data["children"]:
+            level_2 = child_1["name"]
+            for child_2 in child_1["children"]:
+                level_3 = child_2["name"]
+                if "children" in child_2:
+                    for child_3 in child_2["children"]:
+                        level_4 = child_3["name"]
+                        fields = [level_1, level_2, level_3, level_4]
+                        results.append(fields)
+    # Create DataFrame
+    df = pd.DataFrame(results, columns=["Level_1", "Level_2", "Level_3", "Level_4"])
+    
+    # Get name and identifiers
+    if parse_names_and_identifiers:
+        df["Level_4-Name"] = df["Level_4"].map(_get_name)
+        df["Level_4-ID"] = df["Level_4"].map(lambda x: x.split(" ")[0])
+        if index_by_identifiers:
+            df = df.set_index("Level_4-ID")
+    return df
+
 # Clustalo Distance Matrix
 def read_clustalo_distmat(path:str):
     path = format_path(path)

@@ -6,6 +6,7 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 # ========
 # Changes:
 # ========
+* 2021.03.22 Deprecated some KEGG databases because versions couldn't be confirmed.  Added a read_kegg_json in soothsayer.io.  Fixed an error with the MANIFEST.in not including sub-directories in db and non-.pbz2 files such as the .flat and .json files
 * 2021.03.05 Added edgeR's exactTest, edgeR's glmLRT, and fixed np.all incompatibilities (https://github.com/pandas-dev/pandas/issues/40259)
 * 2021.01.21 Added `markerscale=2` to LEGEND_KWS
 * 2021.01.13 Finally removed `WGCNA` dependence.  I have recoded all of the necessary functions in Python.  This will make installation much easier.  New functions include: density, heterogeneity, centralization, scalefree_topology_estimation, and an updated determine_soft_threshold.
