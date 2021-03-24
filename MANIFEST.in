@@ -6,5 +6,7 @@ include soothsayer/db/*
 include soothsayer/db/Archaea_76/*
 include soothsayer/db/Bacteria_71/*
 include soothsayer/db/Protista_83/*
+include soothsayer/db/Ribosomal_RNAs/*
+
 recursive-exclude releases/ *.tar.gz
 global-exclude *.py[cod] __pycache__
