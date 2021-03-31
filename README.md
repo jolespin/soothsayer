@@ -18,13 +18,14 @@ _________________________________
 
 #### *Soothsayer* Ecosystem:
 * [soothsayer_utils](https://github.com/jolespin/soothsayer_utils) - Utility functions for *Soothsayer*
+* [ensemble_networkx](https://github.com/jolespin/ensemble_networkx) - High-level Ensemble Network implementations in Python. Built on top of NetworkX and Pandas.
 * [hive_networkx](https://github.com/jolespin/hive_networkx) - High-level Hive plot (Martin Krzywinski et al. 2012) implementations using *Matplotlib* in Python. Built on top of *NetworkX* and *Pandas*.
 * [compositional](https://github.com/jolespin/compositional) - Compositional data analysis in Python.
 
 _________________________________
 
 #### Case studies, tutorials and usage:
-Documentation will be released upon version 1.0. .. ... ..... ........
+Documentation will be released upon version 1.0 once API is stabilized.
 
 * [Antimicrobial resistance modeling associated with Espinoza & Dupont et al. 2021](https://github.com/jolespin/antimicrobial_resistance_modeling/blob/master/Espinoza-Dupont_et_al_2021/Notebooks/markdown_version/Espinoza-Dupont_et_al_2021__Supplemental.md)
 * [Feature selection using *Clairvoyance* on the Iris dataset with 1000 noise attributes](tutorials/Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
