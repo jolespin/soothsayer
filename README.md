@@ -60,7 +60,6 @@ _________________________________
 
 * Espinoza JL, Shah N, Singh S, Nelson KE, Dupont CL. Applications of weighted association networks applied to compositional data in biology. Environ Microbiol. 2020 May 20;. doi: 10.1111/1462-2920.15091. PubMed PMID: 32436334.
 
-
-<img src ="https://allpistuff.com/wp-content/uploads/2018/07/twitter.c0030826.jpg" width=100> <img src="logo/soothsayer_wide.png" width=200>
+<img src="logo/soothsayer_wide.png" width=200>
 
 
