@@ -51,7 +51,8 @@ functions_from_ensemble_networkx= {
     "centralization",
     "heterogeneity",
     "topological_overlap_measure",
-    "cluster_modularity",
+    "community_detection",
+    "cluster_homogeneity",
     "signed",
     "convert_network",
     }
