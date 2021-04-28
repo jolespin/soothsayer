@@ -17,11 +17,11 @@ from .packages import dynamicTreeCut
 # from .packages import WGCNA
 from .packages import philr
 from .packages import edgeR
-from .packages import metagenomeSeq
-from .packages import propr
+# from .packages import metagenomeSeq
+# from .packages import propr
 from .packages import ALDEx2
 
 
-__all__ += ["dynamicTreeCut", "philr", "edgeR", "metagenomeSeq" ,"propr", "ALDEx2"]
+__all__ += ["dynamicTreeCut", "philr", "edgeR",  "ALDEx2"]
 
 __all__ = sorted(__all__)

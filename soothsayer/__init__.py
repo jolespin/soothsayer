@@ -34,8 +34,8 @@
 # Version
 # =======
 import sys, time
-__version__= "2021.04.12"
-__moniker__ = "Nelson hopped brut cider"
+__version__= "2021.04.27"
+__moniker__ = "Materia"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"

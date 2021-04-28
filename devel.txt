@@ -6,6 +6,7 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 # ========
 # Changes:
 # ========
+* 2021.04.27 Reimplemented `normalize_css` in Python to remove dependency on metagenomeSeq.   Note, `metagenomeSeq` is confusing because it uses `p` for quantile which sounds like it's referring to `percentiles`.  To make it more consistent with `numpy` and `scipy` I switched `p` to `q`.  Also, I removed the `propr` dependency because it's not used at all now that I've made the `compositional` Python package.
 * 2021.04.12 Changed `cluster_modularity` to `cluster_homogeneity` in EnsembleNetworkX and also added `community_detection`
 * 2021.03.22 Deprecated some KEGG databases because versions couldn't be confirmed.  Added a read_kegg_json in soothsayer.io.  Fixed an error with the MANIFEST.in not including sub-directories in db and non-.pbz2 files such as the .flat and .json files
 * 2021.03.05 Added edgeR's exactTest, edgeR's glmLRT, and fixed np.all incompatibilities (https://github.com/pandas-dev/pandas/issues/40259)

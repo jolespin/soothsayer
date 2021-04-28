@@ -22,13 +22,13 @@ from sklearn.preprocessing import MinMaxScaler
 # Soothsayer
 from .conversion import ete_to_skbio
 from ..r_wrappers.packages.edgeR import normalize_edgeR
-from ..r_wrappers.packages.metagenomeSeq import normalize_css
+# from ..r_wrappers.packages.metagenomeSeq import normalize_css
 # from soothsayer.r_wrappers.packages.philr import normalize_philr
 
 
 from ..utils import is_dict, assert_acceptable_arguments, is_number, add_objects_to_globals
 
-__all__ = {"normalize_minmax", "normalize_tss", "normalize_center", "normalize_zscore", "normalize_quantile", "normalize_boxcox",  "normalize", "normalize_expression"}
+__all__ = {"normalize_minmax", "normalize_tss", "normalize_center", "normalize_zscore", "normalize_quantile", "normalize_boxcox", "normalize_css", "normalize", "normalize_expression"}
 
 # Add object from compositional
 functions_from_compositional = {"transform_clr","transform_xlr", "transform_iqlr", "transform_ilr"}
@@ -92,6 +92,89 @@ def normalize_boxcox(X):
     elif isinstance(X, pd.Series):
         return pd.Series(stats.boxcox(X)[0],index=X.index, name=X.name)
 
+# Cumulative sum scaling
+def normalize_css(X, q=0.5, scaling_factor=1000, fillna=0.0, assert_nonnegative=True):
+    """
+    X: Can pd.DataFrame, pd.Series, or np.array either 1D or 2D (`obj` in metagenomeSeq)
+    q: quantile in [0.0,1.0] used in np.quantile.  Note, original implementation in R uses `p` which is misleading percentile is in [0,100] (`p` in metagenomeSeq)
+    scaling_factor: Scaling factor used to divide by normalization factors (e.g. normFactors) (`sl` in metagenomeSeq)
+    fillna: Zeros in `X` will be returned as `np.nan`.  Use this to transform the `nan` back to another value such as 0.0
+    assert_nonnegative: Use this to assert that input values are non-negative
+    
+    This is a Python adaptation of the following R code from metagenomeSeq: 
+    * https://rdrr.io/bioc/metagenomeSeq/src/R/cumNormMat.R
+    * https://rdrr.io/bioc/metagenomeSeq/man/MRcounts.html
+    
+    Please cite the following source: 
+    * https://www.nature.com/articles/nmeth.2658
+    
+    """
+    if assert_nonnegative:
+        assert np.all(X >= 0)
+        
+    if hasattr(X, "index"):
+        index = X.index
+        X_values = X.values.astype(float)
+        if hasattr(X, "columns"):
+            columns = X.columns
+    else:
+        index = columns = None
+        X_values = X.astype(float)
+
+    # Mask Zeros
+    X_values[X_values == 0.0] = np.nan
+    
+    # Dimensionality
+    number_of_dimensions = len(X.shape)
+    assert_acceptable_arguments(number_of_dimensions, {1,2})
+    
+    # 1-Dimensional Data
+    if number_of_dimensions == 1: 
+        # Quantiles
+        qs = np.quantile(
+            a=X_values[np.isfinite(X_values)], 
+            q=q,
+        )
+        # Normalization Factors
+        XX = X_values.copy()
+        XX[XX > qs] = 0.0
+        normalization_factors = np.nansum(XX)/scaling_factor
+        # Apply normalization
+        X_css = X_values/normalization_factors
+        # Fill NA
+        X_css[np.isnan(X_css)] = fillna
+        if index is not None:
+            return pd.Series(X_css, index=index)
+        else:
+            return X_css
+    
+    # 2-Dimensional Data
+    if number_of_dimensions == 2: 
+        # Quantiles
+        # qs = stats.scoreatpercentile(X_values, percentile, axis=1)
+        # NaN Safe Version
+        qs = np.apply_along_axis(
+            func1d=lambda xi: np.quantile(
+                a=xi[np.isfinite(xi)], 
+                q=q,
+            ), 
+            axis=1, 
+            arr=X_values,
+        )
+        
+        # Normalization Factors
+        XX = X_values.copy()
+        XX[XX > qs.reshape(-1,1)] = 0.0
+        normalization_factors = np.nansum(XX, axis=1)/scaling_factor
+        # Apply normalization
+        X_css = X_values/normalization_factors.reshape(-1,1)
+        # Fill NA
+        X_css[np.isnan(X_css)] = fillna
+        if index is not None:
+            return pd.DataFrame(X_css, index=index, columns=columns)
+        else:
+            return X_css
+
 # Normalization
 def normalize(X, method="tss", axis=1, tree=None, feature_range=(0,1)):
     """
@@ -138,7 +221,7 @@ def normalize(X, method="tss", axis=1, tree=None, feature_range=(0,1)):
     return df_normalized
 
 # Normalize gene expresssion data
-def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None, p=0.75, kws=dict()):
+def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None, q=0.5, scaling_factor=1000, kws=dict()):
     """
     # FPKM
     Fragments Per Kilobase of transcript per Million mapped reads
@@ -218,7 +301,7 @@ def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None
     if method in {"tmm", "getmm", "rle", "upperquartile"}:
         return normalize_edgeR(X, length=length, method=method, p=p, **kws)
     if method in  {"css"}:
-        return normalize_css(X)
+        return normalize_css(X, q=q, scaling_factor=scaling_factor)
 
 # # CLR Normalization
 # def transform_clr(X, return_zeros_as_neginfinity=False):
