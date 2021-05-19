@@ -12,7 +12,28 @@ from statsmodels.sandbox.stats.multicomp import multipletests
 from ..utils import is_dict, assert_acceptable_arguments, flatten
 
 
-__all__ = ["p_adjust", "statistically_significant_symbols", "biweight_midcorrelation", "differential_abundance", "feature_set_enrichment"]
+__all__ = ["shannon_entropy","kullback_leibler_divergence", "welchs_ttest", "p_adjust", "statistically_significant_symbols", "biweight_midcorrelation", "differential_abundance", "feature_set_enrichment"]
+
+# Shannon entropy
+def shannon_entropy(pk):
+    """
+    Simple wrapper around scipy.stats.entropy with base set to 2
+    """
+    return stats.entropy(pk, base=2)
+
+# Kullback Leibler Divergence
+def kullback_leibler_divergence(pk, qk, base=2):
+    """
+    Simple wrapper around scipy.stats.entropy with base set to 2
+    """
+    return stats.entropy(pk=pk, qk=qk, base=base)
+
+# Welch's T-Test
+def welchs_ttest(a,b,nan_policy="propogate"):
+    """
+    Simple wrapper around scipy.stats.ttest_ind
+    """
+    return stats.ttest_ind(a=a, b=b, equal_var=False, nan_policy=nan_policy)
 
 # Adjust p-values
 def p_adjust(p_values:pd.Series, method="fdr", name=None, **kwargs):
@@ -315,3 +336,4 @@ def feature_set_enrichment(features:set, feature_sets:Mapping,  tol_test:float=0
     if tol_test is not None:
         df.insert(df.shape[1], "fdr<{}".format(tol_test), df["fdr_value"] < tol_test)
     return df
+

@@ -221,7 +221,7 @@ def normalize(X, method="tss", axis=1, tree=None, feature_range=(0,1)):
     return df_normalized
 
 # Normalize gene expresssion data
-def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None, q=0.5, scaling_factor=1000, kws=dict()):
+def normalize_expression(X:pd.DataFrame, method:str="tpm", length:pd.Series=None, p=0.75, q=0.5, scaling_factor=1000, kws=dict()):
     """
     # FPKM
     Fragments Per Kilobase of transcript per Million mapped reads
