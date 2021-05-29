@@ -2,7 +2,7 @@
 # Modules
 # ==============================================================================
 # Built-ins
-import os, sys, time
+import os, sys, time, warnings
 from collections import OrderedDict, defaultdict
 from io import StringIO
 
@@ -21,7 +21,7 @@ from scipy.cluster import hierarchy as sp_hierarchy
 from scipy.spatial.distance import squareform
 try:
     from fastcluster import linkage
-except (ImportError, ModuleNotFoundError) as e:
+except ModuleNotFoundError:
     from scipy.cluster.hierarchy import linkage
     warnings.warn("Could not import `linkage` from `fastcluster` and using `scipy.cluster.hierarchy.linkage` instead")
     
