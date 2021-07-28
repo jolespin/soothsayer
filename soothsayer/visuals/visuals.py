@@ -16,7 +16,7 @@ from collections import OrderedDict, defaultdict
 from ..microbiome import prevalence
 from ..utils import *
 
-__all__ = ["OutlineCollection", "draw_networkx_labels_with_box", "plot_scatter", "plot_venn_diagram", "plot_waterfall", "plot_volcano", "plot_annotation", "plot_prevalence", "plot_compositional", "bezier_points"]
+__all__ = ["OutlineCollection", "draw_networkx_labels_with_box", "plot_scatter", "plot_venn_diagram", "plot_waterfall", "plot_volcano", "plot_annotation", "plot_prevalence", "plot_compositional","plot_multiindexed_heatmap", "bezier_points"]
 __all__ = sorted(__all__)
 
 # Bezier points for arc plots
