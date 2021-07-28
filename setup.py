@@ -41,7 +41,7 @@ setup(name='soothsayer',
     "statsmodels >= 0.10.0", #https://github.com/statsmodels/statsmodels/issues/5899 May need to use this separately: pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
     "mmh3",
     # Extensions
-    "soothsayer_utils >= 2021.03.12",
+    "soothsayer_utils >= 2021.07.27",
     "compositional >= 2020.12.16",
     "hive_networkx >= 2021.3.08",
     "ensemble_networkx >= 2021.04.12",

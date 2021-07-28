@@ -25,10 +25,10 @@ from sklearn.datasets import load_iris
 import soothsayer_utils as syu
 
 functions_from_soothsayer_utils = [
-'assert_acceptable_arguments', 'boolean', 'consecutive_replace', 'contains', 'dict_build', 'dict_collapse', 'dict_expand', 'dict_fill', 'dict_filter', 'dict_reverse', 'dict_tree',"dict_py_to_bash",
+'assert_acceptable_arguments', 'boolean', 'consecutive_replace', 'contains', 'dict_build', 'dict_collapse', 'dict_expand', 'dict_fill', 'dict_reverse', 'dict_tree',
 'flatten', 'format_memory', 'format_duration', 'format_header', 'format_path', 'fragment',  'get_timestamp', 'get_unique_identifier', 'hash_kmer', 'infer_compression', 'is_all_same_type',
 'is_dict', 'is_dict_like', 'is_file_like', 'is_function', 'is_in_namespace', 'is_nonstring_iterable', 'is_symmetrical', 'is_number', 'is_path_like', 'is_query_class', "is_graph", "is_color",
-'iterable_depth', 'join_as_strings', 'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages", "Suppress","get_color_midpoint","remove_pairwise_nan", "format_pairwise","intersection", "union",
+'iterable_depth', 'join_as_strings', 'pad_left', 'pv', 'range_like',  'reverse_complement', 'to_precision', "check_packages", "Suppress","get_color_midpoint","remove_pairwise_nan", "format_pairwise","intersection", "union","iterate_nested_dict",
 ]
 
 __all__ = {

@@ -1262,6 +1262,297 @@ def plot_compositional(
 
         return fig, axes
 
+# Multiindex Heatmap
+def plot_multiindexed_heatmap(
+    # Data
+    data:pd.DataFrame,
+    sort_rows=True,
+    sort_columns=True,
+    
+    # Heatmap
+    x_rot=0,
+    y_rot=0,
+    xticklabels=True, 
+    yticklabels=True, 
+    cmap=None, 
+    vmax=None, 
+    vmin=None, 
+    annot=False, 
+    linewidth=1, 
+    edgecolor="white", 
+    cbar=True, 
+    heatmap_border=True,
+    heatmap_facecolor=None,
+    
+    # Column Axes
+    column_ax_size = "6.18%",
+    column_partitions=True,
+    column_partition_colors=None,
+
+    # Row Axes
+    row_ax_size = "6.18%",
+    row_partitions=True,
+    row_partition_colors=None,
+    
+    # Labels
+    xlabel=None,
+    ylabel=None,
+    cbar_label=None, 
+
+    # Keywords
+    figsize=(8,8), 
+    fig_kws=dict(), 
+    title_kws=dict(), 
+    xlabel_kws=dict(),
+    ylabel_kws=dict(),
+    heatmap_kws=dict(),
+    cbar_kws=dict(),
+    xticklabel_kws=dict(),
+    yticklabel_kws=dict(),
+    line_kws=dict(),
+
+
+    column_ax_kws = dict(),
+    row_ax_kws=dict(),
+    column_label_kws = dict(),
+    row_label_kws = dict(),
+    row_fill_between_kws=dict(), 
+    column_fill_between_kws=dict(), 
+    
+    # Style
+    style="seaborn-white", 
+    ):
+    
+    # Utility functions
+    def _get_outer_level_splits(index):
+        # Get levels
+        outer_level_values = index.get_level_values(0).unique()
+        # Get splits
+        idx_split_levels = list()
+        for value in outer_level_values:
+            where = np.where(index.map(lambda x: x[0] == value))[0]
+            idx_split_levels.append((where[0], where[-1]))
+        return outer_level_values, idx_split_levels 
+    
+    # Keywords
+    if figsize=="slides":
+        figsize=(26.18,  14.7)
+    _fig_kws = {
+        "figsize":figsize,
+    }
+    _fig_kws.update(fig_kws)
+
+    _cbar_kws = {
+        "label":cbar_label,
+    }
+    _cbar_kws.update(cbar_kws)
+    
+    _title_kws = {
+          "fontsize":15,
+#           "fontweight":"bold",
+          "ha":"left",
+         }
+    _title_kws.update(title_kws)
+    
+    _xlabel_kws = {
+        "fontsize":15,
+    }
+    _xlabel_kws.update(xlabel_kws)
+    
+    _ylabel_kws = {
+        "fontsize":15,
+    }
+    _ylabel_kws.update(ylabel_kws) 
+    
+    _heatmap_kws = {
+        "cmap":cmap,
+        "vmax":vmax,
+        "vmin":vmin,
+        "cbar":cbar,
+        "cbar_kws":_cbar_kws,
+        "linewidth":linewidth, 
+        "edgecolor":edgecolor,
+        "xticklabels":xticklabels,
+        "yticklabels":yticklabels,
+        "annot":annot,
+    }
+    _heatmap_kws.update(heatmap_kws)
+    
+    _xticklabel_kws = {
+        "fontsize":15,
+        "rotation":x_rot,
+#         "ha":"center",
+#         "va":"center",
+    }
+    _xticklabel_kws.update(xticklabel_kws)
+    _yticklabel_kws = {
+        "fontsize":15,
+        "rotation":y_rot,
+        "va":"center",
+        "x":0.01618,
+    }
+    _yticklabel_kws.update(yticklabel_kws)
+    
+    _column_label_kws = {
+        "fontsize":15,
+        "rotation":x_rot,
+        "ha":"center",
+        "va":"center",
+    }
+    _column_label_kws.update(column_label_kws)
+    
+    _row_label_kws = {
+        "fontsize":15,
+        "rotation":y_rot,
+        "ha":"right",
+        "va":"center",
+        "x":-0.0618,
+    }
+    _row_label_kws.update(row_label_kws)
+    
+    _line_kws = {
+        "color":"black",
+    }
+    _line_kws.update(line_kws)
+
+    _row_ax_kws = {
+        "pad":0.0618,
+        "size":row_ax_size,
+    }
+    _row_ax_kws.update(row_ax_kws)
+    
+    _column_ax_kws = {
+        "pad":0.0618,
+        "size":column_ax_size,
+    }
+    _column_ax_kws.update(column_ax_kws)
+    _row_fill_between_kws = {
+        "alpha":0.5,
+    }
+    _row_fill_between_kws.update(row_fill_between_kws)
+    _column_fill_between_kws = {
+        "alpha":0.5,
+    }
+    _column_fill_between_kws.update(column_fill_between_kws)
+    
+    # Sort levels
+    if sort_rows:
+        data = data.sort_index(axis=0)
+    if sort_columns:
+        data = data.sort_index(axis=1)
+    
+    # Check if multiindex
+    n, m = data.shape
+    rows_are_multiindex = isinstance(df.index, pd.MultiIndex)
+    columns_are_multiindex = isinstance(df.columns, pd.MultiIndex)
+    
+
+    with plt.style.context(style):
+        axes = dict() 
+
+        fig, ax_heatmap = plt.subplots(**_fig_kws)
+        axes["ax_heatmap"] = ax_heatmap
+
+        # Heatmap
+        sns.heatmap(data, ax=ax_heatmap, **_heatmap_kws)
+        ax_heatmap.set_xlabel(None)
+        ax_heatmap.set_ylabel(None)
+        if heatmap_facecolor is not None:
+            ax_heatmap.set_facecolor(heatmap_facecolor)
+        # Heatmap border lines
+        if heatmap_border:
+            for i in ax_heatmap.get_xlim():
+                ax_heatmap.axvline(i, **_line_kws)
+            for j in ax_heatmap.get_ylim():
+                ax_heatmap.axhline(j, **_line_kws)
+
+      # Divider
+        if any([rows_are_multiindex, columns_are_multiindex ]):
+            divider = make_axes_locatable(ax_heatmap)
+            
+            # Columns
+            if columns_are_multiindex:
+                # Column ax
+                ax_column = divider.append_axes("bottom", **_column_ax_kws)
+                axes["ax_column"] = ax_column
+
+                ax_column.autoscale(False)
+
+                outer_level_values, idx_split_levels = _get_outer_level_splits(data.columns)
+                for i, (value, (lower_bound, upper_bound)) in enumerate(zip(outer_level_values, idx_split_levels)):
+                    ax_heatmap.axvline(upper_bound + 1, **_line_kws)
+                    ax_column.axvline(upper_bound + 1, **_line_kws)
+                    # Value annotation
+                    ax_column.text(x= 0.5*(upper_bound + lower_bound + 1), y=0.5, s=value, **_column_label_kws)
+                                        
+                # Border
+                if column_partitions:
+                    for i in range(m):
+                        ax_column.axvline(i, **_line_kws, alpha=0.1618)
+                    
+                # Column xticks
+                ax_column.set_xticklabels(map(lambda value: value[1], data.columns), **_xticklabel_kws)
+                ax_column.set_xlim(ax_heatmap.get_xlim())
+                ax_column.set_xticks(ax_heatmap.get_xticks())
+                ax_column.set_yticklabels([])
+                ax_heatmap.set_xticklabels([])
+                if xlabel:
+                    ax_column.set_xlabel(xlabel, **_xlabel_kws)
+                    
+                # Colors
+                if column_partition_colors is not None:
+                    for i in range(m):
+                        tick = data.columns[i]
+                        ax_column.fill_between([i,i+1], *ax_column.get_ylim(), color=column_partition_colors[tick], **_column_fill_between_kws)
+                
+            else:
+                ax_heatmap.set_xticklabels(ax_heatmap.get_xticklabels(), **_xticklabel_kws)
+                if xlabel:
+                    ax_heatmap.set_xlabel(xlabel, **_xlabel_kws)
+                    
+            # Rows
+            if rows_are_multiindex:
+                # Row ax
+                ax_row = divider.append_axes("left", **_row_ax_kws)
+                axes["ax_row"] = ax_row
+
+                ax_row.autoscale(False)
+                
+                outer_level_values, idx_split_levels = _get_outer_level_splits(data.index)
+                for i, (value, (lower_bound, upper_bound)) in enumerate(zip(outer_level_values, idx_split_levels)):
+                    ax_heatmap.axhline(upper_bound + 1, **_line_kws)
+                    ax_row.axhline(upper_bound + 1, **_line_kws)
+                    # Value annotation
+                    ax_row.text(y= 0.5*(upper_bound + lower_bound + 1),  s=value, **_row_label_kws)
+                    
+                # Border
+                for j in range(n):
+                    ytick = data.index[j][1]
+                    ax_row.text(y= j+0.5,  s=ytick, **_yticklabel_kws)
+                    if column_partitions:
+                        ax_row.axhline(j, **_line_kws, alpha=0.1618)
+
+                # Column yticks
+                ax_row.set_yticklabels([])
+                ax_row.set_ylim(ax_heatmap.get_ylim())
+                ax_row.set_yticks(ax_heatmap.get_yticks())
+                ax_row.set_xticklabels([])
+                ax_heatmap.set_yticklabels([])
+                if ylabel:
+                    ax_row.set_ylabel(ylabel, **_ylabel_kws)
+                    
+                # Colors
+                if row_partition_colors is not None:
+                    for j in range(n):
+                        tick = data.index[j]
+                        ax_row.fill_between(ax_column.get_xlim(), j, j+1, color=row_partition_colors[tick], **_row_fill_between_kws)
+            else:
+                ax_heatmap.set_yticklabels(ax_heatmap.get_yticklabels(), **_yticklabel_kws)
+                if ylabel:
+                    ax_heatmap.set_ylabel(ylabel, **_ylabel_kws)
+                    
+        return fig, axes
+
 # ===================
 # Plot.ly Wrappers
 # ===================

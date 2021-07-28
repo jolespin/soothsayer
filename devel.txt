@@ -6,6 +6,7 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 # ========
 # Changes:
 # ========
+* 2021.07.27 - Added `plot_multiindexed_heatmap` and `iterate_nested_dict`
 * 2021.05.19 - Added `intersection` and `union` functions from `soothsayer_utils`.  Also added 2 wrappers around scipy.stats.entropy (`shannon_entropy` and `kullback_leibler_divergence`) and a wrapper around scipy.stats.ttest_ind (`welchs_ttest`)
 * 2021.04.27 - Reimplemented `normalize_css` in Python to remove dependency on metagenomeSeq.   Note, `metagenomeSeq` is confusing because it uses `p` for quantile which sounds like it's referring to `percentiles`.  To make it more consistent with `numpy` and `scipy` I switched `p` to `q`.  Also, I removed the `propr` dependency because it's not used at all now that I've made the `compositional` Python package.
 * 2021.04.12 - Changed `cluster_modularity` to `cluster_homogeneity` in EnsembleNetworkX and also added `community_detection`
@@ -29,21 +30,27 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 * 2020.06.01 - Removed dependencies on R packages but rpy2 is still necessary
 * 2020.06.04 - Added "component_type" to `alpha_diversity`
 
-# Clairvoyance: 
-# =============
-* Remove name in output files
-* Add weights in the synopsis file
-* Remove feature type from synopsis names
-* Change `attributes` to `features`
+
 
 # Bugs:
 # =====
 * 2019.12.06 For some reason adjusting something in regression broke the ability to do sy.r_wrappers.philr.normalize_philr  but you can still do from soothsayer.r_wrappers import philr
 
+# ===========
 # __future__:
-* Make HierarchicalClassifier its own package
-# Make soothsayer_visuals its own package
-* Make PGFCs generalizable 
+# ===========
+
+# Clairvoyance
+# ------------
+* Remove name in output files
+* Add weights in the synopsis file
+* Remove feature type from synopsis names
+* Change `attributes` to `features`
+
+# Soothsayer
+# ----------
+* Make Agglomerative its own package and use skbio instead of Ete3
+* Make HierarchicalClassifier its own package and use skbio instead of Ete3
 * Change `create_pca_model` to something else...
 * Collapse topology so it uses Agglomerative instead
 * Clean up the coloring (map_colors, scalarmapping_from_data, etc.)
