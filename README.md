@@ -29,6 +29,7 @@ Documentation will be released upon version 1.0 once API is stabilized.
 
 * [Antimicrobial resistance modeling associated with Espinoza & Dupont et al. 2021](https://github.com/jolespin/projects/blob/main/antimicrobial_resistance_modeling/Espinoza-Dupont_et_al_2021/Notebooks/markdown_version/Espinoza-Dupont_et_al_2021__Supplemental.md)
 * [Feature selection using *Clairvoyance* on the Iris dataset with 1000 noise attributes](tutorials/Notebooks/markdown_versions/Denoising_Iris-plus-Noise_with_Clairvoyance/Denoising_Iris-plus-Noise_with_Clairvoyance.md)
+* [Multimodal sample-specific perturbation networks and undernutrition modeling from Nabwera & Espinoza et al. 2021](https://github.com/jolespin/projects/blob/main/gambia_gut_undernutrition_microbiome/Nabwera-Espinoza_et_al_2021/Notebooks/markdown_version/Nabwera-Espinoza_et_al_2021.md)
 
 _________________________________
 
