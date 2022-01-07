@@ -882,7 +882,7 @@ def determine_mode_for_logfiles(path, force_overwrite):
 # Pandas
 # ===========
 # Prepend level to pandas index
-def pd_prepend_level_to_index(x, level_value, level_name=None):
+def pd_prepend_level_to_index(x, level_value, level_name=None, axis=0):
     """
     Prepend a level to a pd.Series or pd.DataFrame
     
@@ -909,7 +909,11 @@ def pd_prepend_level_to_index(x, level_value, level_name=None):
     Adapted from the following source:
     https://stackoverflow.com/questions/14744068/prepend-a-level-to-a-pandas-multiindex
     """
-    return pd.concat([x], keys=[level_value], names=[level_name])
+    assert_acceptable_arguments(query=axis, target={0,1})
+    if axis == 0:
+        return pd.concat([x], keys=[level_value], names=[level_name])
+    if axis == 1:
+        return pd.concat([x.T], keys=[level_value], names=[level_name]).T
 
 # Collapse a pandas series
 def pd_series_collapse(u:pd.Series, into=pd.Series, type_collection=set):

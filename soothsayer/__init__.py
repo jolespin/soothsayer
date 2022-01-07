@@ -34,7 +34,7 @@
 # Version
 # =======
 import sys, time
-__version__= "2021.07.27"
+__version__= "2022.01.07"
 __moniker__ = "Materia"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
@@ -112,3 +112,14 @@ __ecosystem__["hive_networkx"] = hx.__version__
 import ensemble_networkx as enx
 print(" * Ensemble NetworkX v{}".format(enx.__version__), file=sys.stderr)
 __ecosystem__["ensemble_networkx"] = enx.__version__
+
+print(" ", file=sys.stderr)
+print(utils.format_header("PyData Ecosystem"), file=sys.stderr)
+import pandas as pd
+print(" * Pandas v{}".format(pd.__version__), file=sys.stderr)
+import numpy as np
+print(" * NumPy v{}".format(np.__version__), file=sys.stderr)
+# import scipy as sp
+# print(" * SciPy v{}".format(sp.__version__), file=sys.stderr)
+# import matplotlib as mpl
+# print(" * Matplotlib v{}".format(mpl.__version__), file=sys.stderr)

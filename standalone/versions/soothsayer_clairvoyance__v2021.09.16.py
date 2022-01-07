@@ -35,7 +35,7 @@
 # ==============================
 # (1) Make copy of stdout as a summary file in __synopsis
 # (2) Add sem to accuracy plots
-# (3) Added option to transform data (2018-May-03)
+# (3) Added option to normalize data (2018-May-03)
 # (4) Added support for cv=0 skipping cross-validation.  Basically, just get the weights out (2018-May-07)
 # (5) Create separate logs for tree, logistic, and info (2018-June-04)
 # (6) Adding iterative method via percentiles (2018-May-31)
@@ -45,7 +45,6 @@
 # (10) Removing `linear` method, adding `early_stopping`, and making cross-validation go from smallest to largest
 # (11) Fixed the .compress compatibility for pandas v1.x
 # (12) Got error from bzip2: TypeError: object of type 'pickle.PickleBuffer' has no len() . Changing bz2 to no compression
-# (13) Removed extra normalization/transformations
 # ==============================
 # Current
 # ==============================
@@ -60,20 +59,15 @@
 # The scores_ file has a .1 appended to the n_features_included b/c of the set_index.  This needs to be fixed after running this on model_v5.4b.  The fix will be easy, just don't include n_features_included and then change the best_results to X.shape[1] - n_features_excluded
 
 # Version
-__version_clairvoyance__ = "v2022.01.06"
+__version_clairvoyance__ = "v2020.05.18"
 
 # Built-ins
 import os, sys, re, multiprocessing, itertools, argparse, subprocess, time, logging, datetime, shutil, copy, warnings
 from collections import *
 from io import StringIO, TextIOWrapper, BytesIO
 import pickle, gzip, bz2, zipfile
-
-
-warnings.simplefilter("ignore")
-os.environ["PYTHONWARNINGS"] = "ignore"
-# Blocks the ConvergenceWarning...it's really annoying
-# ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
-
+# warnings.simplefilter(action='ignore', category=UserWarning) # UserWarning: Attempting to set identical left==right results in singular transformations; automatically expanding
+warnings.filterwarnings("ignore")
 os.environ['KMP_DUPLICATE_LIB_OK']='True' # In case you have 2 versions of OMP installed
 
 # # Custom Soothsayer Scripts
@@ -97,7 +91,7 @@ from scipy import stats
 from sklearn import model_selection, metrics
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-# from sklearn.multiclass import OneVsRestClassifier
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.base import clone
 
 # Scikit-bio
@@ -260,49 +254,110 @@ def write_object(obj, path, compression="infer", serialization_module=pickle, pr
 # ==============================================================================
 # Normalization
 # ==============================================================================
-# Total sum scaling
-def transform_tss(X):
-    sum_ = X.sum(axis=1)
-    return (X.T/sum_).T
+# Normalize by summing to one
+def normalize_tss(X):
+    """
+    NumPy or Pandas
+    """
+    if len(X.shape) == 2: # if type(X) is pd.DataFrame:
+        sum_ = X.sum(axis=1)
+        return (X.T/sum_).T
+    if len(X.shape) == 1: #elif type(X) is pd.Series:
+        return X/X.sum()
 
-# Center Log-Ratio
-def transform_clr(X):
-    X_tss = transform_tss(X)
-    X_log = np.log(X_tss)
-    geometric_mean = X_log.mean(axis=1)
-    return (X_log - geometric_mean.values.reshape(-1,1))
+# CLR Normalization
+def normalize_clr(X):
+    if isinstance(X, pd.DataFrame):
+        return X.apply(clr,axis=1)
+    elif isinstance(X, pd.Series):
+        return pd.Series(clr(X),index=X.index, name=X.name)
 
+# Center Normalization
+def normalize_center(X):
+    if isinstance(X, pd.DataFrame):
+        A = X.values
+        return pd.DataFrame(A - np.nanmean(X, axis=1).reshape((-1,1)), index=X.index, columns=X.columns)
+    elif isinstance(X, pd.Series):
+        return X - X.mean()
 
+# Zscore Normalization
+def normalize_zscore(X):
+    if isinstance(X, pd.DataFrame):
+        A_center = normalize_center(X).values
+        A_std = np.nanstd(X.values, axis=1).reshape((-1,1))
+        return pd.DataFrame(A_center/A_std, index=X.index, columns=X.columns)
+    elif isinstance(X, pd.Series):
+        return (X - X.mean())/X.std()
+
+# Quantile Normalization
+def normalize_quantile(X):
+    assert isinstance(X, pd.DataFrame), "Quantile normalization is only compatible with `pd.DataFrame`"
+    X_transpose = X.T
+    X_mu = X_transpose.stack().groupby(X_transpose.rank(method='first').stack().astype(int)).mean()
+    return X_transpose.rank(method='min').stack().astype(int).map(X_mu).unstack().T
+
+# Boxcox Normalization
+def normalize_boxcox(X):
+    if isinstance(X, pd.DataFrame):
+        return X.apply(lambda x:stats.boxcox(x)[0], axis=1)
+    elif isinstance(X, pd.Series):
+        return pd.Series(stats.boxcox(X)[0],index=X.index, name=X.name)
 
 # Normalization
-def transform(X, method="tss", axis=1):
+def normalize(X, method="tss", axis=1, tree=None):
     """
-    Assumes X_data.index = Samples, X_data.columns = features
+    Assumes X_data.index = Samples, X_data.columns = Attributes
     axis = 0 = cols, axis = 1 = rows
-    e.g. axis=1, method=ratio: transform for relative abundance so each row sums to 1.
+    e.g. axis=1, method=ratio: Normalize for relative abundance so each row sums to 1.
     "tss" = total-sum-scaling
+    "center" = mean centered
     "clr" = center log-ratio
-
+    "quantile" = quantile normalization
+    "zscore" = zscore normalization (mu: 0, var:1)
+    "boxcox"
+    "ilr" = isometric log ratio transform
+    "css" = cumaltive sum scaling metagenomeSeq
+    "tmm" = tmm normalization from edgeR
     """
+    if method in ["ratio", "relative-abundance"]:
+        print("DEPRECATED: `ratio` has been replaced with `tss`", file=sys.stderr)
+        method = "tss"
     # Transpose for axis == 0
     if axis == 0:
         X = X.T
     # Common
     if method == "tss":
-        df_transformed = transform_tss(X)
+        df_normalized = normalize_tss(X)
+    if method == "center":
+        df_normalized = normalize_center(X)
     if method == "clr":
-        df_transformed = transform_clr(X)
-
+        df_normalized = normalize_clr(X)
+    if method == "zscore":
+        df_normalized = normalize_zscore(X)
+    if method == "quantile":
+        df_normalized = normalize_quantile(X)
+    if method == "boxcox":
+        df_normalized = normalize_boxcox(X)
+    # Aitchison
+    if method == "ilr":
+        df_normalized = normalize_ilr(X, tree=tree)
+    if method == "philr":
+        df_normalized = normalize_philr(X, tree=tree)
+    # Sequencing-based methods
+    if method == "css":
+        df_normalized = normalize_css(X)
+    if method == "tmm":
+        df_normalized = normalize_tmm(X)
     # Transpose back
     if axis == 0:
-        df_transformed = df_transformed.T
-    return df_transformed
+        df_normalized = df_normalized.T
+    return df_normalized
 
 
 # Clairvoyant
 class Clairvoyant(object):
     """
-    Clairvoyant is an algorithm that weights features that can optimize the predictive capacity of a dataset
+    Clairvoyant is an algorithm that weights attributes that can optimize the predictive capacity of a dataset
 
     devel
     ============
@@ -317,7 +372,7 @@ class Clairvoyant(object):
     # 2018-April-24
     (8) Added standard error of the mean in the plots
     (9) Added sem to scores output
-    (10) Added feature set to scores output
+    (10) Added attribute set to scores output
     (11) Fixed a HUGE error where the X.index and y.index were getting offset because I was looking for overlaps
     (12) Added functionality for cross-validation to include a target_score.  Mostly useful for commandline version
     # 2018-June-01
@@ -340,7 +395,7 @@ class Clairvoyant(object):
     Refine option for softmax and collapsing groups
     Set up models to work on any combination of parameters
     Add other models (SVC?)
-    Randomly sample features
+    Randomly sample attributes
 
     Benchmarks
     ==========
@@ -386,7 +441,7 @@ class Clairvoyant(object):
         },
         # Labeling
         map_encoding=None,
-        feature_type="feature",
+        attr_type="attr",
         class_type="class",
         verbose=True,
         metadata=dict(),
@@ -416,7 +471,7 @@ class Clairvoyant(object):
         self.models = self._placeholder_models()
         self.n_jobs = n_jobs
         self.map_encoding = map_encoding
-        self.feature_type = feature_type
+        self.attr_type = attr_type
         self.class_type = class_type
         self.verbose = verbose
         # Metadata
@@ -487,7 +542,6 @@ class Clairvoyant(object):
         Internal: Get coefs
         accuracy_A_B means accuracy of B trained on A
         """
-
 #         print(X_A.shape, X_B.shape, y_A.shape, y_B.shape, model, weight_type)
         # Subset A
         model.fit(X_A, y_A)
@@ -502,7 +556,7 @@ class Clairvoyant(object):
     def _merge_partitions(self, X, y, stratify, subset, desc):
         """
         Internal: Distribute tasks
-        # (n_space_per_iteration, 2_splits, n_classifications, n_features)
+        # (n_space_per_iteration, 2_splits, n_classifications, n_attributes)
         """
 
         if self.verbose:
@@ -529,8 +583,8 @@ class Clairvoyant(object):
             # Weights
             if self.model_type == "logistic":
                 # Might be able to condense the w for both
-                w = np.concatenate(list(map(lambda x: x[:-1], parallel_results)), axis=0) #w.shape ==> (n_space_per_iteration, 2_splits, n_classifications, n_features)
-                w = np.concatenate([w[:,0,:,:], w[:,1,:,:]], axis=0) # w shape:  (2*n_space_per_iteration, n_classifications, n_features)
+                w = np.concatenate(list(map(lambda x: x[:-1], parallel_results)), axis=0) #w.shape ==> (n_space_per_iteration, 2_splits, n_classifications, n_attributes)
+                w = np.concatenate([w[:,0,:,:], w[:,1,:,:]], axis=0) # w shape:  (2*n_space_per_iteration, n_classifications, n_attributes)
             if self.model_type == "tree":
                 w = np.asarray(list(map(lambda x: x[0], parallel_results)))
                 w = np.concatenate([w[:,0], w[:,1]], axis=0)
@@ -552,8 +606,8 @@ class Clairvoyant(object):
         """
         self.X = X.copy()
         self.y = y.copy()
-        self.observation_ids = self.X.index
-        self.feature_ids = self.X.columns
+        self.obsv_ids = self.X.index
+        self.attr_ids = self.X.columns
         self.shape_input_ = self.X.shape
         self.class_labels = sorted(y.unique())
         self.class_labels_encoding = self.class_labels
@@ -598,21 +652,21 @@ class Clairvoyant(object):
         if self.model_type == "logistic":
             if into == "xarray":
                 if W.shape[1] > 1:
-                    return xr.DataArray(W, dims=["index_model", self.class_type, self.feature_type], coords=[range(W.shape[0]), self.class_labels, self.feature_ids], name=name)
+                    return xr.DataArray(W, dims=["index_model", self.class_type, self.attr_type], coords=[range(W.shape[0]), self.class_labels, self.attr_ids], name=name)
                 else:
-                    return xr.DataArray(np.squeeze(W), dims=["index_model",  self.feature_type], coords=[range(W.shape[0]), self.feature_ids], name=name)
+                    return xr.DataArray(np.squeeze(W), dims=["index_model",  self.attr_type], coords=[range(W.shape[0]), self.attr_ids], name=name)
             if into == "pandas":
                 panel = pd.Panel(W,
                              major_axis=pd.Index(range(W.shape[1]), level=0, name=self.class_type),
-                             minor_axis=pd.Index(self.feature_ids, level=1, name=self.feature_type))
+                             minor_axis=pd.Index(self.attr_ids, level=1, name=self.attr_type))
                 df = panel.to_frame().T
                 df.index.name = "index"
                 return df
         elif self.model_type == "tree":
             if into == "xarray":
-                return xr.DataArray(W, dims=["index_model", self.feature_type], coords=[range(W.shape[0]),  self.feature_ids], name=name)
+                return xr.DataArray(W, dims=["index_model", self.attr_type], coords=[range(W.shape[0]),  self.attr_ids], name=name)
             if into == "pandas":
-                return pd.DataFrame(W, index=pd.Index(range(W.shape[0]), name="index_model"), columns=pd.Index(self.feature_ids, name=self.feature_type))
+                return pd.DataFrame(W, index=pd.Index(range(W.shape[0]), name="index_model"), columns=pd.Index(self.attr_ids, name=self.attr_type))
 
     def extract_accuracies(self, into="numpy", name=None):
         """
@@ -635,9 +689,9 @@ class Clairvoyant(object):
             W = np.abs(self.extract_kernel(into="numpy", min_threshold=min_threshold))
 
             if self.model_type == "logistic":
-                weights_ = pd.Series(func_reduce(func_reduce(W, axis=0), axis=0), index=self.feature_ids, name=name)
+                weights_ = pd.Series(func_reduce(func_reduce(W, axis=0), axis=0), index=self.attr_ids, name=name)
             if self.model_type == "tree":
-                weights_ = pd.Series(func_reduce(W, axis=0), index=self.feature_ids, name=name)
+                weights_ = pd.Series(func_reduce(W, axis=0), index=self.attr_ids, name=name)
             if func_weights is not None:
                 weights_ = func_weights(weights_)
 
@@ -680,7 +734,7 @@ class Clairvoyant(object):
             W = A/A.sum(axis=1).reshape(-1,1)
             return pd.DataFrame(W,
                                 index=pd.Index(self.class_labels, name=self.class_type),
-                                columns=pd.Index(self.feature_ids, name=self.feature_type)).T
+                                columns=pd.Index(self.attr_ids, name=self.attr_type)).T
 
 
 
@@ -763,7 +817,7 @@ class Clairvoyant(object):
                     cv_idx.append((idx_tr.map(lambda x:self.X.index.get_loc(x)), idx_te.map(lambda x:self.X.index.get_loc(x))))
                 cv = cv_idx
 
-        # feature iterables
+        # Attribute iterables
         if method == "bruteforce":
             if self.verbose:
                 iterable = tqdm(range(1, self.X.shape[1]), desc=desc)
@@ -786,8 +840,8 @@ class Clairvoyant(object):
         # Cross Validate
         cv_summary = defaultdict(dict)
         cv_results = dict()
-        label_features_included = "number_of_features_included"
-        label_features_excluded = "number_of_features_excluded"
+        label_attrs_included = "num_{}_included".format(self.attr_type)
+        label_attrs_excluded = "num_{}_excluded".format(self.attr_type)
 
         # Cross validation
         scores = list()
@@ -797,9 +851,9 @@ class Clairvoyant(object):
         baseline_score  = np.mean(model_selection.cross_val_score(model, X=self.X.values, y=Ar_y, cv=cv, n_jobs=n_jobs, scoring=scoring))
         early_stopping_counter = 0
         for i,pos in enumerate(iterable):
-            idx_query_features = weights_.index[:pos]
-            if idx_query_features.size > 0:
-                Ar_X = self.X.loc[:,idx_query_features].values
+            idx_query_attrs = weights_.index[:pos]
+            if idx_query_attrs.size > 0:
+                Ar_X = self.X.loc[:,idx_query_attrs].values
                 # Original Implementation
                 if func_groupby is None:
                     cross_validation_results = model_selection.cross_val_score(model, X=Ar_X, y=Ar_y, cv=cv, n_jobs=n_jobs, scoring=scoring)
@@ -827,7 +881,7 @@ class Clairvoyant(object):
                                               "Baseline={}".format(to_precision(baseline_score)),
                                               "iteration={}".format(i),
                                               "index={}".format(pos),
-                                              "{}={}".format(label_features_included, idx_query_features.size),
+                                              "{}={}".format(label_attrs_included, idx_query_attrs.size),
                                               "Accuracy={}".format(to_precision(accuracy)),
                                               "∆={}".format(to_precision(accuracy - baseline_score)),
                                               "SEM={}".format(to_precision(sem)),
@@ -838,7 +892,7 @@ class Clairvoyant(object):
                                 if hasattr(log_file, 'write'):
                                     print(entry, file=log_file)
                         if path_save is not None:
-                            save_data = dict(model=model, X=Ar_X, y=Ar_y, cv=cv, idx_features=list(idx_query_features), idx_samples=list(self.X.index), n_jobs=n_jobs, scoring=scoring, random_state=self.random_state)
+                            save_data = dict(model=model, X=Ar_X, y=Ar_y, cv=cv, idx_attrs=list(idx_query_attrs), idx_samples=list(self.X.index), n_jobs=n_jobs, scoring=scoring, random_state=self.random_state)
                             write_object(save_data, path_save, compression="infer")
                         # Reset the Counter
                         early_stopping_counter = 0
@@ -847,8 +901,8 @@ class Clairvoyant(object):
                 # Organize results for dataframe
                 cv_summary[pos][scoring] = accuracy
                 cv_summary[pos]["sem"] = sem
-                cv_summary[pos][label_features_included] = idx_query_features.size
-                cv_summary[pos]["feature_set"] = list(idx_query_features)
+                cv_summary[pos][label_attrs_included] = idx_query_attrs.size
+                cv_summary[pos]["{}_set".format(self.attr_type)] = list(idx_query_attrs)
 
                 # Individual cross-validations
                 cv_results[pos] = pd.Series(cross_validation_results, index=list(map(lambda x:"cv={}".format(x), range(1, len(cross_validation_results)+1))))
@@ -865,13 +919,13 @@ class Clairvoyant(object):
                             if self.verbose:
                                 print(entry, file=log_file)
                     break
-        # DataFrame for number of features included
+        # DataFrame for number of attributes included
         self.performance_ = pd.DataFrame(cv_summary).T
         # print("TESTING", type(self.performance_), self.performance_)
 
-        self.performance_[label_features_included] = self.performance_[label_features_included].astype(int)
-        self.performance_[label_features_excluded] = (self.X.shape[1] - self.performance_[label_features_included]).astype(int)
-        self.performance_ = self.performance_.loc[:,[scoring, "sem", label_features_included, label_features_excluded, "feature_set"]]
+        self.performance_[label_attrs_included] = self.performance_[label_attrs_included].astype(int)
+        self.performance_[label_attrs_excluded] = (self.X.shape[1] - self.performance_[label_attrs_included]).astype(int)
+        self.performance_ = self.performance_.loc[:,[scoring, "sem", label_attrs_included, label_attrs_excluded, "{}_set".format(self.attr_type)]]
 
         # DataFrame for individual cross-validation results
         df_cvresults = pd.DataFrame(cv_results).T
@@ -880,8 +934,8 @@ class Clairvoyant(object):
             df_cvresults.columns = cv_labels
         self.performance_ = pd.concat([self.performance_, df_cvresults], axis=1)
 
-        # Best features
-        self.best_features_ = self.performance_.sort_values(["accuracy", "sem"], ascending=[False, True]).iloc[0,:]["feature_set"]
+        # Best attributes
+        self.best_attrs_ = self.performance_.sort_values(["accuracy", "sem"], ascending=[False, True]).iloc[0,:]["{}_set".format(self.attr_type)]
 
         return self.performance_
 
@@ -891,7 +945,7 @@ class Clairvoyant(object):
     def plot_scores(self, min_threshold=None, style="seaborn-white", figsize=(21,5), ax=None, size_scatter=50, ylabel=None,  title=None, title_kws=dict(), legend_kws=dict(), ylim=None, baseline_score=None):
 
         with plt.style.context(style):
-            df_performance_wrt_included = self.performance_.set_index( "number_of_features_included", drop=True)
+            df_performance_wrt_included = self.performance_.set_index( "num_{}_included".format(self.attr_type), drop=True)
             weights_ = self.extract_weights(min_threshold=min_threshold)
             scores = df_performance_wrt_included["accuracy"]
             df_cvresults = df_performance_wrt_included.iloc[:,4:]
@@ -941,7 +995,7 @@ class Clairvoyant(object):
 
             # Lines
             ax.axhline(best_score, linestyle=":", color="black", label= "%s: %0.3f ± %0.3f"%(score_metric, best_score, sem_at_best_score))
-            ax.axvline(idx_bestscore, linestyle=":", color="black", label="n= {} features".format(idx_bestscore))
+            ax.axvline(idx_bestscore, linestyle=":", color="black", label="n= {} {}s".format(idx_bestscore, self.attr_type))
 
             if baseline_score is not None:
                 ax.axhline(baseline_score, color="maroon", linestyle=":", label="Baseline: {}".format(baseline_score))
@@ -949,7 +1003,7 @@ class Clairvoyant(object):
             # Labels
             if ylabel is None:
                 ylabel = score_metric
-            ax.set_xlabel("Number of features included")
+            ax.set_xlabel("Number of {}s included".format(self.attr_type))
             ax.set_ylabel(ylabel, fontsize=12)
             ax.set_xlabel(ax.get_xlabel(), fontsize=12)
             ax.legend(**_legend_kws)
@@ -1012,13 +1066,12 @@ def main(argv=None):
     """.format(__version_clairvoyance__)
     )
     # Input
-    parser.add_argument('-X', '--feature_matrix', type=str, help = 'Input: Path/to/Tab-separated-value.tsv of feature matrix (rows=samples, cols=features)')
+    parser.add_argument('-X', '--attribute_matrix', type=str, help = 'Input: Path/to/Tab-separated-value.tsv of attribute matrix (rows=samples, cols=attributes)')
     parser.add_argument('-y', '--target_vector', type=str, help = 'Input: Path/to/Tab-separated-value.tsv of target vector (rows=samples, column=integer target)')
     parser.add_argument("-e", "--encoding", default=None, help="Input: Path/to/Tab-separated-value.tsv of encoding.  Column 1 has enocded integer and Column 2 has string representation.  No header! [Default: None]")
 
-    # Transformation
-    parser.add_argument("--transformation", type=str, default=None, help="Transform the feature matrix.  Valid Arguments: {'tss', 'clr'}")
-    parser.add_argument("--multiplicative_replacement", type=float, default=None, help="Multiplicative replacement used for CLR [Default: 1/m^2]")
+    # Normalization
+    parser.add_argument("--normalize", type=str, default="None", help="Normalize the attribute matrix.  Valid Arguments: {'tss', 'zscore', 'quantile', None}: Warning, apply with intelligence.  For example, don't use total-sum-scaling for fold-change values. [Experimental: 2018-May-03]")
 
     # Hyperparameters
     parser.add_argument("-m", "--model_type", type=str, default="logistic,tree", help="Model types in ['logistic','tree'] represented by a comma-separated list [Default: 'logistic,tree']")
@@ -1027,22 +1080,20 @@ def main(argv=None):
     parser.add_argument("--n_jobs", type=int, default=1, help="[Default: 1]")
     parser.add_argument("--min_threshold", type=str, default="0.0,None", help="Minimum accuracy for models when considering coeficients for weights. Can be a single float or list of floats separated by `,` ranging from 0-1. If None it takes an aggregate weight.  [Default: 0.0,None]")
     parser.add_argument("--random_mode", type=int, default=0, help="Random mode 0,1, or 2.  0 uses the same random_state each iteration.  1 uses a different random_state for each parameter set.  2 uses a different random_state each time. [Default: 0]")
-    parser.add_argument("--percentiles", type=str, default="0.0,0.3,0.5,0.75,0.9,0.95,0.96,0.97,0.98,0.99", help="Iterative mode takes in a comma-separated list of floats from 0-1 that dictate how many of the features will be used [Default: 0.0,0.3,0.5,0.75,0.9,0.95,0.96,0.97,0.98,0.99]")
-    parser.add_argument("--solver", type=str, default="liblinear", help="LogisticRegression solver {‘liblinear’, ‘sag’, ‘saga’} [Default: liblinear]")
-
+    parser.add_argument("--percentiles", type=str, default="0.0,0.3,0.5,0.75,0.9,0.95,0.96,0.97,0.98,0.99", help="Iterative mode takes in a comma-separated list of floats from 0-1 that dictate how many of the attributes will be used [Default: 0.0,0.3,0.5,0.75,0.9,0.95,0.96,0.97,0.98,0.99]")
 
     # Labels & Directories
     parser.add_argument("-n", "--name", type=str, default=time.strftime("%Y-%m-%d"), help="Name for data [Default: Date]")
     parser.add_argument("-o", "--out_dir", type=str, default = os.getcwd(), help = "Output: Path/to/existing-directory-for-output.  Do not use `~` to specify /home/[user]/ [Default: cwd]" )
-    parser.add_argument("--feature_type", type=str, default="feature", help="Name of feature type (e.g. gene, orf, otu, etc.) [Default: 'feature']")
+    parser.add_argument("--attr_type", type=str, default="attr", help="Name of attribute type (e.g. gene, orf, otu, etc.) [Default: 'attr']")
     parser.add_argument("--class_type", type=str, default="class", help="Name of class type (e.g. phenotype, MOA, etc.) [Default: 'class']")
 
     # Cross Validation
     parser.add_argument("--method", type=str, default="bruteforce", help = "{'adaptive', 'bruteforce'} [Default: 'bruteforce']")
     parser.add_argument("--adaptive_range", type=str, default="0.0,0.5,1.0", help="Adaptive range in the form of a string of floats separated by commas [Default:'0.0,0.5,1.0']")
     parser.add_argument("--adaptive_steps", type=str, default="1,10", help="Adaptive stepsize in the form of a string of ints separated by commas. len(adaptive_range) - 1 [Default:'1,10']")
-    parser.add_argument("--cv", default=5, type=str, help="Number of steps for percentiles when cross validating and dropping features.  If cv=0 then it skips cross-validation step. [Default: 5]")
-    parser.add_argument("--min_bruteforce", type=int, default=150, help="Minimum number of features to adjust to bruteforce. If value is 0 then it will not change method [Default: 150]")
+    parser.add_argument("--cv", default=5, type=str, help="Number of steps for percentiles when cross validating and dropping attributes.  If cv=0 then it skips cross-validation step. [Default: 5]")
+    parser.add_argument("--min_bruteforce", type=int, default=150, help="Minimum number of attributes to adjust to bruteforce. If value is 0 then it will not change method [Default: 150]")
     parser.add_argument("--early_stopping", type=int, default=100, help="Stopping the algorthm if a certain number of iterations do not increase the accuracy. Use -1 if you don't want to use `early_stopping` [Default: 100]")
 
 
@@ -1051,10 +1102,15 @@ def main(argv=None):
     parser.add_argument("--pickled", type=str, default="infer")
 
     # I/O Model
-    parser.add_argument("--save_kernel", default=False, help="Save the kernel [Default: False]")
+    parser.add_argument("--save_kernel", default=True, help="Save the kernel [Default: True]")
     parser.add_argument("--save_model", default=False, help="Save the model [Default: False]")
     parser.add_argument("--save_data", default=True, help="Save the model [Default: True]")
 
+
+    # Broken parameters
+    # parser.add_argument("--scoring", type=str, default="accuracy", help="Scoring metric [Default: 'accuracy'] NOTE ONLY USE ACCURACY FOR NOW")
+    # parser.add_argument("--load_model", default="infer", help="path/to/model.pbz2.  Default: 'infer' which looks for model in the working directory")
+    # parser.add_argument("--force_overwrite", default=False, help="Force overwrite data [Default: False]") # Note to fix this, all percentiles above the first change need to be recomputed
 
 
 
@@ -1069,11 +1125,11 @@ def main(argv=None):
 
     # Create working directory
     os.makedirs(opts.out_dir, exist_ok=True)
-    path_synopsis = "{}/synopsis".format(opts.out_dir)
+    path_synopsis = "{}/{}__synopsis".format(opts.out_dir,opts.name)
     os.makedirs(path_synopsis, exist_ok=True)
     log_info = create_logfile("information",
-                                  "{}/clairvoyance.log".format(opts.out_dir),
-                                  mode=determine_mode_for_logfiles("{}/clairvoyance.log".format(opts.out_dir), opts.force_overwrite)
+                                  "{}/{}.log".format(opts.out_dir,opts.name),
+                                  mode=determine_mode_for_logfiles("{}/{}.log".format(opts.out_dir,opts.name), opts.force_overwrite)
     )
 
     # Initiating variables
@@ -1131,6 +1187,10 @@ def main(argv=None):
     assert set(opts.model_type) <= set(["logistic", "tree"]), "model_type should only be a combination of ['logistic','tree']. Current input: {}".format(opts.model_type)
 
 
+    # Normalization
+    if opts.normalize.lower() in ["false","none"]:
+        opts.normalize = None
+
     # Serialization
     if opts.pickled != "infer":
         if opts.pickled.lower() in ["false", "none"]:
@@ -1169,12 +1229,7 @@ def main(argv=None):
         else:
             opts.save_data = True
 
-
-
     # Static data
-    X_original = read_dataframe(opts.feature_matrix, compression=opts.compression, pickled=opts.pickled,  func_index=str, func_columns=str, verbose=False)
-
-
     y = read_dataframe(opts.target_vector, compression=opts.compression, pickled=opts.pickled, func_index=str, func_columns=str, verbose=False)
     if isinstance(y, pd.Series):
         y = y.to_frame()
@@ -1188,32 +1243,28 @@ def main(argv=None):
     best_configuration = None
     baseline_scores_ = dict()
     summary_table = list()
-
-    # f_full_synopsis = open("{}/{}__synopsis.tsv".format(path_synopsis,opts.name), "w")
     for m in opts.model_type:
         print("= == === ===== ======= ============ =====================", file=sys.stderr)
         print(m, file=sys.stderr)
         print("= == === ===== ======= ============ =====================".replace("=","."), file=sys.stderr)
 
 
-        estimator = {"logistic":LogisticRegression(random_state=opts.random_state, multi_class='ovr', solver=opts.solver), "tree":DecisionTreeClassifier(random_state=opts.random_state)}[m]
+        estimator = {"logistic":LogisticRegression(random_state=opts.random_state, multi_class='ovr', solver='liblinear'), "tree":DecisionTreeClassifier(random_state=opts.random_state)}[m]
         # Placeholders for dynamic data
-        path_features_current = opts.feature_matrix
+        path_attributes_current = opts.attribute_matrix
         best_configuration_for_modeltype = None # (percentile, min_threshold, hyperparameters)
         best_accuracy_for_modeltype = 0
         best_hyperparameters_for_modeltype = None
         model = None
-        best_features_for_modeltype = None
+        best_attributes_for_modeltype = None
 
         log_crossvalidation = create_logfile(m,
                                                  "{}/{}__cross-validation.log".format(path_synopsis,m),
                                                  mode=determine_mode_for_logfiles("{}/{}__cross-validation.log".format(path_synopsis,m), opts.force_overwrite)
         )
-        print("Opening {} synopsis:".format(m), "{}/{}__synopsis.tsv".format(path_synopsis,m))
-        f_model_synopsis = open("{}/{}__synopsis.tsv".format(path_synopsis,m), "w", buffering=1)
-        print("model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "number_of_features_included", "feature_set", "clairvoyance_weights", sep="\t", file=f_model_synopsis)
 
-        # Iterate through percentiles of weighted features
+
+        # Iterate through percentiles of weighted attributes
         baseline_percentile_0 = None
         for current_iteration, i_percentile in enumerate(opts.percentiles, start=0):
 
@@ -1232,22 +1283,15 @@ def main(argv=None):
             os.makedirs("{}/{}/percentile_{}".format(opts.out_dir,m,i_percentile), exist_ok=True)
 
             f_summary = open(path_summary, "w")
-            # Load features
-            log_info.info("\t\t{} | Percentile={} | Loading features datasets".format(m,i_percentile ))
-
-            # Terrible hack but this will be addressed in future versions
-            features_for_current_iteration = read_dataframe(path_features_current, compression=opts.compression, pickled=opts.pickled,  func_index=str, func_columns=str, verbose=False).columns
-            X = X_original[features_for_current_iteration]
+            # Load attributes
+            log_info.info("\t\t{} | Percentile={} | Loading attributes datasets".format(m,i_percentile ))
+            X = read_dataframe(path_attributes_current, compression=opts.compression, pickled=opts.pickled,  func_index=str, func_columns=str, verbose=False)
             if X.shape[1] < 2:
-                print("Skipping current iteration {} because there is/are only {} feature[s]".format(i_percentile, X.shape[1]), file=sys.stderr)
+                print("Skipping current iteration {} because there is/are only {} attribute[s]".format(i_percentile, X.shape[1]), file=sys.stderr)
             else:
-                # transform
-                if opts.transformation is not None:
-                    if opts.transformation == "clr":
-                        if opts.multiplicative_replacement is None:
-                            opts.multiplicative_replacement = 1/X.shape[1]**2
-                        X = X + opts.multiplicative_replacement
-                    X = transform(X, method=opts.transformation.lower(), axis=1) # COULD PROBABLY MOVE THIS UP AND COMBINE
+                # Normalize
+                if opts.normalize is not None:
+                    X = normalize(X, method=opts.normalize.lower(), axis=1) # COULD PROBABLY MOVE THIS UP AND COMBINE
 
                 # Common Identifiers
                 try:
@@ -1277,11 +1321,11 @@ def main(argv=None):
                     baseline_score = model_selection.cross_val_score(estimator, X=X.values, y=y.values, cv=opts.cv).mean()
                     baseline_scores_[(m,i_percentile)] = baseline_score
 
-                    # Set original feature size and baseline score
+                    # Set original attribute size and baseline score
                     if i_percentile == 0.0:
-                        n_features = X.shape[1]
+                        n_attributes = X.shape[1]
                         baseline_percentile_0 = baseline_score
-                    print("{} | Percentile={} | X.shape = {} | Baseline score({}) = {}".format(m, i_percentile, X.shape,path_features_current,to_precision(baseline_score)), file=sys.stderr)
+                    print("{} | Percentile={} | X.shape = {} | Baseline score({}) = {}".format(m, i_percentile, X.shape,path_attributes_current,to_precision(baseline_score)), file=sys.stderr)
 
 
                     # Determine if weights are different between any of the other runs
@@ -1293,7 +1337,7 @@ def main(argv=None):
                             num_differences = np.sum(_current_order != _query_order)
                             if num_differences < tol_difference*2:  # Times 2 because differences come in pairs
                                 opts.min_threshold.remove(x)
-                                log_info.info("\t\t{} | Percentile={} | Removing min_accuracy={} from computation because {} ordering is already present from another threshold".format(m,i_percentile,x,model.feature_type))
+                                log_info.info("\t\t{} | Percentile={} | Removing min_accuracy={} from computation because {} ordering is already present from another threshold".format(m,i_percentile,x,model.attr_type))
                             else:
                                 _current_order = _query_order
 
@@ -1315,7 +1359,7 @@ def main(argv=None):
                             idx_best_accuracy_for_minthreshold = scores_["accuracy"].sort_values(ascending=False).index[0]
                             query_accuracy = scores_.loc[idx_best_accuracy_for_minthreshold,"accuracy"]
                             query_sem = scores_.loc[idx_best_accuracy_for_minthreshold,"sem"]
-                            feature_set = scores_.loc[idx_best_accuracy_for_minthreshold, "feature_set"]
+                            attribute_set = scores_.loc[idx_best_accuracy_for_minthreshold, "{}_set".format(opts.attr_type)]
 
                             # Update accuracies for current percentile
                             if query_accuracy > best_accuracy_for_percentile:
@@ -1328,12 +1372,11 @@ def main(argv=None):
                                     best_configuration_for_modeltype = (i_percentile, x)
                                     best_hyperparameters_for_modeltype = model.best_hyperparameters_
                                     best_accuracy_for_modeltype = query_accuracy
-                                    best_features_for_modeltype = feature_set
+                                    best_attributes_for_modeltype = attribute_set
 
                             # Synthesize summary table
-                            Se_query = pd.Series([m, model.best_hyperparameters_, i_percentile, x, baseline_percentile_0, baseline_score, query_accuracy,  query_sem, query_accuracy - baseline_percentile_0, opts.random_state, len(feature_set), feature_set, best_weights_for_percentile[feature_set].tolist()],
-                                           index=["model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "number_of_features_included", "feature_set", "clairvoyance_weights"])
-                            print(*Se_query.values, sep="\t", file=f_model_synopsis)
+                            Se_query = pd.Series([m, model.best_hyperparameters_, i_percentile, x, baseline_percentile_0, baseline_score, query_accuracy,  query_sem, query_accuracy - baseline_percentile_0, opts.random_state, len(attribute_set), attribute_set],
+                                           index=["model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "num_{}_included".format(opts.attr_type), "{}_set".format(opts.attr_type)])
                             summary_table.append(Se_query)
                 # ==================================================================
                 # Continue analysis
@@ -1350,7 +1393,7 @@ def main(argv=None):
                                 model_type=m,
                                 n_iter=opts.n_iter,
                                 map_encoding=opts.encoding,
-                                feature_type=opts.feature_type,
+                                attr_type=opts.attr_type,
                                 class_type=opts.class_type,
                                 n_jobs=opts.n_jobs,
                                 verbose=True,
@@ -1358,7 +1401,6 @@ def main(argv=None):
                                 random_mode=opts.random_mode,
                     )
                     log_info.info("\t\tFitting data")
-
                     model.fit(X, y, desc="{} | Percentile={} | Permuting samples and fitting models".format(m, i_percentile))
                     log_info.info("\t\t{} | Percentile={} | Best hyperparameters from fitting: {}".format(m,i_percentile,model.best_hyperparameters_))
                     log_info.info("\t\t{} | Percentile={} | Saving model: {}/{}/percentile_{}/model.pkl".format(m,i_percentile,opts.out_dir,m,i_percentile))
@@ -1379,11 +1421,11 @@ def main(argv=None):
                     baseline_score = model_selection.cross_val_score(estimator, X=X.values, y=y.values, cv=opts.cv).mean()
                     baseline_scores_[(m,i_percentile)] = baseline_score
 
-                    # Set original feature size and baseline score
+                    # Set original attribute size and baseline score
                     if i_percentile == 0.0:
-                        n_features = X.shape[1]
+                        n_attributes = X.shape[1]
                         baseline_percentile_0 = baseline_score
-                    print("{} | Percentile={} | X.shape = {} | Baseline score({}) = {}".format(m,i_percentile,X.shape,path_features_current,to_precision(baseline_score)), file=sys.stderr)
+                    print("{} | Percentile={} | X.shape = {} | Baseline score({}) = {}".format(m,i_percentile,X.shape,path_attributes_current,to_precision(baseline_score)), file=sys.stderr)
 
                     acu_.to_frame("Accuracy").to_csv("{}/{}/percentile_{}/acu.tsv.gz".format(opts.out_dir,m,i_percentile), sep="\t", compression="gzip")
                     hyperparameters_.to_csv("{}/{}/percentile_{}/hyperparameters.tsv.gz".format(opts.out_dir,m,i_percentile), sep="\t", compression="gzip")
@@ -1402,13 +1444,13 @@ def main(argv=None):
                             num_differences = np.sum(_current_order != _query_order)
                             if num_differences < tol_difference*2:  # Times 2 because differences come in pairs
                                 opts.min_threshold.remove(x)
-                                log_info.info("\t\t{} | Percentile={} | Removing min_accuracy={} from computation because {} ordering is already present from another threshold".format(m,i_percentile,x,model.feature_type))
+                                log_info.info("\t\t{} | Percentile={} | Removing min_accuracy={} from computation because {} ordering is already present from another threshold".format(m,i_percentile,x,model.attr_type))
                             else:
                                 _current_order = _query_order
-                    # Soothsayer | feature Finder
+                    # Soothsayer | Attribute Finder
                     print("================================\nsoothsayer:clairvoyance {}\n================================".format(__version_clairvoyance__), file=f_summary)
                     print("Name:", opts.name, sep="\t", file=f_summary)
-                    print("X:", path_features_current, sep="\t", file=f_summary)
+                    print("X:", path_attributes_current, sep="\t", file=f_summary)
                     print("y:", opts.target_vector, sep="\t", file=f_summary)
                     print("Encoding:", opts.encoding, sep="\t", file=f_summary)
                     print("Path:", opts.out_dir, sep="\t", file=f_summary)
@@ -1426,7 +1468,7 @@ def main(argv=None):
                     print("================\n Hyperparameters \n================", file=f_summary)
                     print("\n".join(str(params[["n_iter", "random_state", "random_mode", "n_jobs", "min_threshold"]]).split("\n")[:-1]), file=f_summary)
                     print("================\n Labels \n================", file=f_summary)
-                    print("\n".join(str(params[["feature_type", "class_type"]]).split("\n")[:-1]), file=f_summary)
+                    print("\n".join(str(params[["attr_type", "class_type"]]).split("\n")[:-1]), file=f_summary)
                     print("================\n Cross Validation \n================", file=f_summary)
                     if opts.method == "adaptive":
                         print("\n".join(str(params[["method","adaptive_range","adaptive_steps", "early_stopping"]]).split("\n")[:-1]), file=f_summary)
@@ -1507,15 +1549,15 @@ def main(argv=None):
                                     idx_best_accuracy_for_minthreshold = scores_["accuracy"].sort_values(ascending=False).index[0]
                                     query_accuracy = scores_.loc[idx_best_accuracy_for_minthreshold,"accuracy"]
                                     query_sem = scores_.loc[idx_best_accuracy_for_minthreshold,"sem"]
-                                    feature_set = scores_.loc[idx_best_accuracy_for_minthreshold, "feature_set"]
+                                    attribute_set = scores_.loc[idx_best_accuracy_for_minthreshold, "{}_set".format(opts.attr_type)]
 
                                     # Update accuracies for current percentile
                                     if query_accuracy > best_accuracy_for_percentile:
                                         best_min_threshold_for_percentile = x
                                         if scores_.shape[0] >= 10:
-                                            best_results_for_percentile = scores_.sort_values(["accuracy", "sem", "number_of_features_included"], ascending=[False,True, False]).iloc[:10,:3]
+                                            best_results_for_percentile = scores_.sort_values(["accuracy", "sem", "num_{}_included".format(opts.attr_type)], ascending=[False,True, False]).iloc[:10,:3]
                                         else:
-                                            best_results_for_percentile = scores_.sort_values(["accuracy", "sem", "number_of_features_included"], ascending=[False,True, False]).iloc[:scores_.shape[0],:3]
+                                            best_results_for_percentile = scores_.sort_values(["accuracy", "sem", "num_{}_included".format(opts.attr_type)], ascending=[False,True, False]).iloc[:scores_.shape[0],:3]
 
 
                                         best_accuracy_for_percentile = query_accuracy
@@ -1531,7 +1573,7 @@ def main(argv=None):
                                             best_configuration_for_modeltype = (i_percentile, x)
                                             best_hyperparameters_for_modeltype = model.best_hyperparameters_
                                             best_accuracy_for_modeltype = query_accuracy
-                                            best_features_for_modeltype = feature_set
+                                            best_attributes_for_modeltype = attribute_set
 
                                     log_info.info("\t\t{} | Percentile={} | Minimum threshold={} | Creating plot".format(m,i_percentile,x))
 
@@ -1540,9 +1582,8 @@ def main(argv=None):
                                     plt.close()
 
                                     # Synthesize summary table
-                                    Se_query = pd.Series([m, model.best_hyperparameters_, i_percentile, x, baseline_percentile_0, baseline_score, query_accuracy,  query_sem, query_accuracy - baseline_percentile_0, opts.random_state, len(feature_set), feature_set, best_weights_for_percentile[feature_set].tolist()],
-                                                   index=["model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "number_of_features_included", "feature_set", "clairvoyance_weights"])
-                                    print(*Se_query.values, sep="\t", file=f_model_synopsis)
+                                    Se_query = pd.Series([m, model.best_hyperparameters_, i_percentile, x, baseline_percentile_0, baseline_score, query_accuracy,  query_sem, query_accuracy - baseline_percentile_0, opts.random_state, len(attribute_set), attribute_set],
+                                                   index=["model_type", "hyperparameters", "percentile",  "min_threshold", "baseline_score", "baseline_score_of_current_percentile", "accuracy", "sem", "delta", "random_state", "num_{}_included".format(opts.attr_type), "{}_set".format(opts.attr_type)])
                                     summary_table.append(Se_query)
 
                                 else:
@@ -1575,37 +1616,37 @@ def main(argv=None):
                     print(2*"\n", file=f_summary)
 
 
-                    # Close summary files
-                    f_summary.close() # Should this be where the synopsis is?
+                    # Close summary file
+                    f_summary.close()
 
             # Create next dataset
             if current_iteration+1 < len(opts.percentiles):
                 next_percentile = opts.percentiles[current_iteration+1]
 
                 # Get positions
-                number_of_features_for_next_iteration = int(round((1.0-next_percentile)*n_features))
+                number_of_attributes_for_next_iteration = int(round((1.0-next_percentile)*n_attributes))
 
-                print(m, current_iteration, i_percentile, next_percentile, opts.percentiles, number_of_features_for_next_iteration, opts.min_threshold,  sep="\t")
-                # Get feature set
+                print(m, current_iteration, i_percentile, next_percentile, opts.percentiles, number_of_attributes_for_next_iteration, opts.min_threshold,  sep="\t")
+                # Get attribute set
                 assert best_weights_for_percentile is not None, "Try this again with --force_overwrite because certain files are being read incorrectly"
-                idx_next_feature_set = best_weights_for_percentile.nlargest(number_of_features_for_next_iteration).index
+                idx_next_attribute_set = best_weights_for_percentile.nlargest(number_of_attributes_for_next_iteration).index
 
                 # Create filepath
                 os.makedirs("{}/{}/percentile_{}".format(opts.out_dir, m,next_percentile), exist_ok=True)
-                path_next_feature_matrix = "{}/{}/percentile_{}/X.subset.pkl".format(opts.out_dir,m,next_percentile) #Current iteration and not current_itation + 1 because it starts at 1.  It is already offset
+                path_next_attribute_matrix = "{}/{}/percentile_{}/X.subset.pkl".format(opts.out_dir,m,next_percentile) #Current iteration and not current_itation + 1 because it starts at 1.  It is already offset
                 # Check if the file exists already and overwrite if necessary
-                update_next_feature_matrix = True
-                if os.path.exists(path_next_feature_matrix):
+                update_next_attribute_matrix = True
+                if os.path.exists(path_next_attribute_matrix):
                     if opts.force_overwrite == False:
-                        update_next_feature_matrix = False
-                if update_next_feature_matrix:
-                    X.loc[:,idx_next_feature_set].to_pickle(path_next_feature_matrix, compression=None)
-                # Update the features for next iteration
-                path_features_current = path_next_feature_matrix
+                        update_next_attribute_matrix = False
+                if update_next_attribute_matrix:
+                    X.loc[:,idx_next_attribute_set].to_pickle(path_next_attribute_matrix, compression=None)
+                # Update the attributes for next iteration
+                path_attributes_current = path_next_attribute_matrix
 
         # Save best configuration
         print("= == === ===== ======= ============ =====================".replace("=","."), file=sys.stderr)
-        print("{} | Percentile={} | Minimum threshold = {} | Baseline score = {} | Best score = {} | ∆ = {} | n_features = {}".format(m,best_configuration_for_modeltype[0],best_configuration_for_modeltype[1],to_precision(baseline_percentile_0),to_precision(best_accuracy_for_modeltype),to_precision(best_accuracy_for_modeltype - baseline_percentile_0),len(best_features_for_modeltype)), file=sys.stderr)
+        print("{} | Percentile={} | Minimum threshold = {} | Baseline score = {} | Best score = {} | ∆ = {} | n_attrs = {}".format(m,best_configuration_for_modeltype[0],best_configuration_for_modeltype[1],to_precision(baseline_percentile_0),to_precision(best_accuracy_for_modeltype),to_precision(best_accuracy_for_modeltype - baseline_percentile_0),len(best_attributes_for_modeltype)), file=sys.stderr)
         print("= == === ===== ======= ============ =====================".replace("=","."), file=sys.stderr)
 
         # Copy best configuration
@@ -1625,23 +1666,14 @@ def main(argv=None):
                 shutil.copy2(src=src,
                              dst="{}/{}__pctl_{}__{}".format(path_synopsis,m,best_configuration_for_modeltype[0],file_suffix)
                 )
-
-        # Close files
-        f_model_synopsis.flush()
-        f_model_synopsis.close()
-
         print("", file=sys.stderr)
 
     # Analysis summary
     df_summarytable = pd.DataFrame(summary_table)
-    df_summarytable.index.name = "iteration"
-    df_summarytable.to_csv("{}/output.tsv".format(path_synopsis), sep="\t")
+    df_summarytable.index.name = "Iteration"
+    df_summarytable.to_csv("{}/{}__synopsis.tsv".format(path_synopsis,opts.name), sep="\t")
     log_info.info("\t\tTotal time:\t {}".format(format_duration(start_time)))
-    for m, df in df_summarytable.groupby("model_type"):
-        best_configuration = df.sort_values(["accuracy", "sem", "number_of_features_included"], ascending=[False, True, True]).iloc[0]
-        best_configuration.name = " "
-        best_configuration.to_csv(sys.stdout, sep="\t")
-    # df_summarytable.to_csv(sys.stdout, sep="\t")
+    df_summarytable.to_csv(sys.stdout, sep="\t")
 
 # Initialize
 if __name__ == "__main__":

@@ -1443,8 +1443,8 @@ def plot_multiindexed_heatmap(
     
     # Check if multiindex
     n, m = data.shape
-    rows_are_multiindex = isinstance(df.index, pd.MultiIndex)
-    columns_are_multiindex = isinstance(df.columns, pd.MultiIndex)
+    rows_are_multiindex = isinstance(data.index, pd.MultiIndex)
+    columns_are_multiindex = isinstance(data.columns, pd.MultiIndex)
     
 
     with plt.style.context(style):
