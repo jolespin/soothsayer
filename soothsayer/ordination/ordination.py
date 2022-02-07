@@ -866,6 +866,7 @@ class Procrustes(object):
         loss="rmse",
         style="seaborn-white",
         aspect="auto",
+        ax=None,
         ):
         # build the plot exactly like vegan 
         # using https://github.com/vegandevs/vegan/blob/master/R/plot.procrustes.R
@@ -947,7 +948,11 @@ class Procrustes(object):
         y_max = max(abs(np.hstack((self.Y_rotation_.values[:,1], self.X_.values[:,1]))))
 
         with plt.style.context(style):
-            fig, ax = plt.subplots(**_fig_kws)
+        # Figure
+            if ax is None:
+                fig, ax = plt.subplots(**_fig_kws)
+            else:
+                fig = plt.gcf()
             
             ax.set_aspect(aspect)
             ax.set_xlim(-x_max, x_max)

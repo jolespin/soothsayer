@@ -50,7 +50,7 @@ If you are interested in requesting features or wish to report a bug, please pos
 _________________________________
 
 
-#### `Soothsayer` in the wild:
+#### *Soothsayer* in the wild:
 _________________________________
 * Espinoza JL+, Dupont CL+, O’Rourke A, Beyhan S, Morales P, et al. (2021) Predicting antimicrobial mechanism-of-action from transcriptomes: A generalizable explainable artificial intelligence approach. PLOS Computational Biology 17(3): e1008857. [doi:10.1371/journal.pcbi.1008857](https://doi.org/10.1371/journal.pcbi.1008857)
 
