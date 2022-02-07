@@ -34,7 +34,7 @@
 # Version
 # =======
 import sys, time
-__version__= "2022.01.07"
+__version__= "2022.02.06"
 __moniker__ = "Materia"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
@@ -89,7 +89,7 @@ _submodules = ["core", "classification", "db", "feature_extraction", "hierarchy"
 _core = ["Dataset"]
 _hierarchy = ["Agglomerative", "Topology"]
 _networks = ["Hive", "TemporalNetwork","EnsembleAssociationNetwork", "SampleSpecificPerturbationNetwork", "DifferentialEnsembleAssociationNetwork"]
-_ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold"]
+_ordination = ["PrincipalComponentAnalysis", "PrincipalCoordinatesAnalysis", "Manifold", "Procrustes"]
 _symmetry = ["Symmetric"]
 _utils = ["Chromatic", "Suppress", "pv"]
 

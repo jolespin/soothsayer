@@ -823,8 +823,8 @@ def get_parameters_ellipse(df_xy, groups, metric=np.mean, n_std=3, into=pd.DataF
             order = vals.argsort()[::-1]
             return vals[order], vecs[:,order]
         # Data
-        x =  df_xy.iloc[:,0][idx].as_matrix()
-        y =  df_xy.iloc[:,1][idx].as_matrix()
+        x =  df_xy.iloc[:,0][idx].values
+        y =  df_xy.iloc[:,1][idx].values
         # Reduce
         x_reduce = metric(x)
         y_reduce = metric(y)

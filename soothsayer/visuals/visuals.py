@@ -450,7 +450,7 @@ def plot_scatter(
             # ___________________________
             # Is data a list of strings to index?
             if not is_nonstring_iterable(annot[0]):
-                annot = [(k, xy.as_matrix()) for k, xy in coords.loc[annot,:].T.iteritems()]
+                annot = [(k, xy.values) for k, xy in coords.loc[annot,:].T.iteritems()]
             # Is data a {s:[id_1, id_2, ..., id_m]} object?
                 # Assumes the lists are greater than 2
             if is_nonstring_iterable(annot[0][1]) and (len(annot[0][1]) > 2):
@@ -554,7 +554,7 @@ def plot_scatter(
         # ==================================================
         # Match axis scales
         if share_axis == True:
-            lims = coords.as_matrix().ravel()
+            lims = coords.values.ravel()
             min_lim, max_lim = min(lims), max(lims)
             ax.set_xlim((min_lim*0.98,max_lim*1.02))
             ax.set_ylim((min_lim*0.98,max_lim*1.02))
@@ -1061,6 +1061,9 @@ def plot_compositional(
     annot_kws=dict(),
     log_depth=True,
     log_richness=False,
+    xmin=0, 
+    ymin=0, 
+
     ):
     def _get_line_data(y, data, lines, class_colors, _line_kws):
         kws_collection = list()
@@ -1241,6 +1244,12 @@ def plot_compositional(
         ylabel = "Richness [$N_{%s}$]"%(f"{attr_type}s")
         if log_richness:
             ylabel = "log$_{10}$(%s)"%(ylabel)
+
+        if xmin is not None:
+            ax.set_xlim(xmin, max(ax.get_xlim()))
+       
+        if ymin is not None:
+            ax.set_ylim(xmin, max(ax.get_ylim()))
 
         ax.set_xlabel(xlabel, **_axis_label_kws)
         ax.set_ylabel(ylabel, **_axis_label_kws)

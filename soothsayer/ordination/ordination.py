@@ -27,7 +27,7 @@ from ..visuals import plot_scatter
 from matplotlib.patches import ConnectionPatch
 import matplotlib.pyplot as plt
 
-__all__ = ["MatrixDecomposition", "PrincipalComponentAnalysis","PrincipalCoordinatesAnalysis", "Manifold", "eigenprofiles_from_data"]
+__all__ = ["MatrixDecomposition", "PrincipalComponentAnalysis","PrincipalCoordinatesAnalysis", "Manifold", "Procrustes", "eigenprofiles_from_data"]
 __all__ = sorted(__all__)
 
 
@@ -710,3 +710,274 @@ def eigenprofiles_from_data(X:pd.DataFrame, y:pd.Series, class_type:str = None, 
         return output[0]
     else:
         return tuple(output)
+
+
+class Procrustes(object):
+    """
+    Missing residuals and summary
+    """
+    def __init__(
+        self,
+        X,
+        Y,
+        name=None,
+        n_components=2,
+        scale=True,
+        symmetric=False,
+        ):
+        # Initialize
+        self.name = name
+        self.scale = scale
+        self.symmetric = symmetric
+        self.n_components = n_components
+        
+        # Convert ordination objects into pd.DataFrames
+        if hasattr(X, "projection_"):
+            X = X.projection_
+        if hasattr(Y, "projection_"):
+            Y = Y.projection_
+
+        # Assertions
+        assert set(X.index) == set(Y.index), "X.index must have the same keys as Y.index"
+        assert X.shape[1] >= n_components, "X.shape[1] = {} which is less than {}".format(X.shape[1], n_components)
+        assert Y.shape[1] >= n_components, "Y.shape[1] = {} which is less than {}".format(Y.shape[1], n_components)
+        
+        # Reorder Y
+        index = X.index
+        Y = Y.loc[index]
+        
+        # Dimensions
+        X = X.iloc[:,:n_components]
+        Y = Y.iloc[:,:n_components]
+        
+        # Labels
+        X_columns = X.columns
+        Y_columns = Y.columns
+        
+        # Pandas -> NumPy
+        X = X.values
+        Y = Y.values
+        
+        # Center data
+        # R Code: https://github.com/vegandevs/vegan/blob/83fd020085d6f294ea48496f91564600795c049c/R/procrustes.R
+        #         if (symmetric) {
+        #             X <- scale(X, scale = FALSE)
+        #             Y <- scale(Y, scale = FALSE)
+        #             X <- X/sqrt(ctrace(X))
+        #             Y <- Y/sqrt(ctrace(Y))
+        #         }
+        #         xmean <- apply(X, 2, mean)
+        #         ymean <- apply(Y, 2, mean)
+        #         if (!symmetric) {
+        #             X <- scale(X, scale = FALSE)
+        #             Y <- scale(Y, scale = FALSE)
+        #         }
+        X_ = X.copy()
+        Y_ = Y.copy()
+        if symmetric:
+            X_ = X_ - X_.mean(axis=0)
+            Y_ = Y_ - Y_.mean(axis=0)
+            X_ = X_/np.sqrt(np.sum(X_**2))
+            Y_ = Y_/np.sqrt(np.sum(Y_**2))
+            
+        X_mean = X_.mean(axis=0)
+        Y_mean = Y_.mean(axis=0)
+        if not symmetric:
+            X_ = X_ - X_mean
+            Y_ = Y_ - Y_mean
+
+        
+        # Rotation
+        XY = np.dot(X_.T, Y_) # crossprod(X,Y)
+        U,s,Vh = np.linalg.svd(XY)
+        V = Vh.T
+        A = np.dot(V, U.T)
+        
+        c = 1
+        if scale:
+            c = np.sum(s)/np.sum(Y_**2)
+        Y_rotation = c * np.dot(Y_, A)
+        
+        self.n_ = X_.shape[0]
+        self.X_ = pd.DataFrame(X_, index=index, columns=X_columns)
+        self.X_mean_ = X_mean
+        self.Y_ = pd.DataFrame(Y_, index=index, columns=Y_columns)
+        self.Y_mean_ = Y_mean
+        self.Y_rotation_ = pd.DataFrame(
+            data = Y_rotation, 
+            index=index, 
+            columns=Y_columns,
+        )
+        self.svd_ = {"U":U, "s":s, "Vh":Vh }
+        self.rotation_ = A
+        self.scaling_of_target_ = c
+        self.translation_of_averages_ = X_mean - c * np.dot(Y_mean, A) # This is slightly off  from R because the mean functions
+        self.sum_of_squares_ = np.sum(X_**2) + c * c * np.sum(Y_**2) - 2 * c * np.sum(s)
+        self.mse_ = self.sum_of_squares_/self.n_
+        self.rmse_ = np.sqrt(self.mse_)
+        #         self.mse_ = {
+        #             "dimension_1": np.mean((Y_rotation[:,0] - Y_[:,0])**2),
+        #             "dimension_2": np.mean((Y_rotation[:,1] - Y_[:,1])**2),
+        #         }
+        #         self.rmse_ = {
+        #             "dimension_1": np.sqrt(self.mse_["dimension_1"]),
+        #             "dimension_2": np.sqrt(self.mse_["dimension_2"]),
+        #         }
+        
+    def summary(self):
+        return pd.Series( 
+            OrderedDict([ 
+                ("Number of observations [n]", self.n_),
+                ("Number of dimensions [k]", self.n_components),
+                ("Rotation matrix [A]",self.rotation_),
+                ("Sum of squares [ss]", self.sum_of_squares_),
+                ("MSE", self.mse_),
+                ("RMSE", self.rmse_),
+                ("Translation of averages [b]", self.translation_of_averages_),
+                ("Scaling of target [c]", self.scaling_of_target_),
+            ]),
+            name=self.name,
+        )
+                
+        
+    def plot(
+        self,
+        title=True, 
+        xlabel="Dimension 1",
+        ylabel="Dimension 2",
+        color_arrow="teal",
+        arrow_style="->",
+        ellipse_data=None,
+        ellipse_linewidth=3,
+        ellipse_linestyle='-',
+        ellipse_fillcolor='gray',
+        ellipse_edgecolor='black',
+        ellipse_n_std=3,
+        ellipse_alpha=0.333,
+        ellipse_fill=False,
+        fig_kws=dict(),
+        scatter_kws=dict(),
+        title_kws=dict(),
+        label_kws=dict(),
+        origin_kws = dict(),
+        rotation_kws = dict(),
+        arrow_kws = dict(),
+        include_loss_in_labels=True, 
+        loss="rmse",
+        style="seaborn-white",
+        aspect="auto",
+        ):
+        # build the plot exactly like vegan 
+        # using https://github.com/vegandevs/vegan/blob/master/R/plot.procrustes.R
+#         tails = vpYrot_py
+
+#         tails = self.Y_rotation_.values
+#         heads = self.X_.values
+        
+        # Keywords
+#         if include_loss_in_labels:
+#             assert_acceptable_arguments(loss, {"mse", "rmse"})
+#             if loss == "mse":
+#                 xlabel = "{} (MSE = {:.2e})".format(xlabel, self.mse_["dimension_1"])
+#                 ylabel = "{} (MSE = {:.2e})".format(ylabel, self.mse_["dimension_2"])
+#             if loss == "rmse":
+#                 xlabel = "{} (RMSE = {:.2e})".format(xlabel, self.mse_["dimension_1"])
+#                 ylabel = "{} (RMSE = {:.2e})".format(ylabel, self.mse_["dimension_2"])
+
+        if title is True:
+            title = self.name
+            
+        _fig_kws = dict( 
+            figsize=(8,8),
+        )
+        _fig_kws.update(fig_kws)
+            
+        _scatter_kws = dict(
+            xlabel=xlabel,
+            ylabel=ylabel,
+            title=title,
+            ellipse_data=ellipse_data,
+            ellipse_linewidth=ellipse_linewidth,
+            ellipse_linestyle=ellipse_linestyle,
+            ellipse_fillcolor=ellipse_fillcolor,
+            ellipse_edgecolor=ellipse_edgecolor,
+            ellipse_n_std=ellipse_n_std,
+            ellipse_alpha=ellipse_alpha,
+            ellipse_fill=ellipse_fill,            
+        )
+        _scatter_kws.update(scatter_kws)
+        
+        _origin_kws = dict(
+            linestyle="-",
+            color="black",
+            linewidth=1,
+            alpha=0.618,
+            zorder=0,
+        )
+        _origin_kws.update(origin_kws)
+        
+        _rotation_kws = dict(
+            linestyle="--",
+            color="gray",
+            linewidth=1,
+        )
+        _rotation_kws.update(rotation_kws)
+        
+        _arrow_kws = dict(
+            arrowstyle=arrow_style,
+            color = color_arrow,
+            linewidth=0.618,
+            linestyle="-",
+        )
+        _arrow_kws.update(arrow_kws)
+        
+        _label_kws = dict( 
+            fontsize=15,
+        )
+        _label_kws.update(label_kws)
+        
+        _title_kws = dict( 
+            fontsize=15,
+            fontweight="bold",
+        )
+        _title_kws.update(title_kws)
+        
+        # find the ranges
+        x_max = max(abs(np.hstack((self.Y_rotation_.values[:,0], self.X_.values[:,0]))))
+        y_max = max(abs(np.hstack((self.Y_rotation_.values[:,1], self.X_.values[:,1]))))
+
+        with plt.style.context(style):
+            fig, ax = plt.subplots(**_fig_kws)
+            
+            ax.set_aspect(aspect)
+            ax.set_xlim(-x_max, x_max)
+            ax.set_ylim(-y_max, y_max)
+
+            # Add ordination points
+            plot_scatter(
+                data=self.Y_rotation_,
+                ax=ax,
+                label_kws=_label_kws,
+                **_scatter_kws,
+            )
+
+            # Add origin axes
+            ax.axhline(0, **_origin_kws) # using dashed for origin
+            ax.axvline(0, **_origin_kws)
+
+            # Add rotation axes
+            x_grid = np.linspace(*ax.get_xlim())
+            x_slope = self.rotation_[0, 1]/self.rotation_[0, 0]
+            y_grid = np.linspace(*ax.get_ylim())
+            y_slope = self.rotation_[1, 1]/self.rotation_[1, 0]
+
+            ax.plot(x_grid, x_slope*x_grid, **_rotation_kws)
+            ax.plot(x_grid, y_slope*y_grid, **_rotation_kws)
+
+            # Add arrows
+            for i in range(0, len(self.Y_rotation_.values)):
+                ax.annotate("", xy = self.X_.values[i,:],
+                          xycoords = 'data',
+                          xytext = self.Y_rotation_.values[i,:], 
+                          arrowprops=_arrow_kws,
+               )
