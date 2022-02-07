@@ -15,19 +15,21 @@ conda install -y -c r r-devtools
 
 pip install rpy2
 
-conda install -y -c conda-forge 'pandas>=1.2.4' mmh3 biopython scikit-bio  statsmodels scikit-learn xarray seaborn numpy 'networkx >= 2' 'scipy >= 1' 'matplotlib >= 2'  tqdm graphviz  pygraphviz fastcluster palettable matplotlib-venn adjusttext tzlocal  r-ape 'libopenblas==0.3.7'  
+conda install -y -c conda-forge 'pandas>=1.2.4' mmh3 biopython scikit-bio  statsmodels scikit-learn xarray seaborn numpy 'networkx >= 2' 'scipy >= 1' 'matplotlib >= 3'  tqdm graphviz  pygraphviz fastcluster palettable matplotlib-venn adjusttext tzlocal  r-ape r-devtools rpy2 umap-learn leidenalg python-igraph
 #libopenblas needed for edgeR and metagenomeSeq
 
-conda install -y -c bioconda r-dynamictreecut bioconductor-philr bioconductor-edger bioconductor-aldex2 bioconductor-phyloseq ete3 gneiss bioconductor-lpsymphony # genomeinfodbdata is for ALDEx2
+cconda install -y -c bioconda r-dynamictreecut bioconductor-philr bioconductor-edger bioconductor-aldex2 bioconductor-phyloseq ete3 gneiss bioconductor-lpsymphony r-fastcluster # genomeinfodbdata is for ALDEx2
 
 ## May need to run the following line if R packages fail from stringi.dylib
 # conda install -c r r-stringi
 
-pip install --no-deps soothsayer_utils
-pip install --no-deps compositional
-pip install --no-deps hive_networkx
-pip install --no-deps ensemble_networkx
-pip install --no-deps  soothsayer
+pip install --no-deps git+https://github.com/jolespin/soothsayer_utils
+pip install --no-deps git+https://github.com/jolespin/compositional
+pip install --no-deps git+https://github.com/jolespin/hive_networkx
+pip install --no-deps git+https://github.com/jolespin/ensemble_networkx
+pip install --no-deps git+https://github.com/jolespin/soothsayer
+
+python -c "import soothsayer as sy"
 
 # End
 now=$(date +"%T")
