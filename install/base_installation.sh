@@ -11,10 +11,6 @@ echo "Using Python version: $py_version"
 conda create -n $env_name -y python=$py_version
 source activate $env_name
 
-conda install -y -c r r-devtools 
-
-pip install rpy2
-
 conda install -y -c conda-forge 'pandas>=1.2.4' mmh3 biopython scikit-bio  statsmodels scikit-learn xarray seaborn numpy 'networkx >= 2' 'scipy >= 1' 'matplotlib >= 3'  tqdm graphviz  pygraphviz fastcluster palettable matplotlib-venn adjusttext tzlocal  r-ape r-devtools rpy2 umap-learn leidenalg python-igraph
 #libopenblas needed for edgeR and metagenomeSeq
 
@@ -29,6 +25,7 @@ pip install --no-deps git+https://github.com/jolespin/hive_networkx
 pip install --no-deps git+https://github.com/jolespin/ensemble_networkx
 pip install --no-deps git+https://github.com/jolespin/soothsayer
 
+echo "Checking soothsayer installation"
 python -c "import soothsayer as sy"
 
 # End
