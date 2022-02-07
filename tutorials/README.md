@@ -14,11 +14,8 @@ The following traverses the methods associated with [*Espinoza, Dupont et al. 20
 In particular, this is designed to showcase the usage of the *Soothsayer* Python 3 packages, *Clairvoyance* executable for feature-selection, building/training/evaluating HEC graphical models, and advanced plotting methods.
 
 ##### Files:
-Rendered Notebook [Recommended Online]: [Espinoza-Dupont\_et\_al_2021.md](https://github.com/jolespin/antimicrobial_resistance_modeling/blob/master/Espinoza-Dupont_et_al_2021/Notebooks/markdown_version/Espinoza-Dupont_et_al_2021__Supplemental.md)
+Rendered Notebook [Recommended Online]: [Espinoza-Dupont_et_al_2021__Supplemental.md](https://github.com/jolespin/projects/blob/main/antimicrobial_resistance_modeling/Espinoza-Dupont_et_al_2021/Notebooks/markdown_version/Espinoza-Dupont_et_al_2021__Supplemental.md)
 
-*Jupyter* Notebook: [Espinoza-Dupont\_et\_al\_2021.ipynb](https://github.com/jolespin/antimicrobial_resistance_modeling/blob/master/Espinoza-Dupont_et_al_2021/Notebooks/Espinoza-Dupont_et_al_2021__Supplemental.ipynb)
-
-*HTML* Notebook: [Espinoza-Dupont_et_al_2021.html](https://github.com/jolespin/antimicrobial_resistance_modeling/blob/master/Espinoza-Dupont_et_al_2021/Notebooks/Espinoza-Dupont_et_al_2021__Supplemental.html)
 
 
 #### Feature selection using *Clairvoyance*:
