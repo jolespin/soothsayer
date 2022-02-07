@@ -11,10 +11,10 @@ echo "Using Python version: $py_version"
 conda create -n $env_name -y python=$py_version
 source activate $env_name
 
-conda install -y -c conda-forge 'pandas>=1.2.4' mmh3 biopython scikit-bio  statsmodels scikit-learn xarray seaborn numpy 'networkx >= 2' 'scipy >= 1' 'matplotlib >= 3'  tqdm graphviz  pygraphviz fastcluster palettable matplotlib-venn adjusttext tzlocal  r-ape r-devtools rpy2 umap-learn leidenalg python-igraph
+conda install -y -c conda-forge 'pandas>=1.2.4' mmh3 biopython scikit-bio  statsmodels scikit-learn xarray seaborn numpy 'networkx >= 2' 'scipy >= 1' 'matplotlib >= 3'  tqdm graphviz  pygraphviz fastcluster palettable matplotlib-venn adjusttext tzlocal  r-ape r-devtools rpy2 umap-learn leidenalg python-igraph ete3
 #libopenblas needed for edgeR and metagenomeSeq
 
-cconda install -y -c bioconda r-dynamictreecut bioconductor-philr bioconductor-edger bioconductor-aldex2 bioconductor-phyloseq ete3 gneiss bioconductor-lpsymphony r-fastcluster # genomeinfodbdata is for ALDEx2
+cconda install -y -c bioconda r-dynamictreecut bioconductor-philr bioconductor-edger bioconductor-aldex2 bioconductor-phyloseq gneiss bioconductor-lpsymphony r-fastcluster # genomeinfodbdata is for ALDEx2
 
 ## May need to run the following line if R packages fail from stringi.dylib
 # conda install -c r r-stringi
