@@ -44,10 +44,10 @@ setup(name='soothsayer',
     "leidenalg",
     
     # Extensions
-    "soothsayer_utils >= 2021.07.27",
+    "soothsayer_utils >= 2022.2.9",
     "compositional >= 2020.12.16",
     "hive_networkx >= 2021.3.08",
-    "ensemble_networkx >= 2021.04.12",
+    "ensemble_networkx >= 2022.2.9",
 
     # Optional
     # "teneto",
