@@ -6,6 +6,9 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 # ========
 # Changes:
 # ========
+* 2022.2.14 - Added `protest` method to `Procrustes` and cleaned up plotting function
+* 2022.02.06 - Added `Procrustes` to ordination and replaced .as_matrix() calls with .values
+* 2022.01.07 - Added `get_mixed_feature_pipeline_estimator` and added axis argument to `pd_prepend_level_to_index`
 * 2021.07.27 - Added `plot_multiindexed_heatmap` and `iterate_nested_dict`
 * 2021.05.19 - Added `intersection` and `union` functions from `soothsayer_utils`.  Also added 2 wrappers around scipy.stats.entropy (`shannon_entropy` and `kullback_leibler_divergence`) and a wrapper around scipy.stats.ttest_ind (`welchs_ttest`)
 * 2021.04.27 - Reimplemented `normalize_css` in Python to remove dependency on metagenomeSeq.   Note, `metagenomeSeq` is confusing because it uses `p` for quantile which sounds like it's referring to `percentiles`.  To make it more consistent with `numpy` and `scipy` I switched `p` to `q`.  Also, I removed the `propr` dependency because it's not used at all now that I've made the `compositional` Python package.
@@ -42,17 +45,26 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 
 # Clairvoyance
 # ------------
-* Remove name in output files
-* Add weights in the synopsis file
-* Remove feature type from synopsis names
-* Change `attributes` to `features`
+* Remove name in output files [Fixed v2022.01.06]
+* Add weights in the synopsis file [Fixed v2022.01.06]
+* Remove feature type from synopsis names [Fixed v2022.01.06]
+* Change `attributes` to `features` [Fixed v2022.01.06]
+* Write synopsis file after each model_type is finished [Fixed v2022.01.06]
+* Output only the best models [Fixed v2022.01.06]
+* For normalization, normalize based on the original data not the data for each iteration. For example, this wouldn't make sense for CLR.  [Fixed v2022.01.06]
+* Remove all instances of --encoding
+* Make --save_kernel, save_model, etc. flags
+* Incorporate elasticnet for LogisticRegression
 
 # Soothsayer
 # ----------
+* Remove signed from pairwise and clean up function
 * Make Agglomerative its own package and use skbio instead of Ete3
 * Make HierarchicalClassifier its own package and use skbio instead of Ete3
 * Change `create_pca_model` to something else...
 * Collapse topology so it uses Agglomerative instead
 * Clean up the coloring (map_colors, scalarmapping_from_data, etc.)
 * Move TemporalNetwork to Ensemble NetworkX
-
+* Redo Dataset object and make a .to_anndata method
+* Add subset to orindation plot to only some of the points. useful for different markers.
+* Autodetect multiheader for read_dataframe and clean it up

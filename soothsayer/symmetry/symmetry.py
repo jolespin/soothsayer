@@ -70,7 +70,7 @@ __all__ = sorted(__all__)
 
 
 # Pairwise interactions
-def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, association="infer", signed=True, n_jobs=-1, check_metrics=True, symmetric_kws=dict()):
+def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, association="infer", signed=True, n_jobs=-1, check_metrics=True, symmetric_kws=dict(), verbose=False):
     """
     Compute pairwise interactions
 
@@ -123,7 +123,8 @@ def pairwise(X, metric="euclidean", axis=1, name=None, into=pd.DataFrame, associ
         if metric_name in DISTANCE_METRICS:
             association = "dissimilarity"
         assert association != "infer", f"Unable to infer association from metric = {metric}"
-        print(f"Inferred association as `{association}`", file=sys.stderr)
+        if verbose: 
+            print(f"Inferred association as `{association}`", file=sys.stderr)
 
     # Similarity transformation function
     functions = {

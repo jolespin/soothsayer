@@ -714,7 +714,10 @@ def eigenprofiles_from_data(X:pd.DataFrame, y:pd.Series, class_type:str = None, 
 
 class Procrustes(object):
     """
-    Missing residuals and summary
+    Python adaptation of https://rdrr.io/rforge/vegan/src/R/procrustes.R
+    
+    Differences: 
+    * Symmetric defaults to True instead of False
     """
     def __init__(
         self,
@@ -723,8 +726,13 @@ class Procrustes(object):
         name=None,
         n_components=2,
         scale=True,
-        symmetric=False,
+        symmetric=True,
         ):
+        
+        def _ctrace(MAT):
+            # https://rdrr.io/rforge/vegan/src/R/procrustes.R
+            return np.sum(MAT.ravel()**2)
+        
         # Initialize
         self.name = name
         self.scale = scale
@@ -777,8 +785,8 @@ class Procrustes(object):
         if symmetric:
             X_ = X_ - X_.mean(axis=0)
             Y_ = Y_ - Y_.mean(axis=0)
-            X_ = X_/np.sqrt(np.sum(X_**2))
-            Y_ = Y_/np.sqrt(np.sum(Y_**2))
+            X_ = X_/np.sqrt(_ctrace(X_))
+            Y_ = Y_/np.sqrt(_ctrace(Y_))
             
         X_mean = X_.mean(axis=0)
         Y_mean = Y_.mean(axis=0)
@@ -795,7 +803,7 @@ class Procrustes(object):
         
         c = 1
         if scale:
-            c = np.sum(s)/np.sum(Y_**2)
+            c = np.sum(s)/_ctrace(Y_)
         Y_rotation = c * np.dot(Y_, A)
         
         self.n_ = X_.shape[0]
@@ -808,13 +816,17 @@ class Procrustes(object):
             index=index, 
             columns=Y_columns,
         )
+        self.labels_ = index
         self.svd_ = {"U":U, "s":s, "Vh":Vh }
         self.rotation_ = A
         self.scaling_of_target_ = c
         self.translation_of_averages_ = X_mean - c * np.dot(Y_mean, A) # This is slightly off  from R because the mean functions
-        self.sum_of_squares_ = np.sum(X_**2) + c * c * np.sum(Y_**2) - 2 * c * np.sum(s)
+        self.sum_of_squares_ = _ctrace(X_) + c * c * _ctrace(Y_) - 2 * c * np.sum(s)
         self.mse_ = self.sum_of_squares_/self.n_
         self.rmse_ = np.sqrt(self.mse_)
+        self.residuals_ = np.sqrt(np.sum((self.X_ - self.Y_rotation_)**2, axis=1))
+        self.quantiles_ = pd.Series(self.residuals_.quantile(q=[0,0.25, 0.5, 0.75, 1.0]).values, index=["Min", "1Q", "Median", "3Q", "Max"])
+        
         #         self.mse_ = {
         #             "dimension_1": np.mean((Y_rotation[:,0] - Y_[:,0])**2),
         #             "dimension_2": np.mean((Y_rotation[:,1] - Y_[:,1])**2),
@@ -835,6 +847,8 @@ class Procrustes(object):
                 ("RMSE", self.rmse_),
                 ("Translation of averages [b]", self.translation_of_averages_),
                 ("Scaling of target [c]", self.scaling_of_target_),
+                ("Residuals [resid]", self.residuals_.values),
+                ("Quantiles of errors [Min,1Q,Med,3Q,Max]", self.quantiles_.values),
             ]),
             name=self.name,
         )
@@ -845,7 +859,7 @@ class Procrustes(object):
         title=True, 
         xlabel="Dimension 1",
         ylabel="Dimension 2",
-        color_arrow="teal",
+        arrow_color="teal",
         arrow_style="->",
         ellipse_data=None,
         ellipse_linewidth=3,
@@ -856,17 +870,15 @@ class Procrustes(object):
         ellipse_alpha=0.333,
         ellipse_fill=False,
         fig_kws=dict(),
-        scatter_kws=dict(),
         title_kws=dict(),
         label_kws=dict(),
         origin_kws = dict(),
         rotation_kws = dict(),
         arrow_kws = dict(),
-        include_loss_in_labels=True, 
-        loss="rmse",
         style="seaborn-white",
         aspect="auto",
         ax=None,
+        **plot_scatter_kws,
         ):
         # build the plot exactly like vegan 
         # using https://github.com/vegandevs/vegan/blob/master/R/plot.procrustes.R
@@ -892,7 +904,11 @@ class Procrustes(object):
             figsize=(8,8),
         )
         _fig_kws.update(fig_kws)
-            
+
+        _label_kws = dict( 
+            fontsize=15,
+        )
+        _label_kws.update(label_kws)
         _scatter_kws = dict(
             xlabel=xlabel,
             ylabel=ylabel,
@@ -904,9 +920,10 @@ class Procrustes(object):
             ellipse_edgecolor=ellipse_edgecolor,
             ellipse_n_std=ellipse_n_std,
             ellipse_alpha=ellipse_alpha,
-            ellipse_fill=ellipse_fill,            
+            ellipse_fill=ellipse_fill, 
+            label_kws=_label_kws,
         )
-        _scatter_kws.update(scatter_kws)
+        _scatter_kws.update(plot_scatter_kws)
         
         _origin_kws = dict(
             linestyle="-",
@@ -926,16 +943,13 @@ class Procrustes(object):
         
         _arrow_kws = dict(
             arrowstyle=arrow_style,
-            color = color_arrow,
+            color = arrow_color,
             linewidth=0.618,
             linestyle="-",
         )
         _arrow_kws.update(arrow_kws)
         
-        _label_kws = dict( 
-            fontsize=15,
-        )
-        _label_kws.update(label_kws)
+
         
         _title_kws = dict( 
             fontsize=15,
@@ -962,7 +976,6 @@ class Procrustes(object):
             plot_scatter(
                 data=self.Y_rotation_,
                 ax=ax,
-                label_kws=_label_kws,
                 **_scatter_kws,
             )
 
@@ -985,4 +998,102 @@ class Procrustes(object):
                           xycoords = 'data',
                           xytext = self.Y_rotation_.values[i,:], 
                           arrowprops=_arrow_kws,
-               )
+                ) 
+        
+    def protest(
+        self,
+        n_iter=1000,
+        random_state=0,
+        with_replacement=False,
+        ):
+        """
+        https://rdrr.io/rforge/vegan/src/R/protest.R
+        `protest` <- function (X, Y, scores = "sites", permutations = how(nperm = 999),...)
+        {
+            EPS <- sqrt(.Machine$double.eps)
+            X <- scores(X, display = scores, ...)
+            Y <- scores(Y, display = scores, ...)
+            ## Centre and normalize X & Y here so that the permutations will
+            ## be faster
+            X <- scale(X, scale = FALSE)
+            Y <- scale(Y, scale = FALSE)
+            X <- X/sqrt(sum(X^2))
+            Y <- Y/sqrt(sum(Y^2))
+            ## Transformed X and Y will yield symmetric procrustes() and we
+            ## need not specify that in the call (but we set it symmetric
+            ## after the call).
+            sol <- procrustes(X, Y, symmetric = FALSE)
+            sol$symmetric <- TRUE
+            sol$t0 <- sqrt(1 - sol$ss)
+            N <- nrow(X)
+
+            ## Permutations: We only need the goodness of fit statistic from
+            ## Procrustes analysis, and therefore we only have the necessary
+            ## function here. This avoids a lot of overhead of calling
+            ## procrustes() for each permutation. The following gives the
+            ## Procrustes r directly.
+            procr <- function(X, Y) sum(svd(crossprod(X, Y), nv=0, nu=0)$d)
+
+            permutations <- getPermuteMatrix(permutations, N)
+            if (ncol(permutations) != N)
+                stop(gettextf("'permutations' have %d columns, but data have %d observations",
+                              ncol(permutations), N))
+            np <- nrow(permutations)
+
+            perm <- sapply(seq_len(np),
+                           function(i, ...) procr(X, Y[permutations[i,],]))
+
+            Pval <- (sum(perm >= sol$t0 - EPS) + 1)/(np + 1)
+
+            sol$t <- perm
+            sol$signif <- Pval
+            sol$permutations <- np
+            sol$control <- attr(permutations, "control")
+            sol$call <- match.call()
+            class(sol) <- c("protest", "procrustes")
+            sol
+        }
+        """
+
+        
+        if not self.symmetric:
+            warnings.warn("Protest on non-symmetrical Procrustes is experimental and should be consulted with the statistics community if used")
+            
+        # Get machine float error
+        EPS = np.sqrt(np.finfo(float).eps)
+        
+        # Calculate correlation from sum of squares
+        correlation_of_procrustes_rotation = np.sqrt(1 - self.sum_of_squares_)
+        
+        # Get X and Y values
+        X_T = self.X_.values.T
+        Y_ = self.Y_.values
+        
+        # Get integer index for permutations
+        index = np.arange(0, self.n_)
+
+        # Permute and run svd
+        permutations = list()
+        for rs in range(n_iter):
+            index_permutation = np.random.RandomState(rs).choice(index, replace=with_replacement, size=self.n_) 
+            XY = np.dot(X_T, Y_[index_permutation]) # crossprod(X,Y)
+            U,s,Vh = np.linalg.svd(XY)
+            permutations.append(np.sum(s))
+        permutations = np.asarray(permutations)
+        
+        # Pval <- (sum(perm >= sol$t0 - EPS) + 1)/(np + 1)
+        p_value = (np.sum(permutations >= correlation_of_procrustes_rotation - EPS) + 1)/(n_iter + 1)
+        
+        # Output
+        return pd.Series(
+            data=OrderedDict([
+                ("Number of permutations [n_iter]",n_iter),
+                ("With replacement", with_replacement),
+                ("Random state",random_state),
+                ("Sum of squares [M12 squared]", self.sum_of_squares_),
+                ("Correlation of rotation",correlation_of_procrustes_rotation),
+                ("P-value",p_value),
+            ]), 
+            name="Protest",
+            dtype=object,
+        )
