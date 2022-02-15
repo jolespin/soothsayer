@@ -1002,7 +1002,7 @@ class Procrustes(object):
         
     def protest(
         self,
-        n_iter=1000,
+        n_iter=999,
         random_state=0,
         with_replacement=False,
         ):

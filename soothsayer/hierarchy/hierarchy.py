@@ -567,7 +567,7 @@ class Agglomerative(object):
         if not show_track_ticks:
             ax.set_yticklabels([])
         if show_track_labels:
-            ax.set_ylabel(name, **label_kws, ha="right", va="center")
+            ax.set_ylabel(name, **label_kws)#, horizontalalignment="right", verticalalignment="center")
         return ax
 
 
@@ -595,7 +595,7 @@ class Agglomerative(object):
             ax.fill_between(x=[position - 5,position + 5], y1=0, y2=1, color=color, **fill_kws)
 
         if all([show_track_labels, (track_label is not None)]):
-            ax.set_ylabel(track_label, **label_kws, ha="right", va="center")
+            ax.set_ylabel(track_label, **label_kws)#, horizontalalignment="right", verticalalignment="center")
 
         ax.set_xlim(xlim)
         ax.set_yticklabels([])
@@ -650,7 +650,7 @@ class Agglomerative(object):
         # Keywords
         _fig_kws = {"figsize":figsize}
         _fig_kws.update(fig_kws)
-        _label_kws = {"fontsize":15, "rotation":0, "horizontalalignment":"right"}
+        _label_kws = {"fontsize":15, "rotation":0, "horizontalalignment":"right", "verticalalignment":"center"}
         _label_kws.update(label_kws)
         _legend_kws = {'fontsize': 12, 'frameon': True, 'facecolor': 'white', 'edgecolor': 'black', 'loc': 'center left', 'bbox_to_anchor': (1, 0.5)}
         _legend_kws.update(legend_kws)
@@ -838,7 +838,7 @@ class Agglomerative(object):
                     for i, label in enumerate(self.axes[-1].get_xticklabels()):
                         leaf = self.leaves[i]
                         t = self.leaf_positions_polar[leaf]
-                        label = self.axes[-1].text(t, rmax+pad, leaf, color=leaf_colors[leaf], transform=label.get_transform(), ha="center", va="center")
+                        label = self.axes[-1].text(t, rmax+pad, leaf, color=leaf_colors[leaf], transform=label.get_transform(), horizontalalignment="center", verticalalignment="center")
                         label.set_rotation(np.rad2deg(t))
                 # Add leaf tick labels to rectilinear projection plot
                 else:
