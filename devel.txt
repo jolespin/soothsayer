@@ -6,7 +6,7 @@ Once I have more time and create soothsayer v1.0 then I will make all of this fo
 # ========
 # Changes:
 # ========
-* 2022.2.14 - Added `protest` method to `Procrustes` and cleaned up plotting function
+* 2022.2.14 - Added `protest` method to `Procrustes` and cleaned up plotting function. Fixed ha and horzintalalignment double call in Agglomerative
 * 2022.02.06 - Added `Procrustes` to ordination and replaced .as_matrix() calls with .values
 * 2022.01.07 - Added `get_mixed_feature_pipeline_estimator` and added axis argument to `pd_prepend_level_to_index`
 * 2021.07.27 - Added `plot_multiindexed_heatmap` and `iterate_nested_dict`

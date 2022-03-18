@@ -64,6 +64,7 @@ legend_kws = dict(fontsize=10, frameon=True, facecolor="white", edgecolor="black
 def main(argv=None):
     parser = argparse.ArgumentParser(
     """
+    DONT USE THIS VERSION. USE THE STANDALONE VERSION INSTEAD. THIS IS NOT DATED AND WILL NOT BE MAINTAINED.
     soothsayer:clairvoyance {}
     """.format(__version_clairvoyance__)
     )
