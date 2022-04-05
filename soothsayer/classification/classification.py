@@ -844,19 +844,19 @@ class HierarchicalClassifier(BaseEstimator, ClassifierMixin):
                 # Acknowledgments to @importanceofbeingernest for plotting outline
                 # https://stackoverflow.com/questions/55911075/how-to-plot-the-outline-of-the-outer-edges-on-a-matplotlib-line-in-python/56030879#56030879
                 # OutlineCollection is not working with fancy arrow patches
-                try:
-                    error_line_collection = nx.draw_networkx_edges(G_sem, pos, alpha=alpha_error, edges=G_sem.edges(), edge_color=edge_colors, width=error_scale_func(weights_sem), ax=ax, arrows=False, **_edge_kws)
-                except TypeError:
-                    error_line_collection = nx.draw_networkx_edges(G_sem, pos, alpha=alpha_error, edgelist=G_sem.edges(), edge_color=edge_colors, width=error_scale_func(weights_sem), ax=ax, arrows=False, **_edge_kws)
+                # try:
+                #     error_line_collection = nx.draw_networkx_edges(G_sem, pos, alpha=alpha_error, edges=G_sem.edges(), edge_color=edge_colors, width=error_scale_func(weights_sem), ax=ax, arrows=False, **_edge_kws)
+                # except TypeError:
+                error_line_collection = nx.draw_networkx_edges(G_sem, pos, alpha=alpha_error, edgelist=G_sem.edges(), edge_color=edge_colors, width=error_scale_func(weights_sem), ax=ax, arrows=False, **_edge_kws)
 
                 for path, lw in zip(error_line_collection.get_paths(), error_line_collection.get_linewidths()):
                     error_outline_collection = OutlineCollection(error_line_collection, ax=ax, linewidth=error_linewidth,  alpha=alpha_error, linestyle=error_linestyle, edgecolor=edge_colors, facecolor="none")
 
             # Draw accuracies
-            try:
-                nx.draw_networkx_edges(G, pos, edges=G.edges(), edge_color=edge_colors, width=weight_func(weights), ax=ax,**_edge_kws )
-            except TypeError:
-                nx.draw_networkx_edges(G, pos, edgelist=G.edges(), edge_color=edge_colors, width=weight_func(weights), ax=ax,**_edge_kws )
+            # try:
+            #     nx.draw_networkx_edges(G, pos, edges=G.edges(), edge_color=edge_colors, width=weight_func(weights), ax=ax,**_edge_kws )
+            # except TypeError:
+            nx.draw_networkx_edges(G, pos, edgelist=G.edges(), edge_color=edge_colors, width=weight_func(weights), ax=ax,**_edge_kws )
 
             if show_weight_labels:
                 nx.draw_networkx_edge_labels(G, pos, edge_labels = edge_labels, ax=ax)
