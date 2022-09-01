@@ -15,7 +15,7 @@ from .text import *
 from .web import *
 
 _bioinformatics = [
-"read_kegg_json", "read_clustalo_distmat", "read_vizbin_coords", "read_checkm_qa", "read_fasta", 
+"read_kegg_json", "read_clustalo_distmat",  "read_checkm_qa", "read_fasta", 
 "write_fasta", "read_blast", "read_gtf_gff_base", "read_gff3", "read_gtf", "read_ncbi_xml", "read_ebi_sample_metadata",
 "read_star_log", "read_hmmer",
 ]

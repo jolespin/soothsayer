@@ -3,7 +3,7 @@
 # ==============================================================================
 # Built-ins
 import os, sys, time, datetime, copy, pathlib
-from collections import OrderedDict, defaultdict, Mapping
+from collections import OrderedDict, defaultdict
 from io import StringIO, BytesIO
 # from ast import literal_eval
 

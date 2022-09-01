@@ -1,6 +1,7 @@
 # Built-ins
 import os, sys, itertools, time, copy, logging
-from collections import OrderedDict, defaultdict, Mapping
+from collections import OrderedDict, defaultdict
+from collections.abc import Mapping 
 
 # PyData
 import pandas as pd

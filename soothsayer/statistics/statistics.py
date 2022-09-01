@@ -3,7 +3,9 @@
 # ==============================================================================
 # Built-ins
 import os, sys, warnings
-from collections import defaultdict, OrderedDict, Mapping
+from collections import OrderedDict, defaultdict
+from collections.abc import Mapping 
+
 import pandas as pd
 import numpy as np
 from scipy import stats

@@ -39,13 +39,14 @@ setup(name='soothsayer',
     "adjustText",
     "tzlocal",
     "statsmodels >= 0.10.0", #https://github.com/statsmodels/statsmodels/issues/5899 May need to use this separately: pip install git+https://github.com/statsmodels/statsmodels.git@maintenance/0.10.x
-    "mmh3",
+    # "mmh3",
     "umap-learn",
     "leidenalg",
+    "python-louvain",
     
     # Extensions
-    "soothsayer_utils >= 2022.2.9",
-    "compositional >= 2020.12.16",
+    "soothsayer_utils >= 2022.6.24",
+    "compositional >= 2020.8.31",
     "hive_networkx >= 2021.3.08",
     "ensemble_networkx >= 2022.2.9",
 

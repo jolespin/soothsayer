@@ -5,6 +5,7 @@
 # Built-ins
 import os, sys, time, datetime, copy, warnings, pathlib
 from collections import OrderedDict, defaultdict
+from collections.abc import Mapping 
 
 # PyData
 import pandas as pd
@@ -12,7 +13,6 @@ import numpy as np
 import networkx as nx
 
 # Biology
-from Bio import SeqIO, Seq
 import ete3
 import skbio
 

@@ -1,6 +1,5 @@
 import os,sys, site, datetime, time
 from collections import OrderedDict, defaultdict
-from Bio.KEGG.REST import kegg_list, kegg_get
 import pandas as pd
 
 from ..io import read_object
@@ -152,7 +151,10 @@ def parse_kegg_module(module_file):
     return module_info
 
 # Get KEGG Modules
+@check_packages(["Bio"])
 def get_kegg_modules(expand_nested_modules=True):
+    from Bio.KEGG.REST import kegg_list, kegg_get
+
     results = list()
     for line in pv(list(kegg_list("module")), "Parsing module files"):
         line = line.strip()

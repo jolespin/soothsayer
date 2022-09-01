@@ -3,7 +3,8 @@
 # ==============================================================================
 # Built-ins
 import os, sys, time, datetime, logging, uuid, pathlib, posix, gzip, bz2, zipfile, subprocess, requests, operator
-from collections import OrderedDict, defaultdict, Mapping
+from collections import OrderedDict, defaultdict
+from collections.abc import Mapping 
 from io import TextIOWrapper
 
 # PyData

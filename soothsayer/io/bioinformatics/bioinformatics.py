@@ -16,8 +16,6 @@ import pickle, gzip, bz2, zipfile, site
 import pandas as pd
 import numpy as np
 
-# Biology
-from Bio import SeqIO
 
 # Soothsayer
 from soothsayer.utils import format_path, infer_compression, is_path_like, is_query_class, assert_acceptable_arguments, add_objects_to_globals
@@ -133,31 +131,31 @@ def read_clustalo_distmat(path:str):
         print("Could not accurately parse clustal distance matrix.  Returning raw data instead.", file=sys.stderr)
         return tmp
 
-# VizBin corrdinates
-def read_vizbin_coords(xy_path:str, fasta_path:str=None, xlabel="x", ylabel="y", write_coords=True):
-    """
-    VizBin: http://claczny.github.io/VizBin/
-    xy_path: VizBin coordinates file path
-    fasta_path: Input fasta file path
+# # VizBin corrdinates
+# def read_vizbin_coords(xy_path:str, fasta_path:str=None, xlabel="x", ylabel="y", write_coords=True):
+#     """
+#     VizBin: http://claczny.github.io/VizBin/
+#     xy_path: VizBin coordinates file path
+#     fasta_path: Input fasta file path
 
-    Usage:
-    xy_path = "/var/folders/6z/5vbtz_gmkr76ftgc3149dvtr0003c0/T/map1723096415078571924/points.txt"
-    fasta_path = "./assembly.fa")
-    df_xy = read_vizbin_coords(xy_path, fasta_path)
-    """
-    xy_path = format_path(xy_path)
+#     Usage:
+#     xy_path = "/var/folders/6z/5vbtz_gmkr76ftgc3149dvtr0003c0/T/map1723096415078571924/points.txt"
+#     fasta_path = "./assembly.fa")
+#     df_xy = read_vizbin_coords(xy_path, fasta_path)
+#     """
+#     xy_path = format_path(xy_path)
 
-    df_xy = pd.read_csv(xy_path, sep=",", header=None).astype(float)
-    path_write = None
-    if fasta_path is not None:
-        fasta_path = format_path(fasta_path)
-        df_xy.index = [*map(lambda record:str(record.id), SeqIO.parse(fasta_path, "fasta"))]
-        if write_coords == True:
-            path_write = f"{fasta_path}.xy"
-    df_xy.columns = [xlabel,ylabel]
-    if path_write is not None:
-        df_xy.to_csv(path_write, sep="\t")
-    return df_xy
+#     df_xy = pd.read_csv(xy_path, sep=",", header=None).astype(float)
+#     path_write = None
+#     if fasta_path is not None:
+#         fasta_path = format_path(fasta_path)
+#         df_xy.index = [*map(lambda record:str(record.id), SeqIO.parse(fasta_path, "fasta"))]
+#         if write_coords == True:
+#             path_write = f"{fasta_path}.xy"
+#     df_xy.columns = [xlabel,ylabel]
+#     if path_write is not None:
+#         df_xy.to_csv(path_write, sep="\t")
+#     return df_xy
 
 # CheckM QA
 def read_checkm_qa(path:str, format=8, verbose=True, rename_columns=True, func_orf_to_contig=lambda id_orf:"_".join(id_orf.split("_")[:-1])):
