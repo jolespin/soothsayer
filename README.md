@@ -63,6 +63,8 @@ _________________________________
 
 * Nabwera HM+, Espinoza JL+, Worwui A, Betts M, Okoi C, Sesay AK et al. Interactions between fecal gut microbiome, enteric pathogens, and energy regulating hormones among acutely malnourished rural Gambian children. EBioMedicine 2021; 73: 103644. [doi:10.1016/j.ebiom.2021.103644](https://doi.org/10.1016/j.ebiom.2021.103644)
 
+* Espinoza JL, Dupont CL. VEBA: a modular end-to-end suite for in silico recovery, clustering, and analysis of prokaryotic, microeukaryotic, and viral genomes from metagenomes. BMC Bioinformatics. 2022 Oct 12;23(1):419. [doi: 10.1186/s12859-022-04973-8](https://doi.org/10.1186/s12859-022-04973-8). PMID: 36224545.
+
 <img src="logo/soothsayer_wide.png" width=200>
 
 
