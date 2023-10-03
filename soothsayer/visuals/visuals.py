@@ -19,6 +19,14 @@ from ..utils import *
 __all__ = ["OutlineCollection", "draw_networkx_labels_with_box", "plot_scatter", "plot_venn_diagram", "plot_waterfall", "plot_volcano", "plot_annotation", "plot_prevalence", "plot_compositional","plot_multiindexed_heatmap", "bezier_points"]
 __all__ = sorted(__all__)
 
+def is_string_like(obj): # from John Hunter, types-free version
+    """Check if obj is string."""
+    try:
+        obj + ''
+    except (TypeError, ValueError):
+        return False
+    return True
+
 # Bezier points for arc plots
 def bezier_points(p1, p2, control, granularity=20):
     """
@@ -182,7 +190,7 @@ def draw_networkx_labels_with_box(G, pos,
     for n, label in labels.items():
         if n in pos:
             (x, y) = pos[n]
-            if not nx.utils.is_string_like(label):
+            if not is_string_like(label):
                 label = str(label)  # this makes "1" and 1 labeled the same
             t = ax.text(x, y,
                         label,

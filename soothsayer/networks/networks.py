@@ -52,9 +52,13 @@ functions_from_ensemble_networkx= {
     "heterogeneity",
     "topological_overlap_measure",
     "community_detection",
-    "cluster_homogeneity",
-    "signed",
+    "edge_cluster_cooccurrence",
+    # "signed",
     "convert_network",
+    "condensed_to_redundant",
+    "redundant_to_condensed",
+
+
     }
 add_objects_to_globals(enx, functions_from_ensemble_networkx, globals(), add_version=True, __all__=__all__)
 
@@ -1389,7 +1393,7 @@ class TemporalNetwork(object):
             self.compiled = False
         assert is_number(t), "`t` must be a numeric type"
         if isinstance(data, pd.DataFrame):
-            data = dense_to_condensed(data)
+            data = redundant_to_condensed(data)
 
         self.intratemporal_connections_[t] = data.copy() #! Is this a good idea to copy and have pos/neg weights?
         graph = nx.Graph(name=t)

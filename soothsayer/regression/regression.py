@@ -118,8 +118,8 @@ class CoreLinearModel(object):
 
         # Construct graph
         if graph is None:
-            graph = nx.OrderedDiGraph(name=self.name, **attrs)
-        assert isinstance(graph, (nx.DiGraph, nx.OrderedDiGraph)), "`graph` must either be DiGraph or OrderedDiGraph"
+            graph = nx.DiGraph(name=self.name, **attrs)
+        # assert isinstance(graph, (nx.DiGraph)), "`graph` must either be DiGraph"
         self.graph = graph
 
         # Drop fields and attributes

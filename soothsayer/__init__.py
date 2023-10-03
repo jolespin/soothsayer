@@ -34,8 +34,8 @@
 # Version
 # =======
 import sys, time
-__version__= "2022.8.31"
-__moniker__ = "Materia"
+__version__= "2023.8.22"
+__moniker__ = "triad"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"
