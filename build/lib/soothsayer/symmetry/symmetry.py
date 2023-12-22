@@ -60,7 +60,7 @@ add_objects_to_globals(hx, functions_from_hive_networkx, globals(), add_version=
 
 # ensemble_networkx
 import ensemble_networkx as enx
-functions_from_ensemble_networkx= { "pairwise_biweight_midcorrelation", "Symmetric", "dense_to_condensed", "condensed_to_dense"}
+functions_from_ensemble_networkx= { "pairwise_biweight_midcorrelation", "Symmetric", "redundant_to_condensed", "condensed_to_redundant"}
 add_objects_to_globals(enx, functions_from_ensemble_networkx, globals(), add_version=True, __all__=__all__)
 
 

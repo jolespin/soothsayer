@@ -91,7 +91,6 @@ dependencies:
   - icu=67.1=hb1e8313_0
   - idna=2.10=pyh9f0ad1d_0
   - iniconfig=1.1.1=pyh9f0ad1d_0
-  - ipython=7.19.0=py39h71a6800_0
   - ipython_genutils=0.2.0=py_1
   - isl=0.22.1=hb1e8313_2
   - jedi=0.18.0=py39h6e9494a_2

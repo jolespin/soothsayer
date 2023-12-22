@@ -55,7 +55,7 @@ def cutree_dynamic(kernel, cut_method="hybrid", method="ward", minClusterSize=20
     if method == "ward":
         method = "ward.D2"
     if is_query_class(kernel, "Symmetric"):
-        kernel = kernel.to_dense()
+        kernel = kernel.to_pandas_dataframe()
     if isinstance(kernel, pd.DataFrame):
         rkernel = pandas_to_rpy2(kernel)
 

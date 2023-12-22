@@ -34,7 +34,7 @@
 # Version
 # =======
 import sys, time
-__version__= "2023.8.22"
+__version__= "2023.12.22"
 __moniker__ = "triad"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"

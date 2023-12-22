@@ -47,7 +47,7 @@ setup(name='soothsayer',
     # Extensions
     "soothsayer_utils >= 2022.6.24",
     "compositional >= 2023.8.23",
-    "hive_networkx >= 2021.5.18",
+    "hive_networkx >= 2023.8.22",
     "ensemble_networkx >= 2023.9.25",
 
     # Optional

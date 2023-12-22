@@ -18,6 +18,8 @@ import skbio
 
 # SciPy
 from scipy.cluster import hierarchy as sp_hierarchy
+from scipy.spatial.distance import squareform
+
 try:
     from fastcluster import linkage
 except (ImportError, ModuleNotFoundError) as e:
@@ -138,24 +140,24 @@ class Agglomerative(object):
                  rectilinear_kws=dict(),
                 ):
         # Check the dism object type
-        accepted_dism_types = {pd.DataFrame, Symmetric}
+        accepted_dism_types = {pd.DataFrame}
         assert type(dism) in accepted_dism_types, f"`dism` type must be one of the following: {accepted_dism_types}"
 
-        # pd.DataFrame -> Symmetric
-        if isinstance(dism, pd.DataFrame):
-            dism = Symmetric(data=dism, node_type=leaf_type, name=name, association="dissimilarity", **metadata)
+        # # pd.DataFrame -> Symmetric
+        # if isinstance(dism, pd.DataFrame):
+        #     dism = Symmetric(data=dism, node_type=leaf_type, name=name, association="dissimilarity", **metadata)
 
         # Base
         self.name = name
         self.data = data
-        self.dism = dism
+        self.dism = dism.copy()
 
         # Clustering
         self.method = method
-        self.linkage_labels = self.dism.nodes.copy()
+        self.linkage_labels = self.dism.index
         self.num_leaves = len(self.linkage_labels)
         self._relabel = dict(zip(range(self.num_leaves), self.linkage_labels))
-        self.Z = linkage(self.dism.weights.values, method=method , metric="precomputed") #!
+        self.Z = linkage(squareform(self.dism.values), method=method , metric="precomputed") #!
         if leaf_axis == "infer":
             if data is not None:
                 axis_0_overlap = len(set(self.linkage_labels) & set(data.index))
