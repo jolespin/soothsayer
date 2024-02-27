@@ -458,7 +458,7 @@ def plot_scatter(
             # ___________________________
             # Is data a list of strings to index?
             if not is_nonstring_iterable(annot[0]):
-                annot = [(k, xy.values) for k, xy in coords.loc[annot,:].T.iteritems()]
+                annot = [(k, xy.values) for k, xy in coords.loc[annot,:].T.items()]
             # Is data a {s:[id_1, id_2, ..., id_m]} object?
                 # Assumes the lists are greater than 2
             if is_nonstring_iterable(annot[0][1]) and (len(annot[0][1]) > 2):
@@ -817,7 +817,7 @@ def plot_annotation(labels, x:pd.Series, y:pd.Series, ax, adjust_label_positions
     """
     def _get_text_objects(labels, x, y, ax, **kwargs):
         text_objects = []
-        for ((id, label), x_i, y_i) in zip(labels.iteritems(),x,y):
+        for ((id, label), x_i, y_i) in zip(labels.items(),x,y):
             if is_nonstring_iterable(label):
                 label = label.values[0]
             text_objects.append(ax.text(x_i, y_i, label,  **kwargs))
@@ -1078,7 +1078,7 @@ def plot_compositional(
         if is_function(lines):
             if class_colors is not None:
                 placeholder = list()
-                for id_class, idx_query in pd_series_collapse(y).iteritems():
+                for id_class, idx_query in pd_series_collapse(y).items():
                     v = lines(data[idx_query])
                     placeholder.append(v)
                     kws = {**_line_kws}
@@ -1177,7 +1177,7 @@ def plot_compositional(
 
         # Scatter plot
         if y is not None:
-            for id_class, idx_query in pd_series_collapse(y).iteritems():
+            for id_class, idx_query in pd_series_collapse(y).items():
                 ax.scatter(depth[idx_query], richness[idx_query], c=obsv_colors[idx_query], edgecolor=edgecolor, label=id_class, **_scatter_kws)
         else:
             ax.scatter(depth, richness, c=colors_global, edgecolor=edgecolor, **_scatter_kws)
@@ -1208,7 +1208,7 @@ def plot_compositional(
                     sns.distplot(richness, color=color_density, vertical=True, ax=ax_right, **_kde_1d_kws)
                     sns.distplot(depth, color=color_density, vertical=False, ax=ax_top, **_kde_1d_kws)
                 else:
-                    for id_class, idx_query in pd_series_collapse(y).iteritems():
+                    for id_class, idx_query in pd_series_collapse(y).items():
                         sns.distplot(richness[idx_query], color=class_colors[id_class], vertical=True, ax=ax_right, **_kde_1d_kws)
                         sns.distplot(depth[idx_query], color=class_colors[id_class], vertical=False, ax=ax_top, **_kde_1d_kws)
             else:
@@ -1225,7 +1225,7 @@ def plot_compositional(
                 if class_colors is None:
                     sns.kdeplot(data=depth, data2=richness, color=color_density, zorder=0,  ax=ax, **_kde_2d_kws)
                 else:
-                    for id_class, idx_query in pd_series_collapse(y).iteritems():
+                    for id_class, idx_query in pd_series_collapse(y).items():
                         try:
                             sns.kdeplot(data=depth[idx_query], data2=richness[idx_query],  color=class_colors[id_class], zorder=0, ax=ax, **_kde_2d_kws)
                         except Exception as e:

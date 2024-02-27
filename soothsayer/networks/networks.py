@@ -640,7 +640,7 @@ class Edge(tuple):
 #                 # ================
 #                 if show_node_labels:
 #                     horizontalalignment_nodelabels = horizontalalignment
-#                     for name_node, r in node_positions.iteritems():
+#                     for name_node, r in node_positions.items():
 #                         # theta_anchor is where the padding ends up
 #                         theta_anchor_padding = theta_representative
 #                         if node_pad_fill is None:
@@ -677,9 +677,9 @@ class Edge(tuple):
 #             if show_edges:
 #                 if self.verbose:
 #                     print("-"*44, file=sys.stderr)
-#                     edges_iterable = tqdm(edges.iteritems(), "      Drawing edges")
+#                     edges_iterable = tqdm(edges.items(), "      Drawing edges")
 #                 else:
-#                     edges_iterable = edges.iteritems()
+#                     edges_iterable = edges.items()
 #                 for (edge, weight) in edges_iterable:
 #                     node_A, node_B = edge
 #                     name_axis_A = self.node_mapping_[node_A]
@@ -1266,7 +1266,7 @@ def determine_soft_threshold(similarity:pd.DataFrame, title=None, show_plot=True
                 if show_annotation is False:
                     show_annotation = None
                 if show_annotation is True:
-                    annot = list({(str(p), (p,r + 1e-2)) for p,r in df_plot["Scale-Free Topology Model Fit"].iteritems()})
+                    annot = list({(str(p), (p,r + 1e-2)) for p,r in df_plot["Scale-Free Topology Model Fit"].items()})
                 else:
                     annot = show_annotation
                     
@@ -1338,7 +1338,7 @@ class TemporalNetwork(object):
             temporal_graph = TemporalNetwork(id_subject, edge_type="perturbation",time_unit="day" )
             # Add each visit
             visits = list()
-            for i, (id_visit, timepoint) in enumerate(days.iteritems(), start=0):
+            for i, (id_visit, timepoint) in enumerate(days.items(), start=0):
                 connections = perturbations.loc[id_visit].dropna()
                 connections = connections[lambda x: x != 0]
                 temporal_graph.add_timepoint(t=timepoint, data=connections, id=id_visit) #! Should id be required?

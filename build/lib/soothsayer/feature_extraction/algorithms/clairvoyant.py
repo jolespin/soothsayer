@@ -637,7 +637,7 @@ class Clairvoyant(object):
             values_maximums = list()
 
             current_maximum = 0
-            for i,v in scores.iteritems():
+            for i,v in scores.items():
                 if v > current_maximum:
                     idx_maximums.append(i)
                     values_maximums.append(v)

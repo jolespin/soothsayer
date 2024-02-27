@@ -274,7 +274,7 @@ class Agglomerative(object):
         # Utility
         def _process_subtrees(tree, clusters):
             d_cluster_node = dict(zip(clusters.keys(), [np.nan]*len(clusters)))
-            for cluster, leaves in clusters.iteritems():
+            for cluster, leaves in clusters.items():
                 subtree = tree.get_common_ancestor(*leaves)
                 d_cluster_node[cluster] = subtree.name
             return d_cluster_node
@@ -582,7 +582,7 @@ class Agglomerative(object):
 
             # Labels
             if show_cluster_labels:
-                for cluster, leaves in self.get_clusters(grouped=True).iteritems():
+                for cluster, leaves in self.get_clusters(grouped=True).items():
                     idx_middleleaf = leaves[len(leaves)//2]
                     label_position = self.leaf_positions_rectilinear[idx_middleleaf]
                     label = cluster
@@ -910,7 +910,7 @@ class Agglomerative(object):
 
         d_cluster_eigengenes = dict()
         d_cluster_eigenvalues = dict()
-        for cluster, leaves in self.get_clusters(grouped=True).iteritems():
+        for cluster, leaves in self.get_clusters(grouped=True).items():
             if self.leaf_axis == 0:
                 X_cluster = X.loc[leaves,:].T
             if self.leaf_axis == 1:

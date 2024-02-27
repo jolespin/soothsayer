@@ -1,9 +1,35 @@
 Metadata-Version: 2.1
 Name: soothsayer
-Version: 2023.12.22
+Version: 2024.2.27
 Summary: High-level package for (bio-)informatics
 Home-page: https://github.com/jolespin/soothsayer
 Author: Josh L. Espinoza
 Author-email: jespinoz@jcvi.org
 License: BSD-3
-License-File: LICENSE.txt
+License-File: LICENSE
+Requires-Dist: matplotlib>=3
+Requires-Dist: seaborn>=0.10.1
+Requires-Dist: scipy>=1.0
+Requires-Dist: scikit-learn>=1.0
+Requires-Dist: numpy>=1.13
+Requires-Dist: pandas>=1.2.4
+Requires-Dist: networkx>=2.0
+Requires-Dist: ete3>=3.0
+Requires-Dist: scikit-bio>=0.5.1
+Requires-Dist: biopython>=1.5
+Requires-Dist: xarray>=0.10.3
+Requires-Dist: tqdm>=4.19
+Requires-Dist: openpyxl>=2.5
+Requires-Dist: rpy2>=3.3.2
+Requires-Dist: matplotlib_venn
+Requires-Dist: palettable>=3.0.0
+Requires-Dist: adjustText
+Requires-Dist: tzlocal
+Requires-Dist: statsmodels>=0.10.0
+Requires-Dist: umap-learn
+Requires-Dist: leidenalg
+Requires-Dist: python-louvain
+Requires-Dist: soothsayer_utils>=2022.6.24
+Requires-Dist: compositional>=2023.8.28
+Requires-Dist: hive_networkx>=2023.8.22
+Requires-Dist: ensemble_networkx>=2024.2.5

@@ -219,7 +219,7 @@ class PhylogenomicFunctionalComponents(object):
                 pgfc_collection[id_pgfc] = list(idx_orfs_no_function)
                 del id_pgfc # Reset the namespace
             # Process those with functional category
-            for id_orf, functional_list in self.components_functional[idx_orfs_for_taxonomycomponent & idx_orfs_with_function].iteritems():
+            for id_orf, functional_list in self.components_functional[idx_orfs_for_taxonomycomponent & idx_orfs_with_function].items():
                 for functional_component in functional_list:
                     id_pgfc = self.delimiter.join([taxonomy_component, functional_component])
                     pgfc_collection[id_pgfc].append(id_orf)
@@ -354,7 +354,7 @@ def get_taxonomy_lineage_from_identifier(identifiers, name=None, translate_ids=T
 
         # Group each taxonomy identifier
         dataframes = list()
-        for id_taxon, group in tqdm(pd_series_collapse(identifiers).iteritems(), "Searching lineage from taxonomy identifier"):
+        for id_taxon, group in tqdm(pd_series_collapse(identifiers).items(), "Searching lineage from taxonomy identifier"):
             number_of_orfs_in_group = len(group)
             Se_taxonomy = get_taxonomy_lineage_from_identifier(identifiers=id_taxon, name=None, translate_ids=translate_ids, ncbi=ncbi, verbose=verbose, mode="singular")
             df_taxon = pd.DataFrame(number_of_orfs_in_group*[Se_taxonomy])
@@ -458,7 +458,7 @@ def infer_taxonomy(
     for id_seqgroup, d_taxa_weight in tqdm(d_seqgroup_weights.items(), "Scoring taxonomy for each sequence group"):
         w = pd.Series(d_taxa_weight, name=id_seqgroup)
         scores = w/w.sum()
-        d_seqgroup_inferred[id_seqgroup]["weights"] = sorted(w.iteritems(), key=lambda x:x[-1], reverse=True)
+        d_seqgroup_inferred[id_seqgroup]["weights"] = sorted(w.items(), key=lambda x:x[-1], reverse=True)
         max_score = scores.max()
         d_seqgroup_inferred[id_seqgroup]["score"] = max_score
         if max_score < 1:

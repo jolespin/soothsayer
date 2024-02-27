@@ -1,5 +1,10 @@
 <img src="../logo/soothsayer_wide.png" width=500>
 
+## Warnings: 
+If you have Apple Silicon, you'll have to set the following config: 
+```
+conda config --env --set subdir osx-64
+```
 ## Installation instructions:
 There are several Python & R dependencies that are difficult to install so the recommended installation method is via `conda` with the preconfigured environment `.yml` files.  
 

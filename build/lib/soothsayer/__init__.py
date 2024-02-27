@@ -34,8 +34,8 @@
 # Version
 # =======
 import sys, time
-__version__= "2023.12.22"
-__moniker__ = "triad"
+__version__= "2024.2.27"
+__moniker__ = "year-of-the-dragon"
 #datetime.datetime.utcnow().strftime("%Y.%m")
 __author__ = "Josh L. Espinoza"
 __email__ = "jespinoz@jcvi.org, jol.espinoz@gmail.com"

@@ -144,7 +144,7 @@ class CoreLinearModel(object):
             if np.any(mask_tol):
                 signficant_variables = test_values[mask_tol].index.get_level_values(0)
                 coefficients = data[[*map(lambda x: (x, "coef"), signficant_variables)]]
-                for (id_variable, _), coef in coefficients.iteritems():
+                for (id_variable, _), coef in coefficients.items():
                     self.graph.add_edge(id_variable, id_attribute, weight=np.abs(coef), sign=np.sign(coef), **data[id_variable].to_dict())
         # Check nodes
         number_of_nodes = self.graph.number_of_nodes()
